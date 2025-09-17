@@ -24,10 +24,10 @@
         }
         h1, h2, h3 { color: var(--primary-color); }
         h1 { border-bottom: 3px solid var(--primary-color); padding-bottom: 10px; }
-        
+
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         .box { padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; }
-        
+
         input, select, button {
             width: 100%; padding: 10px; margin-bottom: 10px;
             border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1rem;
@@ -47,14 +47,14 @@
         th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
         th { background-color: var(--primary-color-light); }
         .provvigione-editabile:hover { background-color: #fff3cd; cursor: pointer; }
-        
+
         .riepilogo-totali, .risultato-verifica {
             font-size: 1.2rem; font-weight: bold; padding: 15px; margin-top: 15px;
             border-radius: 5px; background-color: var(--primary-color-light); border-left: 5px solid var(--primary-color);
         }
         .risultato-verifica.ok { color: #155724; background-color: #d4edda; border-left-color: #28a745; }
         .risultato-verifica.errore { color: #721c24; background-color: #f8d7da; border-left-color: #dc3545; }
-        
+
         .decade-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .decade-grid div { padding: 10px; background: #f8f9fa; border-radius: 4px; }
         .decade-grid strong { color: var(--primary-color); }
@@ -62,17 +62,17 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 40px; border-radius: 10px; text-align: center; }
         .modal-content .company-button { display: block; width: 300px; margin: 10px 0; font-size: 1.2rem; }
-        
+
         .app-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 10px 20px; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 20px; gap: 15px; }
         .app-header .header-group { display: flex; align-items: center; gap: 10px; }
         .app-header label { font-weight: bold; }
         .app-header input[type="date"], .app-header button { width: auto; padding: 8px; margin-bottom: 0; }
-        
+
         #status-indicator { font-weight: bold; padding: 5px 10px; border-radius: 5px; color: white; }
         #status-indicator.synced { background-color: #28a745; }
         #status-indicator.saving { background-color: #ffc107; color: black; }
         #status-indicator.error { background-color: #dc3545; }
-        
+
         @media print {
             body { background-color: #fff !important; padding: 0 !important; margin: 0 !important; font-size: 8pt !important; }
             .modal-overlay, .app-header, #formMovimento, .box > h2:first-child, .button-edit, .button-delete, #btnVerifica, #box-conteggio-assegni button, #form-buttons button { display: none !important; }
@@ -99,10 +99,10 @@
             <button class="company-button" data-company="Helvetia" style="background-color:#dc3545">Helvetia</button>
         </div>
     </div>
-    
+
     <div class="container" id="main-container">
         <h1 id="main-title">Registro Cassa</h1>
-        
+
         <div class="app-header">
             <div class="header-group">
                 <label for="date-selector">Giornale del:</label>
@@ -114,25 +114,25 @@
                 <button id="change-company-button">Cambia Compagnia</button>
             </div>
         </div>
-    
+
         <div class="box">
             <h2>1. Inizio Giornata</h2>
             <label for="riportoIniziale"><strong>Riporto Automatico Giorno Precedente (€):</strong></label>
             <input type="number" id="riportoIniziale" placeholder="0.00" step="0.01">
         </div>
-    
+
         <div class="grid-container">
             <div class="box">
                 <h2 id="form-title">2. Registrazione Movimento</h2>
                 <form id="formMovimento">
                     <input type="hidden" id="editingIndex" value="">
-    
+
                     <label for="metodologia">Metodologia Incasso:</label>
                     <select id="metodologia">
                         <option value="Contanti">Contanti</option><option value="Assegno">Assegno</option>
                         <option value="POS">POS</option><option value="Bonifico">Bonifico</option>
                     </select>
-                    
+
                     <div id="divRientroMetodo" style="display:none;">
                         <label for="rientroMetodo">Metodo di Rientro:</label>
                         <select id="rientroMetodo">
@@ -140,7 +140,7 @@
                             <option value="POS">POS</option><option value="Bonifico">Bonifico</option>
                         </select>
                     </div>
-    
+
                     <div id="divNumeroAssegno" style="display:none;">
                         <label for="numeroAssegno">Numero Assegno:</label>
                         <input type="text" id="numeroAssegno" placeholder="N° Assegno">
@@ -148,12 +148,12 @@
                     <label for="nomeCliente">Nome Cliente:</label><input type="text" id="nomeCliente" required>
                     <label for="numeroPolizza">Numero Polizza:</label><input type="text" id="numeroPolizza">
                     <label for="importo">Importo Titolo (€):</label><input type="number" id="importo" step="0.01" placeholder="0.00" required>
-                    
+
                     <div id="divProvvigioni" style="display:none;">
                         <label for="provvigioni">Provvigioni (€):</label>
                         <input type="number" id="provvigioni" step="0.01" placeholder="0.00">
                     </div>
-    
+
                     <label for="arrotondamenti">Arrotondamenti (€):</label><input type="number" id="arrotondamenti" step="0.01" placeholder="Es. -0.02">
                     <label for="uscite">Uscite Cassa (€):</label><input type="number" id="uscite" step="0.01" placeholder="0.00">
                     <div id="form-buttons">
@@ -161,7 +161,7 @@
                     </div>
                 </form>
             </div>
-    
+
             <div class="box">
                 <h2>3. Conteggio Fisico Cassa</h2>
                 <div id="conteggioBanconote"></div>
@@ -174,7 +174,7 @@
                 <div class="riepilogo-totali">Totale Contato Fisicamente: € <span id="totaleConteggioFisico">0.00</span></div>
             </div>
         </div>
-    
+
         <div class="box">
             <h2>Riepilogo Movimenti di Cassa</h2>
             <table id="tabellaMovimenti">
@@ -187,7 +187,7 @@
             </table>
             <div class="riepilogo-totali">Cassa Teorica Finale (Riporto + Movimenti): € <span id="cassaTeorica">0.00</span></div>
         </div>
-        
+
         <div class="box" id="box-provvigioni" style="display:none;">
             <h2>Riepilogo Provvigioni e Decadi (Mese Corrente)</h2>
             <div class="riepilogo-totali">
@@ -199,14 +199,13 @@
                 <div><strong>3ª Decade (21+):</strong> € <span id="decade3-result">0.00</span></div>
             </div>
         </div>
-        
+
         <div class="box">
             <h2>4. Verifica Finale</h2>
             <button id="btnVerifica" class="button-secondary">VERIFICA I CONTI</button>
             <div class="risultato-verifica" id="risultatoVerifica">In attesa di verifica...</div>
         </div>
     </div>
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -242,6 +241,7 @@
             console.error("Errore caricamento da Firebase: ", error);
             statusIndicator.textContent = 'Errore Sinc.';
             statusIndicator.className = 'error';
+            alert("ATTENZIONE: Impossibile caricare i dati. Controlla la connessione e le Regole di Sicurezza su Firebase.");
         }
     }
 
@@ -258,24 +258,25 @@
                 console.error("Errore salvataggio su Firebase: ", error);
                 statusIndicator.textContent = 'Errore Sinc.';
                 statusIndicator.className = 'error';
+                alert("ATTENZIONE: Impossibile salvare i dati. Le modifiche potrebbero non essere condivise.");
             }
         }, 1500);
     }
-    
+
     async function inizializzaApp(compagnia) {
         stato.compagniaSelezionata = compagnia;
         document.body.className = `theme-${compagnia.toLowerCase()}`;
-        
+
         await caricaDatiDaFirebase();
-        
+
         document.getElementById('company-selector-modal').style.display = 'none';
         document.getElementById('main-container').style.display = 'block';
         document.getElementById('main-title').textContent = `Registro Cassa ${compagnia}`;
-        
+
         const showProvvigioni = compagnia === 'HDI' || compagnia === 'Vittoria';
         document.getElementById('box-provvigioni').style.display = showProvvigioni ? 'block' : 'none';
         document.querySelectorAll('.col-provvigioni').forEach(el => el.style.display = showProvvigioni ? '' : 'none');
-        
+
         const selectMetodo = document.getElementById('metodologia');
         selectMetodo.innerHTML = `<option value="Contanti">Contanti</option><option value="Assegno">Assegno</option><option value="POS">POS</option><option value="Bonifico">Bonifico</option>`;
         if (showProvvigioni) {
@@ -306,7 +307,7 @@
         aggiornaTuttiRiepiloghi();
         annullaModifica();
     }
-    
+
     function creaNuovoGiorno(data) {
         return { riportoIniziale: calcolaRiporto(data), movimenti: [], conteggioFisico: {} };
     }
@@ -334,7 +335,7 @@
             arrotondamenti: parseFloat(document.getElementById('arrotondamenti').value) || 0,
             uscite: parseFloat(document.getElementById('uscite').value) || 0,
         };
-        
+
         const dataKey = formatDate(stato.dataSelezionata);
         const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
         (datiGiorno.movimenti = datiGiorno.movimenti || []);
@@ -344,15 +345,15 @@
         } else {
             datiGiorno.movimenti.push(movimento);
         }
-        
+
         await salvaStatoCorrente();
         caricaGiornale(stato.dataSelezionata);
     }
-    
+
     function modificaMovimento(index) {
         const dataKey = formatDate(stato.dataSelezionata);
         const movimento = stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti[index];
-        
+
         document.getElementById('editingIndex').value = index;
         document.getElementById('metodologia').value = movimento.metodologia;
         document.getElementById('rientroMetodo').value = movimento.rientroMetodo || 'Contanti';
@@ -363,7 +364,7 @@
         document.getElementById('provvigioni').value = movimento.provvigioni || '';
         document.getElementById('arrotondamenti').value = movimento.arrotondamenti;
         document.getElementById('uscite').value = movimento.uscite;
-        
+
         document.getElementById('form-title').textContent = "Modifica Movimento";
         document.getElementById('form-buttons').innerHTML = `<button type="submit">Salva Modifiche</button><button type="button" class="button-secondary" id="cancel-edit-button">Annulla</button>`;
         document.getElementById('cancel-edit-button').addEventListener('click', annullaModifica);
@@ -413,7 +414,7 @@
         const divMonete = document.getElementById('conteggioMonete');
         divBanconote.innerHTML = '<h3>Banconote</h3>';
         divMonete.innerHTML = '<h3>Monete</h3>';
-        
+
         const saveAndUpdate = async () => { aggiornaTuttiRiepiloghi(); await salvaStatoCorrente(); };
 
         [...tagliBanconote, ...tagliMonete].forEach(taglio => {
@@ -456,7 +457,7 @@
         const saveAndUpdate = async () => { aggiornaTuttiRiepiloghi(); await salvaStatoCorrente(); };
         input.addEventListener('input', saveAndUpdate);
         button.addEventListener('click', async () => { div.remove(); await saveAndUpdate(); });
-        
+
         div.appendChild(input);
         div.appendChild(button);
         divAssegni.appendChild(div);
@@ -477,7 +478,7 @@
         });
         return conteggio;
     }
-    
+
     function aggiornaTabellaMovimenti(movimenti = []) {
         const tbody = document.getElementById('tabellaMovimenti').querySelector('tbody');
         tbody.innerHTML = '';
@@ -519,7 +520,7 @@
         });
         document.querySelectorAll('.col-provvigioni').forEach(el => el.style.display = showProvvigioni ? '' : 'none');
     }
-    
+
     function aggiornaTuttiRiepiloghi() {
         calcolaCassaTeorica();
         calcolaConteggioFisico();
@@ -527,7 +528,7 @@
             aggiornaRiepilogoProvvigioni();
         }
     }
-    
+
     function calcolaConteggioFisico() {
         let totale = 0;
         document.querySelectorAll('#conteggioBanconote input, #conteggioMonete input').forEach(input => {
@@ -543,19 +544,19 @@
         document.getElementById('totaleConteggioFisico').textContent = totale.toFixed(2);
         return totale;
     }
-    
+
     function calcolaRiporto(data) {
         const giornoPrecedenteLavorativo = getGiornoPrecedenteLavorativo(data);
         const dataKeyPrec = formatDate(giornoPrecedenteLavorativo);
         const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
         const datiGiornoPrec = datiCompagnia[dataKeyPrec];
-        
+
         if (datiGiornoPrec) {
             let totaleConteggiato = 0;
             const conteggio = datiGiornoPrec.conteggioFisico || {};
             for (const tipo in conteggio) {
                 if(tipo === 'assegni') {
-                    conteggio.assegni.forEach(val => totaleConteggiato += val);
+                    (conteggio.assegni || []).forEach(val => totaleConteggiato += val);
                 } else {
                     for (const taglio in conteggio[tipo]) {
                         totaleConteggiato += parseFloat(taglio) * parseInt(conteggio[tipo][taglio], 10);
@@ -566,7 +567,7 @@
         }
         return 0;
     }
-    
+
     function verificaChiusura() {
         const teorica = calcolaCassaTeorica();
         const fisica = calcolaConteggioFisico();
@@ -599,7 +600,7 @@
         document.getElementById('cassaTeorica').textContent = cassaTeorica.toFixed(2);
         return cassaTeorica;
     }
-        
+
     function aggiornaCampiCondizionali() {
         const compagnia = stato.compagniaSelezionata;
         const metodologia = document.getElementById('metodologia').value;
@@ -608,11 +609,11 @@
         const showProvvigioni = (compagnia === 'HDI' || compagnia === 'Vittoria') && metodologia !== 'Rientro da Anticipo';
         const showRientro = metodologia === 'Rientro da Anticipo';
         const showAssegno = metodologia === 'Assegno' || (showRientro && rientroMetodo === 'Assegno');
-        
+
         document.getElementById('divProvvigioni').style.display = showProvvigioni ? 'block' : 'none';
         document.getElementById('divRientroMetodo').style.display = showRientro ? 'block' : 'none';
         document.getElementById('divNumeroAssegno').style.display = showAssegno ? 'block' : 'none';
-        
+
         if (!showProvvigioni) document.getElementById('provvigioni').value = '';
         if (!showAssegno) document.getElementById('numeroAssegno').value = '';
     }
@@ -644,7 +645,7 @@
         document.getElementById('decade2-result').textContent = (decadi[2].titoli - decadi[2].provvigioni).toFixed(2);
         document.getElementById('decade3-result').textContent = (decadi[3].titoli - decadi[3].provvigioni).toFixed(2);
     }
-    
+
     function formatDate(date) { return date.toISOString().split('T')[0]; }
     function getGiornoPrecedenteLavorativo(data) {
         let dataPrec = new Date(data);
@@ -654,7 +655,7 @@
         }
         return dataPrec;
     }
-    
+
     // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO) ---
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.company-button').forEach(button => {
@@ -676,6 +677,7 @@
             const row = target.closest('tr');
             if (!row) return;
             const index = Array.from(tbody.children).indexOf(row);
+
             if (target.matches('.button-edit')) {
                 modificaMovimento(index);
             } else if (target.matches('.button-delete')) {
@@ -685,6 +687,7 @@
             }
         });
     });
+
 </script>
 </body>
 </html>
