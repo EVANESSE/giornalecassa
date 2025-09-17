@@ -259,7 +259,7 @@
                 statusIndicator.textContent = 'Errore Sinc.';
                 statusIndicator.className = 'error';
             }
-        }, 1500);
+        }, 1000);
     }
     
     async function inizializzaApp(compagnia) {
@@ -345,10 +345,10 @@
             datiGiorno.movimenti.push(movimento);
         }
         
-        annullaModifica();
-        await salvaStatoCorrente();
         aggiornaTabellaMovimenti(datiGiorno.movimenti);
         aggiornaTuttiRiepiloghi();
+        annullaModifica();
+        await salvaStatoCorrente();
     }
     
     function modificaMovimento(index) {
@@ -385,8 +385,9 @@
         if (confirm('Sei sicuro di voler eliminare questo movimento?')) {
             const dataKey = formatDate(stato.dataSelezionata);
             stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti.splice(index, 1);
+            aggiornaTabellaMovimenti(stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti);
+            aggiornaTuttiRiepiloghi();
             await salvaStatoCorrente();
-            caricaGiornale(stato.dataSelezionata);
         }
     }
 
@@ -396,17 +397,18 @@
         cell.innerHTML = `<input type="number" step="0.01" value="${valoreCorrente}" style="width: 80px; padding: 2px;"/>`;
         const input = cell.querySelector('input');
         input.focus();
-        const save = () => salvaProvvigioneModificata(input, index);
+        const save = () => salvaProvvigioneModificata(input, index, cell, valoreCorrente);
         input.addEventListener('blur', save);
         input.addEventListener('keydown', (event) => { if (event.key === 'Enter') input.blur(); });
     }
 
-    async function salvaProvvigioneModificata(input, index) {
+    async function salvaProvvigioneModificata(input, index, cell, oldValue) {
         const nuovoValore = parseFloat(input.value) || 0;
+        cell.innerHTML = nuovoValore.toFixed(2); // Ripristina la cella subito per reattività
         const dataKey = formatDate(stato.dataSelezionata);
         stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti[index].provvigioni = nuovoValore;
+        aggiornaTuttiRiepiloghi();
         await salvaStatoCorrente();
-        caricaGiornale(stato.dataSelezionata);
     }
 
     function creaCampiConteggio(datiConteggio = {}) {
@@ -417,7 +419,7 @@
         
         const saveAndUpdate = async () => { 
             const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][formatDate(stato.dataSelezionata)];
-            datiGiorno.conteggioFisico = raccogliDatiConteggio();
+            if(datiGiorno) datiGiorno.conteggioFisico = raccogliDatiConteggio();
             aggiornaTuttiRiepiloghi();
             await salvaStatoCorrente(); 
         };
@@ -460,7 +462,7 @@
 
         const saveAndUpdate = async () => {
             const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][formatDate(stato.dataSelezionata)];
-            datiGiorno.conteggioFisico = raccogliDatiConteggio();
+            if(datiGiorno) datiGiorno.conteggioFisico = raccogliDatiConteggio();
             aggiornaTuttiRiepiloghi(); 
             await salvaStatoCorrente(); 
         };
@@ -665,7 +667,7 @@
         return dataPrec;
     }
     
-    // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO) ---
+    // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO E CORRETTO) ---
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.company-button').forEach(button => {
             button.addEventListener('click', () => inizializzaApp(button.dataset.company));
@@ -695,7 +697,6 @@
             }
         });
     });
-
 </script>
 </body>
 </html>
