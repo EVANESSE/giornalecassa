@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Cassa Online (Definitiva)</title>
+    <style>
+        :root {
+            --primary-color: #6c757d; --primary-color-light: #f8f9fa;
+        }
+        body.theme-allianz { --primary-color: #007bff; --primary-color-light: #cce5ff; }
+        body.theme-hdi { --primary-color: #28a745; --primary-color-light: #d4edda; }
+        body.theme-vittoria { --primary-color: #6f42c1; --primary-color-light: #e2d9f3; }
+        body.theme-arag { --primary-color: #ffc107; --primary-color-light: #fff3cd; }
+        body.theme-helvetia { --primary-color: #dc3545; --primary-color-light: #f8d7da; }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5; color: #333; margin: 0; padding: 20px;
+        }
+        .container {
+            max-width: 1400px; margin: auto; background: #fff; padding: 25px;
+            border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none;
+        }
+        h1, h2, h3 { color: var(--primary-color); }
+        h1 { border-bottom: 3px solid var(--primary-color); padding-bottom: 10px; }
+
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .box { padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; }
+
+        input, select, button {
+            width: 100%; padding: 10px; margin-bottom: 10px;
+            border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1rem;
+        }
+        button {
+            background-color: var(--primary-color); color: white; border: none;
+            cursor: pointer; font-weight: bold; transition: background-color 0.2s;
+        }
+        button:hover { filter: brightness(90%); }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        .button-secondary { background-color: #6c757d; }
+        .button-danger { background-color: #dc3545; }
+        .button-edit { background-color: #ffc107; color: #212529; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
+        .button-delete { background-color: #dc3545; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; }
+        th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: var(--primary-color-light); }
+        .provvigione-editabile:hover { background-color: #fff3cd; cursor: pointer; }
+
+        .riepilogo-totali, .risultato-verifica {
+            font-size: 1.2rem; font-weight: bold; padding: 15px; margin-top: 15px;
+            border-radius: 5px; background-color: var(--primary-color-light); border-left: 5px solid var(--primary-color);
+        }
+        .risultato-verifica.ok { color: #155724; background-color: #d4edda; border-left-color: #28a745; }
+        .risultato-verifica.errore { color: #721c24; background-color: #f8d7da; border-left-color: #dc3545; }
+
+        .decade-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .decade-grid div { padding: 10px; background: #f8f9fa; border-radius: 4px; }
+        .decade-grid strong { color: var(--primary-color); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 40px; border-radius: 10px; text-align: center; }
+        .modal-content .company-button { display: block; width: 300px; margin: 10px 0; font-size: 1.2rem; }
+
+        .app-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 10px 20px; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 20px; gap: 15px; }
+        .app-header .header-group { display: flex; align-items: center; gap: 10px; }
+        .app-header label { font-weight: bold; }
+        .app-header input[type="date"], .app-header button { width: auto; padding: 8px; margin-bottom: 0; }
+
+        #status-indicator { font-weight: bold; padding: 5px 10px; border-radius: 5px; color: white; }
+        #status-indicator.synced { background-color: #28a745; }
+        #status-indicator.saving { background-color: #ffc107; color: black; }
+        #status-indicator.error { background-color: #dc3545; }
+    </style>
+</head>
+<body id="app-body">
+    <div class="modal-overlay" id="company-selector-modal">
+        <div class="modal-content">
+            <h2>Seleziona la Compagnia</h2>
+            <button class="company-button" data-company="Allianz" style="background-color:#007bff">Allianz</button>
+            <button class="company-button" data-company="HDI" style="background-color:#28a745">HDI</button>
+            <button class="company-button" data-company="Vittoria" style="background-color:#6f42c1">Vittoria</button>
+            <button class="company-button" data-company="ARAG" style="background-color:#ffc107">ARAG</button>
+            <button class="company-button" data-company="Helvetia" style="background-color:#dc3545">Helvetia</button>
+        </div>
+    </div>
+
+    <div class="container" id="main-container">
+        <h1 id="main-title">Registro Cassa</h1>
+
+        <div class="app-header">
+            <div class="header-group">
+                <label for="date-selector">Giornale del:</label>
+                <input type="date" id="date-selector">
+            </div>
+            <div class="header-group">
+                <div id="status-indicator" class="saving">Inizializzazione...</div>
+                <button id="print-button" class="button-secondary">Stampa / Salva PDF</button>
+                <button id="change-company-button">Cambia Compagnia</button>
+            </div>
+        </div>
+
+        <div class="box">
+            <h2>1. Inizio Giornata</h2>
+            <label for="riportoIniziale"><strong>Riporto Automatico Giorno Precedente (€):</strong></label>
+            <input type="number" id="riportoIniziale" placeholder="0.00" step="0.01">
+        </div>
+
+        <div class="grid-container">
+            <div class="box">
+                <h2 id="form-title">2. Registrazione Movimento</h2>
+                <form id="formMovimento">
+                    <input type="hidden" id="editingIndex" value="">
+
+                    <label for="metodologia">Metodologia Incasso:</label>
+                    <select id="metodologia">
+                        <option value="Contanti">Contanti</option><option value="Assegno">Assegno</option>
+                        <option value="POS">POS</option><option value="Bonifico">Bonifico</option>
+                    </select>
+
+                    <div id="divRientroMetodo" style="display:none;">
+                        <label for="rientroMetodo">Metodo di Rientro:</label>
+                        <select id="rientroMetodo">
+                            <option value="Contanti">Contanti</option><option value="Assegno">Assegno</option>
+                            <option value="POS">POS</option><option value="Bonifico">Bonifico</option>
+                        </select>
+                    </div>
+
+                    <div id="divNumeroAssegno" style="display:none;">
+                        <label for="numeroAssegno">Numero Assegno:</label>
+                        <input type="text" id="numeroAssegno" placeholder="N° Assegno">
+                    </div>
+                    <label for="nomeCliente">Nome Cliente:</label><input type="text" id="nomeCliente" required>
+                    <label for="numeroPolizza">Numero Polizza:</label><input type="text" id="numeroPolizza">
+                    <label for="importo">Importo Titolo (€):</label><input type="number" id="importo" step="0.01" placeholder="0.00" required>
+
+                    <div id="divProvvigioni" style="display:none;">
+                        <label for="provvigioni">Provvigioni (€):</label>
+                        <input type="number" id="provvigioni" step="0.01" placeholder="0.00">
+                    </div>
+
+                    <label for="arrotondamenti">Arrotondamenti (€):</label><input type="number" id="arrotondamenti" step="0.01" placeholder="Es. -0.02">
+                    <label for="uscite">Uscite Cassa (€):</label><input type="number" id="uscite" step="0.01" placeholder="0.00">
+                    <div id="form-buttons">
+                        <button type="submit">Aggiungi Movimento</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="box">
+                <h2>3. Conteggio Fisico Cassa</h2>
+                <div id="conteggioBanconote"></div>
+                <div id="conteggioMonete"></div>
+                <div id="box-conteggio-assegni">
+                    <h3>Assegni in Cassa</h3>
+                    <div id="lista-conteggio-assegni"></div>
+                    <button id="add-assegno-button" class="button-secondary" style="width: auto; padding: 5px 10px; font-size: 0.9rem;">+ Aggiungi Assegno</button>
+                </div>
+                <div class="riepilogo-totali">Totale Contato Fisicamente: € <span id="totaleConteggioFisico">0.00</span></div>
+            </div>
+        </div>
+
+        <div class="box">
+            <h2>Riepilogo Movimenti di Cassa</h2>
+            <table id="tabellaMovimenti">
+                <thead><tr>
+                    <th>Cliente</th><th>Polizza</th><th>Metodo</th><th>Importo (€)</th>
+                    <th class="col-provvigioni">Provv.(€)</th>
+                    <th>Arroton. (€)</th><th>Uscite (€)</th><th>Impatto (€)</th><th>Azioni</th>
+                </tr></thead>
+                <tbody></tbody>
+            </table>
+            <div class="riepilogo-totali">Cassa Teorica Finale (Riporto + Movimenti): € <span id="cassaTeorica">0.00</span></div>
+        </div>
+
+        <div class="box" id="box-provvigioni" style="display:none;">
+            <h2>Riepilogo Provvigioni e Decadi (Mese Corrente)</h2>
+            <div class="riepilogo-totali">
+                Totale Provvigioni del Mese: € <span id="provvigioni-mese-corrente">0.00</span>
+            </div>
+            <div class="decade-grid">
+                <div><strong>1ª Decade (1-10):</strong> € <span id="decade1-result">0.00</span></div>
+                <div><strong>2ª Decade (11-20):</strong> € <span id="decade2-result">0.00</span></div>
+                <div><strong>3ª Decade (21+):</strong> € <span id="decade3-result">0.00</span></div>
+            </div>
+        </div>
+
+        <div class="box">
+            <h2>4. Verifica Finale</h2>
+            <button id="btnVerifica" class="button-secondary">VERIFICA I CONTI</button>
+            <div class="risultato-verifica" id="risultatoVerifica">In attesa di verifica...</div>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD41OqDrIwwH7PrK_ywmYRYVrR_KAehiU8",
+      authDomain: "giornalecassa.firebaseapp.com",
+      projectId: "giornalecassa",
+      storageBucket: "giornalecassa.appspot.com",
+      messagingSenderId: "655250052165",
+      appId: "1:655250052165:web:8cead9e63e7dd951773f2c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const dbRef = doc(db, "gestione-cassa", "databaseCompleto");
+    const statusIndicator = document.getElementById('status-indicator');
+
+    let stato = { compagniaSelezionata: null, dataSelezionata: null, datiCompleti: {} };
+    const tagliBanconote = [500, 200, 100, 50, 20, 10, 5];
+    const tagliMonete = [2, 1, 0.50, 0.20, 0.10, 0.05, 0.02, 0.01];
+    let saveTimeout;
+
+    async function caricaDatiDaFirebase() {
+        statusIndicator.textContent = 'Sincronizzazione...';
+        statusIndicator.className = 'saving';
+        try {
+            const docSnap = await getDoc(dbRef);
+            stato.datiCompleti = docSnap.exists() ? docSnap.data() : {};
+            statusIndicator.textContent = 'Sincronizzato';
+            statusIndicator.className = 'synced';
+        } catch (error) {
+            console.error("Errore caricamento da Firebase: ", error);
+            statusIndicator.textContent = 'Errore Sinc.';
+            statusIndicator.className = 'error';
+        }
+    }
+
+    async function salvaStatoCorrente() {
+        clearTimeout(saveTimeout);
+        statusIndicator.textContent = 'Salvataggio...';
+        statusIndicator.className = 'saving';
+        saveTimeout = setTimeout(async () => {
+            try {
+                await setDoc(dbRef, stato.datiCompleti);
+                statusIndicator.textContent = 'Sincronizzato';
+                statusIndicator.className = 'synced';
+            } catch (error) {
+                console.error("Errore salvataggio su Firebase: ", error);
+                statusIndicator.textContent = 'Errore Sinc.';
+                statusIndicator.className = 'error';
+            }
+        }, 1500);
+    }
+
+    async function inizializzaApp(compagnia) {
+        stato.compagniaSelezionata = compagnia;
+        document.body.className = `theme-${compagnia.toLowerCase()}`;
+
+        await caricaDatiDaFirebase();
+
+        document.getElementById('company-selector-modal').style.display = 'none';
+        document.getElementById('main-container').style.display = 'block';
+        document.getElementById('main-title').textContent = `Registro Cassa ${compagnia}`;
+
+        const showProvvigioni = compagnia === 'HDI' || compagnia === 'Vittoria';
+        document.getElementById('box-provvigioni').style.display = showProvvigioni ? 'block' : 'none';
+        document.querySelectorAll('.col-provvigioni').forEach(el => el.style.display = showProvvigioni ? '' : 'none');
+
+        const selectMetodo = document.getElementById('metodologia');
+        selectMetodo.innerHTML = `<option value="Contanti">Contanti</option><option value="Assegno">Assegno</option><option value="POS">POS</option><option value="Bonifico">Bonifico</option>`;
+        if (showProvvigioni) {
+            selectMetodo.add(new Option('Anticipo', 'Anticipo'));
+            selectMetodo.add(new Option('Rientro da Anticipo', 'Rientro da Anticipo'));
+        }
+
+        document.getElementById('date-selector').valueAsDate = new Date();
+        caricaGiornale(new Date());
+    }
+
+    async function caricaGiornale(data) {
+        stato.dataSelezionata = data;
+        const dataKey = formatDate(data);
+        const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
+        let datiGiorno = datiCompagnia[dataKey];
+
+        if (!datiGiorno) {
+            datiGiorno = creaNuovoGiorno(data);
+            if (!stato.datiCompleti[stato.compagniaSelezionata]) stato.datiCompleti[stato.compagniaSelezionata] = {};
+            stato.datiCompleti[stato.compagniaSelezionata][dataKey] = datiGiorno;
+            await salvaStatoCorrente(); 
+        }
+
+        document.getElementById('riportoIniziale').value = (datiGiorno.riportoIniziale || 0).toFixed(2);
+        creaCampiConteggio(datiGiorno.conteggioFisico);
+        aggiornaTabellaMovimenti(datiGiorno.movimenti);
+        aggiornaTuttiRiepiloghi();
+        annullaModifica();
+    }
+
+    function creaNuovoGiorno(data) {
+        return { riportoIniziale: calcolaRiporto(data), movimenti: [], conteggioFisico: {} };
+    }
+
+    async function salvaRiportoManuale() {
+        const dataKey = formatDate(stato.dataSelezionata);
+        const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata]?.[dataKey];
+        if (datiGiorno) {
+            datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
+            aggiornaTuttiRiepiloghi(); 
+            await salvaStatoCorrente();
+        }
+    }
+
+    async function processaFormMovimento() {
+        const editingIndex = document.getElementById('editingIndex').value;
+        const movimento = {
+            metodologia: document.getElementById('metodologia').value,
+            rientroMetodo: document.getElementById('rientroMetodo').value,
+            numeroAssegno: document.getElementById('numeroAssegno').value,
+            nomeCliente: document.getElementById('nomeCliente').value,
+            numeroPolizza: document.getElementById('numeroPolizza').value,
+            importo: parseFloat(document.getElementById('importo').value) || 0,
+            provvigioni: parseFloat(document.getElementById('provvigioni').value) || 0,
+            arrotondamenti: parseFloat(document.getElementById('arrotondamenti').value) || 0,
+            uscite: parseFloat(document.getElementById('uscite').value) || 0,
+        };
+
+        const dataKey = formatDate(stato.dataSelezionata);
+        const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
+        (datiGiorno.movimenti = datiGiorno.movimenti || []);
+
+        if (editingIndex !== "") {
+            datiGiorno.movimenti[parseInt(editingIndex)] = movimento;
+        } else {
+            datiGiorno.movimenti.push(movimento);
+        }
+
+        await salvaStatoCorrente();
+        caricaGiornale(stato.dataSelezionata);
+    }
+
+    function modificaMovimento(index) {
+        const dataKey = formatDate(stato.dataSelezionata);
+        const movimento = stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti[index];
+
+        document.getElementById('editingIndex').value = index;
+        document.getElementById('metodologia').value = movimento.metodologia;
+        document.getElementById('rientroMetodo').value = movimento.rientroMetodo || 'Contanti';
+        document.getElementById('numeroAssegno').value = movimento.numeroAssegno;
+        document.getElementById('nomeCliente').value = movimento.nomeCliente;
+        document.getElementById('numeroPolizza').value = movimento.numeroPolizza;
+        document.getElementById('importo').value = movimento.importo;
+        document.getElementById('provvigioni').value = movimento.provvigioni || '';
+        document.getElementById('arrotondamenti').value = movimento.arrotondamenti;
+        document.getElementById('uscite').value = movimento.uscite;
+
+        document.getElementById('form-title').textContent = "Modifica Movimento";
+        document.getElementById('form-buttons').innerHTML = `<button type="submit">Salva Modifiche</button><button type="button" class="button-secondary" id="cancel-edit-button">Annulla</button>`;
+        document.getElementById('cancel-edit-button').addEventListener('click', annullaModifica);
+        aggiornaCampiCondizionali();
+        window.scrollTo(0, 0);
+    }
+
+    function annullaModifica() {
+        document.getElementById('editingIndex').value = "";
+        document.getElementById('formMovimento').reset();
+        document.getElementById('form-title').textContent = "2. Registrazione Movimento";
+        document.getElementById('form-buttons').innerHTML = `<button type="submit">Aggiungi Movimento</button>`;
+        aggiornaCampiCondizionali();
+    }
+
+    async function cancellaMovimento(index) {
+        if (confirm('Sei sicuro di voler eliminare questo movimento?')) {
+            const dataKey = formatDate(stato.dataSelezionata);
+            stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti.splice(index, 1);
+            await salvaStatoCorrente();
+            caricaGiornale(stato.dataSelezionata);
+        }
+    }
+
+    function rendiProvvigioneEditabile(cell, index) {
+        if (cell.querySelector('input')) return;
+        const valoreCorrente = cell.textContent;
+        cell.innerHTML = `<input type="number" step="0.01" value="${valoreCorrente}" style="width: 80px; padding: 2px;"/>`;
+        const input = cell.querySelector('input');
+        input.focus();
+        input.addEventListener('blur', () => salvaProvvigioneModificata(input, index));
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') input.blur();
+        });
+    }
+
+    async function salvaProvvigioneModificata(input, index) {
+        const nuovoValore = parseFloat(input.value) || 0;
+        const dataKey = formatDate(stato.dataSelezionata);
+        stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti[index].provvigioni = nuovoValore;
+        await salvaStatoCorrente();
+        caricaGiornale(stato.dataSelezionata);
+    }
+
+    function creaCampiConteggio(datiConteggio = {}) {
+        const divBanconote = document.getElementById('conteggioBanconote');
+        const divMonete = document.getElementById('conteggioMonete');
+        divBanconote.innerHTML = '<h3>Banconote</h3>';
+        divMonete.innerHTML = '<h3>Monete</h3>';
+
+        const saveAndUpdate = async () => { aggiornaTuttiRiepiloghi(); await salvaStatoCorrente(); };
+
+        [...tagliBanconote, ...tagliMonete].forEach(taglio => {
+            const tipo = taglio >= 5 ? 'banconote' : 'monete';
+            const div = tipo === 'banconote' ? divBanconote : divMonete;
+            const valoreSalvato = datiConteggio?.[tipo]?.[taglio] || '';
+            const idTaglio = taglio.toString().replace('.', '_');
+            const input = document.createElement('input');
+            input.type = 'number'; input.dataset.valore = taglio; input.dataset.tipo = tipo;
+            input.value = valoreSalvato; input.placeholder = 'N° pezzi';
+            input.addEventListener('input', saveAndUpdate);
+
+            const grid = document.createElement('div');
+            grid.className = 'conteggio-grid';
+            grid.style.cssText = "display: grid; grid-template-columns: 1fr 2fr 2fr; align-items: center; gap: 5px; margin-bottom: 5px;";
+            grid.innerHTML = `<label style="font-weight: bold;">€ ${taglio.toFixed(2)}</label>`;
+            grid.appendChild(input);
+            grid.innerHTML += `<span id="subtotale-${idTaglio}">€ 0.00</span>`;
+            div.appendChild(grid);
+        });
+
+        const divAssegni = document.getElementById('lista-conteggio-assegni');
+        divAssegni.innerHTML = '';
+        const assegniSalvati = datiConteggio?.assegni || [];
+        assegniSalvati.forEach((importo) => {
+            aggiungiCampoAssegnoConteggio(importo);
+        });
+    }
+
+    function aggiungiCampoAssegnoConteggio(importo = '') {
+        const divAssegni = document.getElementById('lista-conteggio-assegni');
+        const div = document.createElement('div');
+        div.style.display = 'flex'; div.style.gap = '5px'; div.style.marginBottom = '5px';
+        const input = document.createElement('input');
+        input.type = 'number'; input.step = '0.01'; input.className = 'conteggio-assegno';
+        input.placeholder = 'Importo Assegno'; input.value = importo;
+        const button = document.createElement('button');
+        button.className = 'button-delete'; button.style.width = 'auto'; button.textContent = 'X';
+
+        const saveAndUpdate = async () => { aggiornaTuttiRiepiloghi(); await salvaStatoCorrente(); };
+        input.addEventListener('input', saveAndUpdate);
+        button.addEventListener('click', async () => { div.remove(); await saveAndUpdate(); });
+
+        div.appendChild(input);
+        div.appendChild(button);
+        divAssegni.appendChild(div);
+    }
+
+    function raccogliDatiConteggio() {
+        const conteggio = { banconote: {}, monete: {}, assegni: [] };
+        document.querySelectorAll('#conteggioBanconote input, #conteggioMonete input').forEach(input => {
+            if (input.value && parseInt(input.value) > 0) {
+                conteggio[input.dataset.tipo][input.dataset.valore] = parseInt(input.value, 10);
+            }
+        });
+        document.querySelectorAll('.conteggio-assegno').forEach(input => {
+            const valore = parseFloat(input.value);
+            if (!isNaN(valore) && valore > 0) {
+                conteggio.assegni.push(valore);
+            }
+        });
+        return conteggio;
+    }
+
+    function aggiornaTabellaMovimenti(movimenti = []) {
+        const tbody = document.getElementById('tabellaMovimenti').querySelector('tbody');
+        tbody.innerHTML = '';
+        const showProvvigioni = stato.compagniaSelezionata === 'HDI' || stato.compagniaSelezionata === 'Vittoria';
+
+        (movimenti || []).forEach((m, index) => {
+            let impattoCassa = 0;
+            if (m.metodologia === 'Contanti' || m.metodologia === 'Assegno') {
+                impattoCassa = m.importo;
+            } else if (m.metodologia === 'Rientro da Anticipo' && (m.rientroMetodo === 'Contanti' || m.rientroMetodo === 'Assegno')) {
+                impattoCassa = m.importo;
+            }
+            impattoCassa += (m.arrotondamenti || 0) - (m.uscite || 0);
+
+            let metodoDisplay = m.metodologia;
+            if (m.metodologia === 'Assegno') {
+                metodoDisplay += ` ${m.numeroAssegno || ''}`;
+            } else if (m.metodologia === 'Rientro da Anticipo') {
+                metodoDisplay += ` (${m.rientroMetodo || ''})`;
+                if (m.rientroMetodo === 'Assegno') {
+                     metodoDisplay += ` ${m.numeroAssegno || ''}`;
+                }
+            }
+
+            const riga = tbody.insertRow();
+            riga.innerHTML = `
+                <td>${m.nomeCliente || ''}</td>
+                <td>${m.numeroPolizza || ''}</td>
+                <td>${metodoDisplay || ''}</td>
+                <td>${(m.importo || 0).toFixed(2)}</td>
+                <td class="col-provvigioni provvigione-editabile" data-index="${index}">${(m.provvigioni || 0).toFixed(2)}</td>
+                <td>${(m.arrotondamenti || 0).toFixed(2)}</td>
+                <td>${(m.uscite || 0).toFixed(2)}</td>
+                <td><strong>${impattoCassa.toFixed(2)}</strong></td>
+                <td>
+                    <button class="button-edit" data-index="${index}">Modifica</button>
+                    <button class="button-delete" data-index="${index}">Elimina</button>
+                </td>`;
+        });
+        document.querySelectorAll('.col-provvigioni').forEach(el => el.style.display = showProvvigioni ? '' : 'none');
+    }
+
+    function aggiornaTuttiRiepiloghi() {
+        calcolaCassaTeorica();
+        calcolaConteggioFisico();
+        if (stato.compagniaSelezionata === 'HDI' || stato.compagniaSelezionata === 'Vittoria') {
+            aggiornaRiepilogoProvvigioni();
+        }
+    }
+
+    function calcolaConteggioFisico() {
+        let totale = 0;
+        document.querySelectorAll('#conteggioBanconote input, #conteggioMonete input').forEach(input => {
+            const valore = parseFloat(input.dataset.valore);
+            const quantita = parseInt(input.value) || 0;
+            const subtotale = valore * quantita;
+            totale += subtotale;
+            document.getElementById(`subtotale-${valore.toString().replace('.', '_')}`).textContent = `€ ${subtotale.toFixed(2)}`;
+        });
+        document.querySelectorAll('.conteggio-assegno').forEach(input => {
+            totale += parseFloat(input.value) || 0;
+        });
+        document.getElementById('totaleConteggioFisico').textContent = totale.toFixed(2);
+        return totale;
+    }
+
+    function calcolaRiporto(data) {
+        const giornoPrecedenteLavorativo = getGiornoPrecedenteLavorativo(data);
+        const dataKeyPrec = formatDate(giornoPrecedenteLavorativo);
+        const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
+        const datiGiornoPrec = datiCompagnia[dataKeyPrec];
+
+        if (datiGiornoPrec) {
+            let totaleConteggiato = 0;
+            const conteggio = datiGiornoPrec.conteggioFisico || {};
+            for (const tipo in conteggio) {
+                if(tipo === 'assegni') {
+                    conteggio.assegni.forEach(val => totaleConteggiato += val);
+                } else {
+                    for (const taglio in conteggio[tipo]) {
+                        totaleConteggiato += parseFloat(taglio) * parseInt(conteggio[tipo][taglio], 10);
+                    }
+                }
+            }
+            return totaleConteggiato;
+        }
+        return 0;
+    }
+
+    function verificaChiusura() {
+        const teorica = calcolaCassaTeorica();
+        const fisica = calcolaConteggioFisico();
+        const differenza = fisica - teorica;
+        const divRisultato = document.getElementById('risultatoVerifica');
+        if (Math.abs(differenza) < 0.01) {
+            divRisultato.textContent = `✅ I CONTI TORNANO! Differenza: € 0.00`;
+            divRisultato.className = 'risultato-verifica ok';
+        } else {
+            divRisultato.textContent = `❌ ATTENZIONE! Differenza di cassa: € ${differenza.toFixed(2)}`;
+            divRisultato.className = 'risultato-verifica errore';
+        }
+    }
+
+    function calcolaCassaTeorica() {
+        const riporto = parseFloat(document.getElementById('riportoIniziale').value) || 0;
+        const dataKey = formatDate(stato.dataSelezionata);
+        const movimenti = stato.datiCompleti[stato.compagniaSelezionata]?.[dataKey]?.movimenti || [];
+        const totaleMovimentiCassa = movimenti.reduce((acc, m) => {
+            let impatto = 0;
+            if (m.metodologia === 'Contanti' || m.metodologia === 'Assegno') {
+                impatto = m.importo;
+            } else if (m.metodologia === 'Rientro da Anticipo' && (m.rientroMetodo === 'Contanti' || m.rientroMetodo === 'Assegno')) {
+                impatto = m.importo;
+            }
+            impatto += (m.arrotondamenti || 0) - (m.uscite || 0);
+            return acc + impatto;
+        }, 0);
+        const cassaTeorica = riporto + totaleMovimentiCassa;
+        document.getElementById('cassaTeorica').textContent = cassaTeorica.toFixed(2);
+        return cassaTeorica;
+    }
+
+    function aggiornaCampiCondizionali() {
+        const compagnia = stato.compagniaSelezionata;
+        const metodologia = document.getElementById('metodologia').value;
+        const rientroMetodo = document.getElementById('rientroMetodo').value;
+
+        const showProvvigioni = (compagnia === 'HDI' || compagnia === 'Vittoria') && metodologia !== 'Rientro da Anticipo';
+        const showRientro = metodologia === 'Rientro da Anticipo';
+        const showAssegno = metodologia === 'Assegno' || (showRientro && rientroMetodo === 'Assegno');
+
+        document.getElementById('divProvvigioni').style.display = showProvvigioni ? 'block' : 'none';
+        document.getElementById('divRientroMetodo').style.display = showRientro ? 'block' : 'none';
+        document.getElementById('divNumeroAssegno').style.display = showAssegno ? 'block' : 'none';
+
+        if (!showProvvigioni) document.getElementById('provvigioni').value = '';
+        if (!showAssegno) document.getElementById('numeroAssegno').value = '';
+    }
+
+    function aggiornaRiepilogoProvvigioni() {
+        const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
+        const meseCorrente = stato.dataSelezionata.getMonth();
+        const annoCorrente = stato.dataSelezionata.getFullYear();
+
+        let totaleProvvigioniMese = 0;
+        const decadi = { 1: { titoli: 0, provvigioni: 0 }, 2: { titoli: 0, provvigioni: 0 }, 3: { titoli: 0, provvigioni: 0 } };
+
+        for (const dataKey in datiCompagnia) {
+            const dataGiornale = new Date(dataKey);
+            dataGiornale.setHours(12);
+            if (dataGiornale.getMonth() === meseCorrente && dataGiornale.getFullYear() === annoCorrente) {
+                (datiCompagnia[dataKey].movimenti || []).forEach(m => {
+                    const giorno = dataGiornale.getDate();
+                    totaleProvvigioniMese += (m.provvigioni || 0);
+                    const decadeNum = giorno <= 10 ? 1 : (giorno <= 20 ? 2 : 3);
+                    decadi[decadeNum].titoli += m.importo;
+                    decadi[decadeNum].provvigioni += (m.provvigioni || 0);
+                });
+            }
+        }
+
+        document.getElementById('provvigioni-mese-corrente').textContent = totaleProvvigioniMese.toFixed(2);
+        document.getElementById('decade1-result').textContent = (decadi[1].titoli - decadi[1].provvigioni).toFixed(2);
+        document.getElementById('decade2-result').textContent = (decadi[2].titoli - decadi[2].provvigioni).toFixed(2);
+        document.getElementById('decade3-result').textContent = (decadi[3].titoli - decadi[3].provvigioni).toFixed(2);
+    }
+
+    function formatDate(date) { return date.toISOString().split('T')[0]; }
+    function getGiornoPrecedenteLavorativo(data) {
+        let dataPrec = new Date(data);
+        dataPrec.setDate(data.getDate() - 1);
+        while (dataPrec.getDay() === 0 || dataPrec.getDay() === 6) {
+            dataPrec.setDate(dataPrec.getDate() - 1);
+        }
+        return dataPrec;
+    }
+
+    // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO) ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Modale di selezione
+        document.querySelectorAll('.company-button').forEach(button => {
+            button.addEventListener('click', () => inizializzaApp(button.dataset.company || button.textContent));
+        });
+
+        // Header
+        document.getElementById('print-button').addEventListener('click', () => window.print());
+        document.getElementById('change-company-button').addEventListener('click', () => location.reload());
+        document.getElementById('date-selector').addEventListener('change', (e) => caricaGiornale(e.target.valueAsDate));
+
+        // Box Inizio Giornata
+        document.getElementById('riportoIniziale').addEventListener('input', salvaRiportoManuale);
+
+        // Form Movimenti
+        document.getElementById('formMovimento').addEventListener('submit', processaFormMovimento);
+        document.getElementById('metodologia').addEventListener('change', aggiornaCampiCondizionali);
+        document.getElementById('rientroMetodo').addEventListener('change', aggiornaCampiCondizionali);
+
+        // Box Conteggio Fisico
+        document.getElementById('add-assegno-button').addEventListener('click', () => aggiungiCampoAssegnoConteggio());
+
+        // Box Verifica Finale
+        document.getElementById('btnVerifica').addEventListener('click', verificaChiusura);
+
+        // Event Delegation per la tabella
+        const tabellaBody = document.getElementById('tabellaMovimenti').querySelector('tbody');
+        tabellaBody.addEventListener('click', (event) => {
+            const target = event.target;
+            const cell = target.closest('td');
+            const row = target.closest('tr');
+            if (!row) return;
+
+            const index = Array.from(tbody.children).indexOf(row);
+
+            if (target.matches('.button-edit')) {
+                modificaMovimento(index);
+            } else if (target.matches('.button-delete')) {
+                cancellaMovimento(index);
+            } else if (cell && cell.matches('.provvigione-editabile')) {
+                rendiProvvigioneEditabile(cell, index);
+            }
+        });
+    });
+
+</script>
+</body>
+</html>
