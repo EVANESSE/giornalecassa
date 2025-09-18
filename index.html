@@ -230,7 +230,7 @@
         statusIndicator.textContent = 'Salvataggio...';
         statusIndicator.className = 'saving';
         try {
-            salvaDatiLocali(); 
+            salvaDatiLocali(); // Assicura che i dati dell'interfaccia siano nello stato prima di salvare
             await setDoc(dbRef, stato.datiCompleti);
             statusIndicator.textContent = 'Salvato Online';
             statusIndicator.className = 'synced';
@@ -631,6 +631,7 @@
         return dataPrec;
     }
     
+    // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO E CORRETTO) ---
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.company-button').forEach(button => {
             button.addEventListener('click', () => inizializzaApp(button.dataset.company));
