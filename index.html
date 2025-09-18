@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Cassa Online (Finale)</title>
+    <title>Gestione Cassa Online (Stabile)</title>
     <style>
         :root {
             --primary-color: #6c757d; --primary-color-light: #f8f9fa;
@@ -294,9 +294,7 @@
     }
     
     function creaNuovoGiorno(data) {
-        const riporto = calcolaRiporto(data);
-        const datiGiorno = { riportoIniziale: riporto, movimenti: [], conteggioFisico: {}, cassaTeorica: riporto };
-        return datiGiorno;
+        return { riportoIniziale: calcolaRiporto(data), movimenti: [], conteggioFisico: {} };
     }
 
     async function salvaRiportoManuale() {
@@ -310,7 +308,7 @@
     }
 
     async function processaFormMovimento(event) {
-        event.preventDefault();
+        event.preventDefault(); 
         const editingIndex = document.getElementById('editingIndex').value;
         const movimento = {
             metodologia: document.getElementById('metodologia').value,
@@ -552,7 +550,7 @@
         const datiGiornoPrec = datiCompagnia[dataKeyPrec];
         
         if (datiGiornoPrec) {
-            return datiGiornoPrec.cassaTeorica || 0; // CORREZIONE: Usa la cassa teorica
+            return datiGiornoPrec.cassaTeorica || 0;
         }
         return 0;
     }
@@ -589,7 +587,7 @@
 
         const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata]?.[dataKey];
         if (datiGiorno) {
-            datiGiorno.cassaTeorica = cassaTeorica; // CORREZIONE: Salva la cassa teorica nello stato
+            datiGiorno.cassaTeorica = cassaTeorica;
         }
 
         document.getElementById('cassaTeorica').textContent = cassaTeorica.toFixed(2);
@@ -651,7 +649,7 @@
         return dataPrec;
     }
     
-    // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO E CORRETTO) ---
+    // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO) ---
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.company-button').forEach(button => {
             button.addEventListener('click', () => inizializzaApp(button.dataset.company));
@@ -671,6 +669,7 @@
             const target = event.target;
             const row = target.closest('tr');
             if (!row) return;
+            
             const index = Array.from(tbody.children).indexOf(row);
             
             if (target.matches('.button-edit')) {
