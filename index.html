@@ -232,8 +232,8 @@
         statusIndicator.className = 'saving';
         saveTimeout = setTimeout(async () => {
             try {
-                // Prima di salvare, assicurati che i totali siano aggiornati nello stato
-                salvaDatiLocali();
+                // Prima di salvare, assicurati che i dati locali siano aggiornati
+                salvaDatiLocali(); 
                 await setDoc(dbRef, stato.datiCompleti);
                 statusIndicator.textContent = 'Salvato Online';
                 statusIndicator.className = 'synced';
@@ -268,7 +268,7 @@
         caricaGiornale(new Date());
     }
 
-    function caricaGiornale(data) {
+    async function caricaGiornale(data) {
         stato.dataSelezionata = data;
         const dataKey = formatDate(data);
         const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
@@ -278,6 +278,7 @@
             datiGiorno = creaNuovoGiorno(data);
             if (!stato.datiCompleti[stato.compagniaSelezionata]) stato.datiCompleti[stato.compagniaSelezionata] = {};
             stato.datiCompleti[stato.compagniaSelezionata][dataKey] = datiGiorno;
+            await salvaStatoCorrente(); 
         }
 
         document.getElementById('riportoIniziale').value = (datiGiorno.riportoIniziale || 0).toFixed(2);
@@ -305,7 +306,7 @@
     }
 
     async function processaFormMovimento(event) {
-        event.preventDefault();
+        event.preventDefault(); 
         const editingIndex = document.getElementById('editingIndex').value;
         const movimento = {
             metodologia: document.getElementById('metodologia').value,
@@ -400,7 +401,7 @@
         const divMonete = document.getElementById('conteggioMonete');
         divBanconote.innerHTML = '<h3>Banconote</h3>';
         divMonete.innerHTML = '<h3>Monete</h3>';
-
+        
         [...tagliBanconote, ...tagliMonete].forEach(taglio => {
             const tipo = taglio >= 5 ? 'banconote' : 'monete';
             const div = tipo === 'banconote' ? divBanconote : divMonete;
@@ -554,7 +555,7 @@
     function verificaChiusura() {
         const teorica = calcolaCassaTeorica();
         const fisica = calcolaConteggioFisico();
-        const differenza = teorica - fisica;
+        const differenza = fisica - teorica; // Modificato per coerenza
         const divRisultato = document.getElementById('risultatoVerifica');
         if (Math.abs(differenza) < 0.01) {
             divRisultato.textContent = `✅ I CONTI TORNANO! Differenza: € 0.00`;
@@ -639,6 +640,7 @@
         return dataPrec;
     }
     
+    // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO E CORRETTO) ---
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.company-button').forEach(button => {
             button.addEventListener('click', () => inizializzaApp(button.dataset.company));
