@@ -545,7 +545,7 @@
     function verificaChiusura() {
         const teorica = calcolaCassaTeorica();
         const fisica = calcolaConteggioFisico();
-        const differenza = teorica - fisica; // Nota: ho invertito per coerenza logica
+        const differenza = teorica - fisica;
         const divRisultato = document.getElementById('risultatoVerifica');
         if (Math.abs(differenza) < 0.01) {
             divRisultato.textContent = `✅ I CONTI TORNANO! Differenza: € 0.00`;
