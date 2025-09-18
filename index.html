@@ -210,7 +210,7 @@
     let stato = { compagniaSelezionata: null, dataSelezionata: null, datiCompleti: {} };
     const tagliBanconote = [500, 200, 100, 50, 20, 10, 5];
     const tagliMonete = [2, 1, 0.50, 0.20, 0.10, 0.05, 0.02, 0.01];
-
+    
     async function caricaDatiDaFirebase() {
         statusIndicator.textContent = 'Caricamento...';
         statusIndicator.className = 'saving';
@@ -230,6 +230,8 @@
         statusIndicator.textContent = 'Salvataggio...';
         statusIndicator.className = 'saving';
         try {
+            // Prima di salvare, assicurati che i totali siano aggiornati nello stato
+            aggiornaTuttiRiepiloghi();
             await setDoc(dbRef, stato.datiCompleti);
             statusIndicator.textContent = 'Salvato Online';
             statusIndicator.className = 'synced';
@@ -243,7 +245,6 @@
     async function inizializzaApp(compagnia) {
         stato.compagniaSelezionata = compagnia;
         document.body.className = `theme-${compagnia.toLowerCase()}`;
-        
         document.getElementById('company-selector-modal').style.display = 'none';
         document.getElementById('main-container').style.display = 'block';
         
@@ -630,7 +631,6 @@
         return dataPrec;
     }
     
-    // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO E CORRETTO) ---
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.company-button').forEach(button => {
             button.addEventListener('click', () => inizializzaApp(button.dataset.company));
