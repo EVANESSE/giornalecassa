@@ -230,6 +230,7 @@
         statusIndicator.textContent = 'Salvataggio...';
         statusIndicator.className = 'saving';
         try {
+            salvaDatiLocali(); 
             await setDoc(dbRef, stato.datiCompleti);
             statusIndicator.textContent = 'Salvato Online';
             statusIndicator.className = 'synced';
@@ -243,7 +244,6 @@
     async function inizializzaApp(compagnia) {
         stato.compagniaSelezionata = compagnia;
         document.body.className = `theme-${compagnia.toLowerCase()}`;
-        
         document.getElementById('company-selector-modal').style.display = 'none';
         document.getElementById('main-container').style.display = 'block';
         
@@ -290,16 +290,17 @@
 
     function salvaDatiLocali() {
         const dataKey = formatDate(stato.dataSelezionata);
+        if (!stato.datiCompleti[stato.compagniaSelezionata]) stato.datiCompleti[stato.compagniaSelezionata] = {};
+        if (!stato.datiCompleti[stato.compagniaSelezionata][dataKey]) stato.datiCompleti[stato.compagniaSelezionata][dataKey] = creaNuovoGiorno(stato.dataSelezionata);
+        
         const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
-        if (datiGiorno) {
-            datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
-            datiGiorno.conteggioFisico = raccogliDatiConteggio();
-            aggiornaTuttiRiepiloghi();
-        }
+        
+        datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
+        datiGiorno.conteggioFisico = raccogliDatiConteggio();
+        aggiornaTuttiRiepiloghi();
     }
 
-    function processaFormMovimento(event) {
-        event.preventDefault(); 
+    function processaFormMovimento() {
         const editingIndex = document.getElementById('editingIndex').value;
         const movimento = {
             metodologia: document.getElementById('metodologia').value,
@@ -380,9 +381,9 @@
 
     function salvaProvvigioneModificata(input, index, cell) {
         const nuovoValore = parseFloat(input.value) || 0;
-        cell.textContent = nuovoValore.toFixed(2);
         const dataKey = formatDate(stato.dataSelezionata);
         stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti[index].provvigioni = nuovoValore;
+        cell.textContent = nuovoValore.toFixed(2);
         aggiornaTuttiRiepiloghi();
     }
 
@@ -545,7 +546,7 @@
     function verificaChiusura() {
         const teorica = calcolaCassaTeorica();
         const fisica = calcolaConteggioFisico();
-        const differenza = teorica - fisica; // Nota: ho invertito per coerenza logica
+        const differenza = teorica - fisica;
         const divRisultato = document.getElementById('risultatoVerifica');
         if (Math.abs(differenza) < 0.01) {
             divRisultato.textContent = `✅ I CONTI TORNANO! Differenza: € 0.00`;
@@ -630,7 +631,6 @@
         return dataPrec;
     }
     
-    // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO E CORRETTO) ---
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.company-button').forEach(button => {
             button.addEventListener('click', () => inizializzaApp(button.dataset.company));
