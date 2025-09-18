@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Cassa (Stabile)</title>
+    <title>Gestione Cassa Online (Stabile)</title>
     <style>
         :root {
             --primary-color: #6c757d; --primary-color-light: #f8f9fa;
@@ -36,10 +36,10 @@
             background-color: var(--primary-color); color: white; border: none;
             cursor: pointer; font-weight: bold; transition: background-color 0.2s;
         }
-        button.button-save { background-color: #28a745; font-size: 1.1rem; padding: 12px;}
         button:hover { filter: brightness(90%); }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         .button-secondary { background-color: #6c757d; }
+        .button-danger { background-color: #dc3545; }
         .button-edit { background-color: #ffc107; color: #212529; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
         .button-delete { background-color: #dc3545; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
 
@@ -96,7 +96,6 @@
             </div>
             <div class="header-group">
                 <div id="status-indicator" class="saving">Inizializzazione...</div>
-                <button id="save-all-button" class="button-save">Salva Modifiche Online</button>
                 <button id="print-button" class="button-secondary">Stampa</button>
                 <button id="change-company-button">Cambia Compagnia</button>
             </div>
@@ -210,7 +209,8 @@
     let stato = { compagniaSelezionata: null, dataSelezionata: null, datiCompleti: {} };
     const tagliBanconote = [500, 200, 100, 50, 20, 10, 5];
     const tagliMonete = [2, 1, 0.50, 0.20, 0.10, 0.05, 0.02, 0.01];
-    
+    let saveTimeout;
+
     async function caricaDatiDaFirebase() {
         statusIndicator.textContent = 'Caricamento...';
         statusIndicator.className = 'saving';
@@ -227,19 +227,21 @@
     }
 
     async function salvaStatoCorrente() {
+        clearTimeout(saveTimeout);
         statusIndicator.textContent = 'Salvataggio...';
         statusIndicator.className = 'saving';
-        try {
-            // Prima di salvare, assicurati che i totali siano aggiornati nello stato
-            aggiornaTuttiRiepiloghi();
-            await setDoc(dbRef, stato.datiCompleti);
-            statusIndicator.textContent = 'Salvato Online';
-            statusIndicator.className = 'synced';
-        } catch (error) {
-            console.error("Errore salvataggio su Firebase: ", error);
-            statusIndicator.textContent = 'Errore Salvataggio';
-            statusIndicator.className = 'error';
-        }
+        saveTimeout = setTimeout(async () => {
+            try {
+                calcolaCassaTeorica(); // Assicura che la cassa teorica sia aggiornata prima di salvare
+                await setDoc(dbRef, stato.datiCompleti);
+                statusIndicator.textContent = 'Salvato Online';
+                statusIndicator.className = 'synced';
+            } catch (error) {
+                console.error("Errore salvataggio su Firebase: ", error);
+                statusIndicator.textContent = 'Errore Salvataggio';
+                statusIndicator.className = 'error';
+            }
+        }, 1000);
     }
     
     async function inizializzaApp(compagnia) {
@@ -289,17 +291,18 @@
         return { riportoIniziale: riporto, movimenti: [], conteggioFisico: {} };
     }
 
-    function salvaDatiLocali() {
+    async function salvaDatiLocaliESincronizza() {
         const dataKey = formatDate(stato.dataSelezionata);
-        const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
+        const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata]?.[dataKey];
         if (datiGiorno) {
             datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
             datiGiorno.conteggioFisico = raccogliDatiConteggio();
             aggiornaTuttiRiepiloghi();
+            await salvaStatoCorrente();
         }
     }
 
-    function processaFormMovimento(event) {
+    async function processaFormMovimento(event) {
         event.preventDefault(); 
         const editingIndex = document.getElementById('editingIndex').value;
         const movimento = {
@@ -327,6 +330,7 @@
         annullaModifica();
         aggiornaTabellaMovimenti(datiGiorno.movimenti);
         aggiornaTuttiRiepiloghi();
+        await salvaStatoCorrente();
     }
     
     function modificaMovimento(index) {
@@ -359,12 +363,13 @@
         aggiornaCampiCondizionali();
     }
 
-    function cancellaMovimento(index) {
+    async function cancellaMovimento(index) {
         if (confirm('Sei sicuro di voler eliminare questo movimento?')) {
             const dataKey = formatDate(stato.dataSelezionata);
             stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti.splice(index, 1);
             aggiornaTabellaMovimenti(stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti);
             aggiornaTuttiRiepiloghi();
+            await salvaStatoCorrente();
         }
     }
 
@@ -379,12 +384,13 @@
         input.addEventListener('keydown', (event) => { if (event.key === 'Enter') input.blur(); });
     }
 
-    function salvaProvvigioneModificata(input, index, cell) {
+    async function salvaProvvigioneModificata(input, index, cell) {
         const nuovoValore = parseFloat(input.value) || 0;
-        cell.textContent = nuovoValore.toFixed(2);
         const dataKey = formatDate(stato.dataSelezionata);
         stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti[index].provvigioni = nuovoValore;
+        cell.textContent = nuovoValore.toFixed(2);
         aggiornaTuttiRiepiloghi();
+        await salvaStatoCorrente();
     }
 
     function creaCampiConteggio(datiConteggio = {}) {
@@ -401,7 +407,7 @@
             const input = document.createElement('input');
             input.type = 'number'; input.dataset.valore = taglio; input.dataset.tipo = tipo;
             input.value = valoreSalvato; input.placeholder = 'N° pezzi';
-            input.addEventListener('input', salvaDatiLocali);
+            input.addEventListener('input', salvaDatiLocaliESincronizza);
 
             const grid = document.createElement('div');
             grid.className = 'conteggio-grid';
@@ -429,8 +435,8 @@
         const button = document.createElement('button');
         button.className = 'button-delete'; button.style.width = 'auto'; button.textContent = 'X';
 
-        input.addEventListener('input', salvaDatiLocali);
-        button.addEventListener('click', () => { div.remove(); salvaDatiLocali(); });
+        input.addEventListener('input', salvaDatiLocaliESincronizza);
+        button.addEventListener('click', () => { div.remove(); salvaDatiLocaliESincronizza(); });
         
         div.appendChild(input);
         div.appendChild(button);
