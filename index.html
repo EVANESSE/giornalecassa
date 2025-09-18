@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Cassa Online (Stabile)</title>
+    <title>Gestione Cassa (Stabile)</title>
     <style>
         :root {
             --primary-color: #6c757d; --primary-color-light: #f8f9fa;
@@ -36,10 +36,10 @@
             background-color: var(--primary-color); color: white; border: none;
             cursor: pointer; font-weight: bold; transition: background-color 0.2s;
         }
+        button.button-save { background-color: #28a745; font-size: 1.1rem; padding: 12px;}
         button:hover { filter: brightness(90%); }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         .button-secondary { background-color: #6c757d; }
-        .button-danger { background-color: #dc3545; }
         .button-edit { background-color: #ffc107; color: #212529; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
         .button-delete { background-color: #dc3545; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
 
@@ -96,6 +96,7 @@
             </div>
             <div class="header-group">
                 <div id="status-indicator" class="saving">Inizializzazione...</div>
+                <button id="save-all-button" class="button-save">Salva Modifiche Online</button>
                 <button id="print-button" class="button-secondary">Stampa</button>
                 <button id="change-company-button">Cambia Compagnia</button>
             </div>
@@ -103,7 +104,7 @@
     
         <div class="box">
             <h2>1. Inizio Giornata</h2>
-            <label for="riportoIniziale"><strong>Riporto da Cassa Teorica Giorno Precedente (€):</strong></label>
+            <label for="riportoIniziale"><strong>Riporto da Conteggio Giorno Precedente (€):</strong></label>
             <input type="number" id="riportoIniziale" placeholder="0.00" step="0.01">
         </div>
     
@@ -209,7 +210,6 @@
     let stato = { compagniaSelezionata: null, dataSelezionata: null, datiCompleti: {} };
     const tagliBanconote = [500, 200, 100, 50, 20, 10, 5];
     const tagliMonete = [2, 1, 0.50, 0.20, 0.10, 0.05, 0.02, 0.01];
-    let saveTimeout;
 
     async function caricaDatiDaFirebase() {
         statusIndicator.textContent = 'Caricamento...';
@@ -227,27 +227,23 @@
     }
 
     async function salvaStatoCorrente() {
-        clearTimeout(saveTimeout);
         statusIndicator.textContent = 'Salvataggio...';
         statusIndicator.className = 'saving';
-        saveTimeout = setTimeout(async () => {
-            try {
-                // Prima di salvare, assicurati che i dati locali siano aggiornati
-                salvaDatiLocali(); 
-                await setDoc(dbRef, stato.datiCompleti);
-                statusIndicator.textContent = 'Salvato Online';
-                statusIndicator.className = 'synced';
-            } catch (error) {
-                console.error("Errore salvataggio su Firebase: ", error);
-                statusIndicator.textContent = 'Errore Salvataggio';
-                statusIndicator.className = 'error';
-            }
-        }, 1500);
+        try {
+            await setDoc(dbRef, stato.datiCompleti);
+            statusIndicator.textContent = 'Salvato Online';
+            statusIndicator.className = 'synced';
+        } catch (error) {
+            console.error("Errore salvataggio su Firebase: ", error);
+            statusIndicator.textContent = 'Errore Salvataggio';
+            statusIndicator.className = 'error';
+        }
     }
     
     async function inizializzaApp(compagnia) {
         stato.compagniaSelezionata = compagnia;
         document.body.className = `theme-${compagnia.toLowerCase()}`;
+        
         document.getElementById('company-selector-modal').style.display = 'none';
         document.getElementById('main-container').style.display = 'block';
         
@@ -268,7 +264,7 @@
         caricaGiornale(new Date());
     }
 
-    async function caricaGiornale(data) {
+    function caricaGiornale(data) {
         stato.dataSelezionata = data;
         const dataKey = formatDate(data);
         const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
@@ -278,7 +274,6 @@
             datiGiorno = creaNuovoGiorno(data);
             if (!stato.datiCompleti[stato.compagniaSelezionata]) stato.datiCompleti[stato.compagniaSelezionata] = {};
             stato.datiCompleti[stato.compagniaSelezionata][dataKey] = datiGiorno;
-            await salvaStatoCorrente(); 
         }
 
         document.getElementById('riportoIniziale').value = (datiGiorno.riportoIniziale || 0).toFixed(2);
@@ -290,22 +285,20 @@
     
     function creaNuovoGiorno(data) {
         const riporto = calcolaRiporto(data);
-        return { riportoIniziale: riporto, movimenti: [], conteggioFisico: {}, cassaTeorica: riporto };
+        return { riportoIniziale: riporto, movimenti: [], conteggioFisico: {} };
     }
 
     function salvaDatiLocali() {
         const dataKey = formatDate(stato.dataSelezionata);
-        if (!stato.datiCompleti[stato.compagniaSelezionata]) stato.datiCompleti[stato.compagniaSelezionata] = {};
-        if (!stato.datiCompleti[stato.compagniaSelezionata][dataKey]) stato.datiCompleti[stato.compagniaSelezionata][dataKey] = creaNuovoGiorno(stato.dataSelezionata);
-        
         const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
-        
-        datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
-        datiGiorno.conteggioFisico = raccogliDatiConteggio();
-        aggiornaTuttiRiepiloghi();
+        if (datiGiorno) {
+            datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
+            datiGiorno.conteggioFisico = raccogliDatiConteggio();
+            aggiornaTuttiRiepiloghi();
+        }
     }
 
-    async function processaFormMovimento(event) {
+    function processaFormMovimento(event) {
         event.preventDefault(); 
         const editingIndex = document.getElementById('editingIndex').value;
         const movimento = {
@@ -333,7 +326,6 @@
         annullaModifica();
         aggiornaTabellaMovimenti(datiGiorno.movimenti);
         aggiornaTuttiRiepiloghi();
-        await salvaStatoCorrente();
     }
     
     function modificaMovimento(index) {
@@ -366,13 +358,12 @@
         aggiornaCampiCondizionali();
     }
 
-    async function cancellaMovimento(index) {
+    function cancellaMovimento(index) {
         if (confirm('Sei sicuro di voler eliminare questo movimento?')) {
             const dataKey = formatDate(stato.dataSelezionata);
             stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti.splice(index, 1);
             aggiornaTabellaMovimenti(stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti);
             aggiornaTuttiRiepiloghi();
-            await salvaStatoCorrente();
         }
     }
 
@@ -387,13 +378,12 @@
         input.addEventListener('keydown', (event) => { if (event.key === 'Enter') input.blur(); });
     }
 
-    async function salvaProvvigioneModificata(input, index, cell) {
+    function salvaProvvigioneModificata(input, index, cell) {
         const nuovoValore = parseFloat(input.value) || 0;
+        cell.textContent = nuovoValore.toFixed(2);
         const dataKey = formatDate(stato.dataSelezionata);
         stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti[index].provvigioni = nuovoValore;
-        cell.textContent = nuovoValore.toFixed(2);
         aggiornaTuttiRiepiloghi();
-        await salvaStatoCorrente();
     }
 
     function creaCampiConteggio(datiConteggio = {}) {
@@ -401,7 +391,7 @@
         const divMonete = document.getElementById('conteggioMonete');
         divBanconote.innerHTML = '<h3>Banconote</h3>';
         divMonete.innerHTML = '<h3>Monete</h3>';
-        
+
         [...tagliBanconote, ...tagliMonete].forEach(taglio => {
             const tipo = taglio >= 5 ? 'banconote' : 'monete';
             const div = tipo === 'banconote' ? divBanconote : divMonete;
@@ -555,7 +545,7 @@
     function verificaChiusura() {
         const teorica = calcolaCassaTeorica();
         const fisica = calcolaConteggioFisico();
-        const differenza = fisica - teorica; // Modificato per coerenza
+        const differenza = teorica - fisica; // Nota: ho invertito per coerenza logica
         const divRisultato = document.getElementById('risultatoVerifica');
         if (Math.abs(differenza) < 0.01) {
             divRisultato.textContent = `✅ I CONTI TORNANO! Differenza: € 0.00`;
