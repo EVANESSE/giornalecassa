@@ -40,7 +40,6 @@
         button:hover { filter: brightness(90%); }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         .button-secondary { background-color: #6c757d; }
-        .button-danger { background-color: #dc3545; }
         .button-edit { background-color: #ffc107; color: #212529; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
         .button-delete { background-color: #dc3545; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
 
@@ -103,13 +102,97 @@
             </div>
         </div>
     
+        <div class="box">
+            <h2>1. Inizio Giornata</h2>
+            <label for="riportoIniziale"><strong>Riporto da Conteggio Giorno Precedente (€):</strong></label>
+            <input type="number" id="riportoIniziale" placeholder="0.00" step="0.01">
         </div>
+    
+        <div class="grid-container">
+            <div class="box">
+                <h2 id="form-title">2. Registrazione Movimento</h2>
+                <form id="formMovimento">
+                    <input type="hidden" id="editingIndex" value="">
+                    <label for="metodologia">Metodologia Incasso:</label>
+                    <select id="metodologia">
+                        <option value="Contanti">Contanti</option><option value="Assegno">Assegno</option>
+                        <option value="POS">POS</option><option value="Bonifico">Bonifico</option>
+                    </select>
+                    <div id="divRientroMetodo" style="display:none;">
+                        <label for="rientroMetodo">Metodo di Rientro:</label>
+                        <select id="rientroMetodo">
+                            <option value="Contanti">Contanti</option><option value="Assegno">Assegno</option>
+                            <option value="POS">POS</option><option value="Bonifico">Bonifico</option>
+                        </select>
+                    </div>
+                    <div id="divNumeroAssegno" style="display:none;">
+                        <label for="numeroAssegno">Numero Assegno:</label>
+                        <input type="text" id="numeroAssegno" placeholder="N° Assegno">
+                    </div>
+                    <label for="nomeCliente">Nome Cliente:</label><input type="text" id="nomeCliente" required>
+                    <label for="numeroPolizza">Numero Polizza:</label><input type="text" id="numeroPolizza">
+                    <label for="importo">Importo Titolo (€):</label><input type="number" id="importo" step="0.01" placeholder="0.00" required>
+                    <div id="divProvvigioni" style="display:none;">
+                        <label for="provvigioni">Provvigioni (€):</label>
+                        <input type="number" id="provvigioni" step="0.01" placeholder="0.00">
+                    </div>
+                    <label for="arrotondamenti">Arrotondamenti (€):</label><input type="number" id="arrotondamenti" step="0.01" placeholder="Es. -0.02">
+                    <label for="uscite">Uscite Cassa (€):</label><input type="number" id="uscite" step="0.01" placeholder="0.00">
+                    <div id="form-buttons">
+                        <button type="submit">Aggiungi Movimento</button>
+                    </div>
+                </form>
+            </div>
+    
+            <div class="box">
+                <h2>3. Conteggio Fisico Cassa</h2>
+                <div id="conteggioBanconote"></div>
+                <div id="conteggioMonete"></div>
+                <div id="box-conteggio-assegni">
+                    <h3>Assegni in Cassa</h3>
+                    <div id="lista-conteggio-assegni"></div>
+                    <button id="add-assegno-button" class="button-secondary" style="width: auto; padding: 5px 10px; font-size: 0.9rem;">+ Aggiungi Assegno</button>
+                </div>
+                <div class="riepilogo-totali">Totale Contato Fisicamente: € <span id="totaleConteggioFisico">0.00</span></div>
+            </div>
+        </div>
+    
+        <div class="box">
+            <h2>Riepilogo Movimenti di Cassa</h2>
+            <table id="tabellaMovimenti">
+                <thead><tr>
+                    <th>Cliente</th><th>Polizza</th><th>Metodo</th><th>Importo (€)</th>
+                    <th class="col-provvigioni">Provv.(€)</th>
+                    <th>Arroton. (€)</th><th>Uscite (€)</th><th>Impatto (€)</th><th>Azioni</th>
+                </tr></thead>
+                <tbody></tbody>
+            </table>
+            <div class="riepilogo-totali">Cassa Teorica Finale (Riporto + Movimenti): € <span id="cassaTeorica">0.00</span></div>
+        </div>
+        
+        <div class="box" id="box-provvigioni" style="display:none;">
+            <h2>Riepilogo Provvigioni e Decadi (Mese Corrente)</h2>
+            <div class="riepilogo-totali">
+                Totale Provvigioni del Mese: € <span id="provvigioni-mese-corrente">0.00</span>
+            </div>
+            <div class="decade-grid">
+                <div><strong>1ª Decade (1-10):</strong> € <span id="decade1-result">0.00</span></div>
+                <div><strong>2ª Decade (11-20):</strong> € <span id="decade2-result">0.00</span></div>
+                <div><strong>3ª Decade (21+):</strong> € <span id="decade3-result">0.00</span></div>
+            </div>
+        </div>
+        
+        <div class="box">
+            <h2>4. Verifica Finale</h2>
+            <button id="btnVerifica" class="button-secondary">VERIFICA I CONTI</button>
+            <div class="risultato-verifica" id="risultatoVerifica">In attesa di verifica...</div>
+        </div>
+    </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // Inserisci qui la tua configurazione Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyD41OqDrIwwH7PrK_ywmYRYVrR_KAehiU8",
       authDomain: "giornalecassa.firebaseapp.com",
@@ -160,6 +243,7 @@
     async function inizializzaApp(compagnia) {
         stato.compagniaSelezionata = compagnia;
         document.body.className = `theme-${compagnia.toLowerCase()}`;
+        
         document.getElementById('company-selector-modal').style.display = 'none';
         document.getElementById('main-container').style.display = 'block';
         
@@ -201,15 +285,16 @@
     
     function creaNuovoGiorno(data) {
         const riporto = calcolaRiporto(data);
-        return { riportoIniziale: riporto, movimenti: [], conteggioFisico: {}, cassaTeorica: riporto };
+        return { riportoIniziale: riporto, movimenti: [], conteggioFisico: {} };
     }
 
-    function salvaRiportoManuale() {
+    function salvaDatiLocali() {
         const dataKey = formatDate(stato.dataSelezionata);
-        const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata]?.[dataKey];
+        const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
         if (datiGiorno) {
             datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
-            aggiornaTuttiRiepiloghi(); 
+            datiGiorno.conteggioFisico = raccogliDatiConteggio();
+            aggiornaTuttiRiepiloghi();
         }
     }
 
@@ -306,12 +391,6 @@
         const divMonete = document.getElementById('conteggioMonete');
         divBanconote.innerHTML = '<h3>Banconote</h3>';
         divMonete.innerHTML = '<h3>Monete</h3>';
-        
-        const updateState = () => { 
-            const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][formatDate(stato.dataSelezionata)];
-            if(datiGiorno) datiGiorno.conteggioFisico = raccogliDatiConteggio();
-            aggiornaTuttiRiepiloghi();
-        };
 
         [...tagliBanconote, ...tagliMonete].forEach(taglio => {
             const tipo = taglio >= 5 ? 'banconote' : 'monete';
@@ -321,7 +400,7 @@
             const input = document.createElement('input');
             input.type = 'number'; input.dataset.valore = taglio; input.dataset.tipo = tipo;
             input.value = valoreSalvato; input.placeholder = 'N° pezzi';
-            input.addEventListener('input', updateState);
+            input.addEventListener('input', salvaDatiLocali);
 
             const grid = document.createElement('div');
             grid.className = 'conteggio-grid';
@@ -349,13 +428,8 @@
         const button = document.createElement('button');
         button.className = 'button-delete'; button.style.width = 'auto'; button.textContent = 'X';
 
-        const updateState = () => {
-            const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][formatDate(stato.dataSelezionata)];
-            if(datiGiorno) datiGiorno.conteggioFisico = raccogliDatiConteggio();
-            aggiornaTuttiRiepiloghi(); 
-        };
-        input.addEventListener('input', updateState);
-        button.addEventListener('click', () => { div.remove(); updateState(); });
+        input.addEventListener('input', salvaDatiLocali);
+        button.addEventListener('click', () => { div.remove(); salvaDatiLocali(); });
         
         div.appendChild(input);
         div.appendChild(button);
@@ -403,18 +477,19 @@
             }
 
             const riga = tbody.insertRow();
+            riga.dataset.index = index;
             riga.innerHTML = `
                 <td>${m.nomeCliente || ''}</td>
                 <td>${m.numeroPolizza || ''}</td>
                 <td>${metodoDisplay || ''}</td>
                 <td>${(m.importo || 0).toFixed(2)}</td>
-                <td class="col-provvigioni provvigione-editabile" data-index="${index}">${(m.provvigioni || 0).toFixed(2)}</td>
+                <td class="col-provvigioni provvigione-editabile">${(m.provvigioni || 0).toFixed(2)}</td>
                 <td>${(m.arrotondamenti || 0).toFixed(2)}</td>
                 <td>${(m.uscite || 0).toFixed(2)}</td>
                 <td><strong>${impattoCassa.toFixed(2)}</strong></td>
                 <td>
-                    <button class="button-edit" data-index="${index}">Modifica</button>
-                    <button class="button-delete" data-index="${index}">Elimina</button>
+                    <button class="button-edit">Modifica</button>
+                    <button class="button-delete">Elimina</button>
                 </td>`;
         });
         document.querySelectorAll('.col-provvigioni').forEach(el => el.style.display = showProvvigioni ? '' : 'none');
@@ -450,8 +525,19 @@
         const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
         const datiGiornoPrec = datiCompagnia[dataKeyPrec];
         
-        if (datiGiornoPrec) {
-            return datiGiornoPrec.cassaTeorica || 0;
+        if (datiGiornoPrec && datiGiornoPrec.conteggioFisico) {
+            let totaleConteggiato = 0;
+            const conteggio = datiGiornoPrec.conteggioFisico;
+            for (const tipo in conteggio) {
+                if(tipo === 'assegni') {
+                    (conteggio.assegni || []).forEach(val => totaleConteggiato += val);
+                } else {
+                    for (const taglio in conteggio[tipo]) {
+                        totaleConteggiato += parseFloat(taglio) * parseInt(conteggio[tipo][taglio], 10);
+                    }
+                }
+            }
+            return totaleConteggiato;
         }
         return 0;
     }
@@ -459,7 +545,7 @@
     function verificaChiusura() {
         const teorica = calcolaCassaTeorica();
         const fisica = calcolaConteggioFisico();
-        const differenza = fisica - teorica;
+        const differenza = teorica - fisica; // Nota: ho invertito per coerenza logica
         const divRisultato = document.getElementById('risultatoVerifica');
         if (Math.abs(differenza) < 0.01) {
             divRisultato.textContent = `✅ I CONTI TORNANO! Differenza: € 0.00`;
@@ -485,12 +571,6 @@
             return acc + impatto;
         }, 0);
         const cassaTeorica = riporto + totaleMovimentiCassa;
-
-        const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata]?.[dataKey];
-        if (datiGiorno) {
-            datiGiorno.cassaTeorica = cassaTeorica;
-        }
-
         document.getElementById('cassaTeorica').textContent = cassaTeorica.toFixed(2);
         return cassaTeorica;
     }
@@ -558,12 +638,13 @@
         document.getElementById('print-button').addEventListener('click', () => window.print());
         document.getElementById('change-company-button').addEventListener('click', () => location.reload());
         document.getElementById('date-selector').addEventListener('change', (e) => caricaGiornale(e.target.valueAsDate));
-        document.getElementById('riportoIniziale').addEventListener('input', salvaRiportoManuale);
+        document.getElementById('riportoIniziale').addEventListener('input', salvaDatiLocali);
         document.getElementById('formMovimento').addEventListener('submit', processaFormMovimento);
         document.getElementById('metodologia').addEventListener('change', aggiornaCampiCondizionali);
         document.getElementById('rientroMetodo').addEventListener('change', aggiornaCampiCondizionali);
         document.getElementById('add-assegno-button').addEventListener('click', () => aggiungiCampoAssegnoConteggio());
         document.getElementById('btnVerifica').addEventListener('click', verificaChiusura);
+        document.getElementById('save-all-button').addEventListener('click', salvaStatoCorrente);
         
         const tabellaBody = document.getElementById('tabellaMovimenti').querySelector('tbody');
         tabellaBody.addEventListener('click', (event) => {
@@ -571,7 +652,7 @@
             const row = target.closest('tr');
             if (!row) return;
             
-            const index = Array.from(tabellaBody.children).indexOf(row);
+            const index = parseInt(row.dataset.index);
             
             if (target.matches('.button-edit')) {
                 modificaMovimento(index);
