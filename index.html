@@ -39,6 +39,7 @@
         button:hover { filter: brightness(90%); }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         .button-secondary { background-color: #6c757d; }
+        .button-danger { background-color: #dc3545; }
         .button-edit { background-color: #ffc107; color: #212529; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
         .button-delete { background-color: #dc3545; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
 
@@ -76,6 +77,7 @@
 <body id="app-body">
     <div class="modal-overlay" id="company-selector-modal">
         <div class="modal-content">
+            <h2>Seleziona la Compagnia</h2>
             <button class="company-button" data-company="Allianz" style="background-color:#007bff">Allianz</button>
             <button class="company-button" data-company="HDI" style="background-color:#28a745">HDI</button>
             <button class="company-button" data-company="Vittoria" style="background-color:#6f42c1">Vittoria</button>
@@ -101,7 +103,7 @@
     
         <div class="box">
             <h2>1. Inizio Giornata</h2>
-            <label for="riportoIniziale"><strong>Riporto da Conteggio Giorno Precedente (€):</strong></label>
+            <label for="riportoIniziale"><strong>Riporto da Cassa Teorica Giorno Precedente (€):</strong></label>
             <input type="number" id="riportoIniziale" placeholder="0.00" step="0.01">
         </div>
     
@@ -230,8 +232,8 @@
         statusIndicator.className = 'saving';
         saveTimeout = setTimeout(async () => {
             try {
-                // Prima di salvare, assicurati che i dati locali siano aggiornati
-                salvaDatiLocali(); 
+                // Prima di salvare, assicurati che i totali siano aggiornati nello stato
+                salvaDatiLocali();
                 await setDoc(dbRef, stato.datiCompleti);
                 statusIndicator.textContent = 'Salvato Online';
                 statusIndicator.className = 'synced';
@@ -240,7 +242,7 @@
                 statusIndicator.textContent = 'Errore Salvataggio';
                 statusIndicator.className = 'error';
             }
-        }, 1500); // Ritardo per raggruppare modifiche rapide
+        }, 1500);
     }
     
     async function inizializzaApp(compagnia) {
@@ -287,7 +289,7 @@
     
     function creaNuovoGiorno(data) {
         const riporto = calcolaRiporto(data);
-        return { riportoIniziale: riporto, movimenti: [], conteggioFisico: {} };
+        return { riportoIniziale: riporto, movimenti: [], conteggioFisico: {}, cassaTeorica: riporto };
     }
 
     function salvaDatiLocali() {
@@ -302,7 +304,8 @@
         aggiornaTuttiRiepiloghi();
     }
 
-    function processaFormMovimento() {
+    async function processaFormMovimento(event) {
+        event.preventDefault();
         const editingIndex = document.getElementById('editingIndex').value;
         const movimento = {
             metodologia: document.getElementById('metodologia').value,
@@ -329,7 +332,7 @@
         annullaModifica();
         aggiornaTabellaMovimenti(datiGiorno.movimenti);
         aggiornaTuttiRiepiloghi();
-        salvaStatoCorrente();
+        await salvaStatoCorrente();
     }
     
     function modificaMovimento(index) {
@@ -362,13 +365,13 @@
         aggiornaCampiCondizionali();
     }
 
-    function cancellaMovimento(index) {
+    async function cancellaMovimento(index) {
         if (confirm('Sei sicuro di voler eliminare questo movimento?')) {
             const dataKey = formatDate(stato.dataSelezionata);
             stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti.splice(index, 1);
             aggiornaTabellaMovimenti(stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti);
             aggiornaTuttiRiepiloghi();
-            salvaStatoCorrente();
+            await salvaStatoCorrente();
         }
     }
 
@@ -383,13 +386,13 @@
         input.addEventListener('keydown', (event) => { if (event.key === 'Enter') input.blur(); });
     }
 
-    function salvaProvvigioneModificata(input, index, cell) {
+    async function salvaProvvigioneModificata(input, index, cell) {
         const nuovoValore = parseFloat(input.value) || 0;
         const dataKey = formatDate(stato.dataSelezionata);
         stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti[index].provvigioni = nuovoValore;
         cell.textContent = nuovoValore.toFixed(2);
         aggiornaTuttiRiepiloghi();
-        salvaStatoCorrente();
+        await salvaStatoCorrente();
     }
 
     function creaCampiConteggio(datiConteggio = {}) {
@@ -551,7 +554,7 @@
     function verificaChiusura() {
         const teorica = calcolaCassaTeorica();
         const fisica = calcolaConteggioFisico();
-        const differenza = fisica - teorica; // Modificato per coerenza
+        const differenza = teorica - fisica;
         const divRisultato = document.getElementById('risultatoVerifica');
         if (Math.abs(differenza) < 0.01) {
             divRisultato.textContent = `✅ I CONTI TORNANO! Differenza: € 0.00`;
