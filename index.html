@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Cassa Online (Stabile)</title>
+    <title>Gestione Cassa Online (Finale)</title>
     <style>
         :root {
             --primary-color: #6c757d; --primary-color-light: #f8f9fa;
@@ -294,7 +294,9 @@
     }
     
     function creaNuovoGiorno(data) {
-        return { riportoIniziale: calcolaRiporto(data), movimenti: [], conteggioFisico: {} };
+        const riporto = calcolaRiporto(data);
+        const datiGiorno = { riportoIniziale: riporto, movimenti: [], conteggioFisico: {}, cassaTeorica: riporto };
+        return datiGiorno;
     }
 
     async function salvaRiportoManuale() {
@@ -308,7 +310,7 @@
     }
 
     async function processaFormMovimento(event) {
-        if (event) event.preventDefault();
+        event.preventDefault();
         const editingIndex = document.getElementById('editingIndex').value;
         const movimento = {
             metodologia: document.getElementById('metodologia').value,
@@ -550,18 +552,7 @@
         const datiGiornoPrec = datiCompagnia[dataKeyPrec];
         
         if (datiGiornoPrec) {
-            let totaleConteggiato = 0;
-            const conteggio = datiGiornoPrec.conteggioFisico || {};
-            for (const tipo in conteggio) {
-                if(tipo === 'assegni') {
-                    (conteggio.assegni || []).forEach(val => totaleConteggiato += val);
-                } else {
-                    for (const taglio in conteggio[tipo]) {
-                        totaleConteggiato += parseFloat(taglio) * parseInt(conteggio[tipo][taglio], 10);
-                    }
-                }
-            }
-            return totaleConteggiato;
+            return datiGiornoPrec.cassaTeorica || 0; // CORREZIONE: Usa la cassa teorica
         }
         return 0;
     }
@@ -595,6 +586,12 @@
             return acc + impatto;
         }, 0);
         const cassaTeorica = riporto + totaleMovimentiCassa;
+
+        const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata]?.[dataKey];
+        if (datiGiorno) {
+            datiGiorno.cassaTeorica = cassaTeorica; // CORREZIONE: Salva la cassa teorica nello stato
+        }
+
         document.getElementById('cassaTeorica').textContent = cassaTeorica.toFixed(2);
         return cassaTeorica;
     }
@@ -656,13 +653,9 @@
     
     // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO E CORRETTO) ---
     document.addEventListener('DOMContentLoaded', () => {
-        // Usa Event Delegation per la modale
-        document.getElementById('company-selector-modal').addEventListener('click', (event) => {
-            if (event.target.matches('.company-button')) {
-                inizializzaApp(event.target.dataset.company);
-            }
+        document.querySelectorAll('.company-button').forEach(button => {
+            button.addEventListener('click', () => inizializzaApp(button.dataset.company));
         });
-
         document.getElementById('print-button').addEventListener('click', () => window.print());
         document.getElementById('change-company-button').addEventListener('click', () => location.reload());
         document.getElementById('date-selector').addEventListener('change', (e) => caricaGiornale(e.target.valueAsDate));
@@ -678,18 +671,14 @@
             const target = event.target;
             const row = target.closest('tr');
             if (!row) return;
-            
             const index = Array.from(tbody.children).indexOf(row);
-            const editButton = target.closest('.button-edit');
-            const deleteButton = target.closest('.button-delete');
-            const provvigioneCell = target.closest('.provvigione-editabile');
-
-            if (editButton) {
+            
+            if (target.matches('.button-edit')) {
                 modificaMovimento(index);
-            } else if (deleteButton) {
+            } else if (target.matches('.button-delete')) {
                 cancellaMovimento(index);
-            } else if (provvigioneCell) {
-                rendiProvvigioneEditabile(provvigioneCell, index);
+            } else if (target.closest('.provvigione-editabile')) {
+                rendiProvvigioneEditabile(target.closest('.provvigione-editabile'), index);
             }
         });
     });
