@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Cassa Online (Stabile)</title>
+    <title>Gestione Cassa (Stabile)</title>
     <style>
         :root {
             --primary-color: #6c757d; --primary-color-light: #f8f9fa;
@@ -36,10 +36,10 @@
             background-color: var(--primary-color); color: white; border: none;
             cursor: pointer; font-weight: bold; transition: background-color 0.2s;
         }
+        button.button-save { background-color: #28a745; font-size: 1.1rem; padding: 12px;}
         button:hover { filter: brightness(90%); }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         .button-secondary { background-color: #6c757d; }
-        .button-danger { background-color: #dc3545; }
         .button-edit { background-color: #ffc107; color: #212529; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
         .button-delete { background-color: #dc3545; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
 
@@ -96,6 +96,7 @@
             </div>
             <div class="header-group">
                 <div id="status-indicator" class="saving">Inizializzazione...</div>
+                <button id="save-all-button" class="button-save">Salva Modifiche Online</button>
                 <button id="print-button" class="button-secondary">Stampa</button>
                 <button id="change-company-button">Cambia Compagnia</button>
             </div>
@@ -209,7 +210,6 @@
     let stato = { compagniaSelezionata: null, dataSelezionata: null, datiCompleti: {} };
     const tagliBanconote = [500, 200, 100, 50, 20, 10, 5];
     const tagliMonete = [2, 1, 0.50, 0.20, 0.10, 0.05, 0.02, 0.01];
-    let saveTimeout;
 
     async function caricaDatiDaFirebase() {
         statusIndicator.textContent = 'Caricamento...';
@@ -227,21 +227,19 @@
     }
 
     async function salvaStatoCorrente() {
-        clearTimeout(saveTimeout);
         statusIndicator.textContent = 'Salvataggio...';
         statusIndicator.className = 'saving';
-        saveTimeout = setTimeout(async () => {
-            try {
-                calcolaCassaTeorica(); // Assicura che la cassa teorica sia aggiornata prima di salvare
-                await setDoc(dbRef, stato.datiCompleti);
-                statusIndicator.textContent = 'Salvato Online';
-                statusIndicator.className = 'synced';
-            } catch (error) {
-                console.error("Errore salvataggio su Firebase: ", error);
-                statusIndicator.textContent = 'Errore Salvataggio';
-                statusIndicator.className = 'error';
-            }
-        }, 1000);
+        try {
+            // Aggiorna lo stato locale con i dati correnti prima di salvare
+            salvaDatiLocali(); 
+            await setDoc(dbRef, stato.datiCompleti);
+            statusIndicator.textContent = 'Salvato Online';
+            statusIndicator.className = 'synced';
+        } catch (error) {
+            console.error("Errore salvataggio su Firebase: ", error);
+            statusIndicator.textContent = 'Errore Salvataggio';
+            statusIndicator.className = 'error';
+        }
     }
     
     async function inizializzaApp(compagnia) {
@@ -291,18 +289,17 @@
         return { riportoIniziale: riporto, movimenti: [], conteggioFisico: {} };
     }
 
-    async function salvaDatiLocaliESincronizza() {
+    function salvaDatiLocali() {
         const dataKey = formatDate(stato.dataSelezionata);
         const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata]?.[dataKey];
         if (datiGiorno) {
             datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
             datiGiorno.conteggioFisico = raccogliDatiConteggio();
             aggiornaTuttiRiepiloghi();
-            await salvaStatoCorrente();
         }
     }
 
-    async function processaFormMovimento(event) {
+    function processaFormMovimento(event) {
         event.preventDefault(); 
         const editingIndex = document.getElementById('editingIndex').value;
         const movimento = {
@@ -330,7 +327,6 @@
         annullaModifica();
         aggiornaTabellaMovimenti(datiGiorno.movimenti);
         aggiornaTuttiRiepiloghi();
-        await salvaStatoCorrente();
     }
     
     function modificaMovimento(index) {
@@ -363,13 +359,12 @@
         aggiornaCampiCondizionali();
     }
 
-    async function cancellaMovimento(index) {
+    function cancellaMovimento(index) {
         if (confirm('Sei sicuro di voler eliminare questo movimento?')) {
             const dataKey = formatDate(stato.dataSelezionata);
             stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti.splice(index, 1);
             aggiornaTabellaMovimenti(stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti);
             aggiornaTuttiRiepiloghi();
-            await salvaStatoCorrente();
         }
     }
 
@@ -384,13 +379,12 @@
         input.addEventListener('keydown', (event) => { if (event.key === 'Enter') input.blur(); });
     }
 
-    async function salvaProvvigioneModificata(input, index, cell) {
+    function salvaProvvigioneModificata(input, index, cell) {
         const nuovoValore = parseFloat(input.value) || 0;
         const dataKey = formatDate(stato.dataSelezionata);
         stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti[index].provvigioni = nuovoValore;
         cell.textContent = nuovoValore.toFixed(2);
         aggiornaTuttiRiepiloghi();
-        await salvaStatoCorrente();
     }
 
     function creaCampiConteggio(datiConteggio = {}) {
@@ -407,7 +401,7 @@
             const input = document.createElement('input');
             input.type = 'number'; input.dataset.valore = taglio; input.dataset.tipo = tipo;
             input.value = valoreSalvato; input.placeholder = 'N° pezzi';
-            input.addEventListener('input', salvaDatiLocaliESincronizza);
+            input.addEventListener('input', salvaDatiLocali);
 
             const grid = document.createElement('div');
             grid.className = 'conteggio-grid';
@@ -435,8 +429,8 @@
         const button = document.createElement('button');
         button.className = 'button-delete'; button.style.width = 'auto'; button.textContent = 'X';
 
-        input.addEventListener('input', salvaDatiLocaliESincronizza);
-        button.addEventListener('click', () => { div.remove(); salvaDatiLocaliESincronizza(); });
+        input.addEventListener('input', salvaDatiLocali);
+        button.addEventListener('click', () => { div.remove(); salvaDatiLocali(); });
         
         div.appendChild(input);
         div.appendChild(button);
@@ -637,6 +631,7 @@
         return dataPrec;
     }
     
+    // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO E CORRETTO) ---
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.company-button').forEach(button => {
             button.addEventListener('click', () => inizializzaApp(button.dataset.company));
