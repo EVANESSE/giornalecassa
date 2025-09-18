@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Cassa (Stabile)</title>
+    <title>Gestione Cassa Online (Stabile)</title>
     <style>
         :root {
             --primary-color: #6c757d; --primary-color-light: #f8f9fa;
@@ -36,7 +36,6 @@
             background-color: var(--primary-color); color: white; border: none;
             cursor: pointer; font-weight: bold; transition: background-color 0.2s;
         }
-        button.button-save { background-color: #28a745; font-size: 1.1rem; padding: 12px;}
         button:hover { filter: brightness(90%); }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         .button-secondary { background-color: #6c757d; }
@@ -77,7 +76,6 @@
 <body id="app-body">
     <div class="modal-overlay" id="company-selector-modal">
         <div class="modal-content">
-            <h2>Seleziona la Compagnia</h2>
             <button class="company-button" data-company="Allianz" style="background-color:#007bff">Allianz</button>
             <button class="company-button" data-company="HDI" style="background-color:#28a745">HDI</button>
             <button class="company-button" data-company="Vittoria" style="background-color:#6f42c1">Vittoria</button>
@@ -96,7 +94,6 @@
             </div>
             <div class="header-group">
                 <div id="status-indicator" class="saving">Inizializzazione...</div>
-                <button id="save-all-button" class="button-save">Salva Modifiche Online</button>
                 <button id="print-button" class="button-secondary">Stampa</button>
                 <button id="change-company-button">Cambia Compagnia</button>
             </div>
@@ -210,6 +207,7 @@
     let stato = { compagniaSelezionata: null, dataSelezionata: null, datiCompleti: {} };
     const tagliBanconote = [500, 200, 100, 50, 20, 10, 5];
     const tagliMonete = [2, 1, 0.50, 0.20, 0.10, 0.05, 0.02, 0.01];
+    let saveTimeout;
 
     async function caricaDatiDaFirebase() {
         statusIndicator.textContent = 'Caricamento...';
@@ -227,19 +225,22 @@
     }
 
     async function salvaStatoCorrente() {
+        clearTimeout(saveTimeout);
         statusIndicator.textContent = 'Salvataggio...';
         statusIndicator.className = 'saving';
-        try {
-            // Aggiorna lo stato locale con i dati correnti prima di salvare
-            salvaDatiLocali(); 
-            await setDoc(dbRef, stato.datiCompleti);
-            statusIndicator.textContent = 'Salvato Online';
-            statusIndicator.className = 'synced';
-        } catch (error) {
-            console.error("Errore salvataggio su Firebase: ", error);
-            statusIndicator.textContent = 'Errore Salvataggio';
-            statusIndicator.className = 'error';
-        }
+        saveTimeout = setTimeout(async () => {
+            try {
+                // Prima di salvare, assicurati che i dati locali siano aggiornati
+                salvaDatiLocali(); 
+                await setDoc(dbRef, stato.datiCompleti);
+                statusIndicator.textContent = 'Salvato Online';
+                statusIndicator.className = 'synced';
+            } catch (error) {
+                console.error("Errore salvataggio su Firebase: ", error);
+                statusIndicator.textContent = 'Errore Salvataggio';
+                statusIndicator.className = 'error';
+            }
+        }, 1500); // Ritardo per raggruppare modifiche rapide
     }
     
     async function inizializzaApp(compagnia) {
@@ -291,16 +292,17 @@
 
     function salvaDatiLocali() {
         const dataKey = formatDate(stato.dataSelezionata);
-        const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata]?.[dataKey];
-        if (datiGiorno) {
-            datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
-            datiGiorno.conteggioFisico = raccogliDatiConteggio();
-            aggiornaTuttiRiepiloghi();
-        }
+        if (!stato.datiCompleti[stato.compagniaSelezionata]) stato.datiCompleti[stato.compagniaSelezionata] = {};
+        if (!stato.datiCompleti[stato.compagniaSelezionata][dataKey]) stato.datiCompleti[stato.compagniaSelezionata][dataKey] = creaNuovoGiorno(stato.dataSelezionata);
+        
+        const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
+        
+        datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
+        datiGiorno.conteggioFisico = raccogliDatiConteggio();
+        aggiornaTuttiRiepiloghi();
     }
 
-    function processaFormMovimento(event) {
-        event.preventDefault(); 
+    function processaFormMovimento() {
         const editingIndex = document.getElementById('editingIndex').value;
         const movimento = {
             metodologia: document.getElementById('metodologia').value,
@@ -327,6 +329,7 @@
         annullaModifica();
         aggiornaTabellaMovimenti(datiGiorno.movimenti);
         aggiornaTuttiRiepiloghi();
+        salvaStatoCorrente();
     }
     
     function modificaMovimento(index) {
@@ -365,6 +368,7 @@
             stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti.splice(index, 1);
             aggiornaTabellaMovimenti(stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti);
             aggiornaTuttiRiepiloghi();
+            salvaStatoCorrente();
         }
     }
 
@@ -385,6 +389,7 @@
         stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti[index].provvigioni = nuovoValore;
         cell.textContent = nuovoValore.toFixed(2);
         aggiornaTuttiRiepiloghi();
+        salvaStatoCorrente();
     }
 
     function creaCampiConteggio(datiConteggio = {}) {
@@ -546,7 +551,7 @@
     function verificaChiusura() {
         const teorica = calcolaCassaTeorica();
         const fisica = calcolaConteggioFisico();
-        const differenza = teorica - fisica;
+        const differenza = fisica - teorica; // Modificato per coerenza
         const divRisultato = document.getElementById('risultatoVerifica');
         if (Math.abs(differenza) < 0.01) {
             divRisultato.textContent = `✅ I CONTI TORNANO! Differenza: € 0.00`;
@@ -631,7 +636,6 @@
         return dataPrec;
     }
     
-    // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO E CORRETTO) ---
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.company-button').forEach(button => {
             button.addEventListener('click', () => inizializzaApp(button.dataset.company));
