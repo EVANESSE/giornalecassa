@@ -237,6 +237,8 @@
         statusIndicator.className = 'saving';
         saveTimeout = setTimeout(async () => {
             try {
+                // Prima di salvare, assicurati che la cassa teorica sia aggiornata
+                calcolaCassaTeorica(); 
                 await setDoc(dbRef, stato.datiCompleti);
                 statusIndicator.textContent = 'Sincronizzato';
                 statusIndicator.className = 'synced';
@@ -295,8 +297,7 @@
     
     function creaNuovoGiorno(data) {
         const riporto = calcolaRiporto(data);
-        const datiGiorno = { riportoIniziale: riporto, movimenti: [], conteggioFisico: {}, cassaTeorica: riporto };
-        return datiGiorno;
+        return { riportoIniziale: riporto, movimenti: [], conteggioFisico: {}, cassaTeorica: riporto };
     }
 
     async function salvaRiportoManuale() {
@@ -310,7 +311,7 @@
     }
 
     async function processaFormMovimento(event) {
-        event.preventDefault(); 
+        event.preventDefault();
         const editingIndex = document.getElementById('editingIndex').value;
         const movimento = {
             metodologia: document.getElementById('metodologia').value,
@@ -651,7 +652,6 @@
         return dataPrec;
     }
     
-    // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO E CORRETTO) ---
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.company-button').forEach(button => {
             button.addEventListener('click', () => inizializzaApp(button.dataset.company));
@@ -671,6 +671,8 @@
             const target = event.target;
             const row = target.closest('tr');
             if (!row) return;
+            
+            // CORREZIONE DEFINITIVA QUI:
             const index = Array.from(tabellaBody.children).indexOf(row);
             
             if (target.matches('.button-edit')) {
