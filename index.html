@@ -72,20 +72,6 @@
         #status-indicator.synced { background-color: #28a745; }
         #status-indicator.saving { background-color: #ffc107; color: black; }
         #status-indicator.error { background-color: #dc3545; }
-        
-        @media print {
-            body { background-color: #fff !important; padding: 0 !important; margin: 0 !important; font-size: 8pt !important; }
-            .modal-overlay, .app-header, #formMovimento, .box > h2:first-child, .button-edit, .button-delete, #btnVerifica, #box-conteggio-assegni button, #form-buttons button { display: none !important; }
-            #main-container { display: block !important; }
-            .container { box-shadow: none !important; border: none !important; padding: 1cm !important; max-width: 100% !important; }
-            .grid-container { grid-template-columns: 1fr !important; }
-            .box { border: 1px solid #ccc !important; page-break-inside: avoid !important; padding: 10px !important; margin-bottom: 10px !important; }
-            table { font-size: 8pt !important; width: 100% !important; }
-            td, th { padding: 3px !important; }
-            h1 { font-size: 16pt !important; text-align: center; }
-            h2, h3 { margin-top: 10px; margin-bottom: 5px; font-size: 10pt !important; }
-            .riepilogo-totali, .risultato-verifica { font-size: 10pt !important; padding: 5px !important; margin-top: 5px !important; }
-        }
     </style>
 </head>
 <body id="app-body">
@@ -322,7 +308,7 @@
     }
 
     async function processaFormMovimento(event) {
-        event.preventDefault(); // <-- CORREZIONE CRUCIALE
+        if (event) event.preventDefault();
         const editingIndex = document.getElementById('editingIndex').value;
         const movimento = {
             metodologia: document.getElementById('metodologia').value,
@@ -668,11 +654,15 @@
         return dataPrec;
     }
     
-    // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO) ---
+    // --- COLLEGAMENTO DEGLI EVENTI (METODO ROBUSTO E CORRETTO) ---
     document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.company-button').forEach(button => {
-            button.addEventListener('click', () => inizializzaApp(button.dataset.company));
+        // Usa Event Delegation per la modale
+        document.getElementById('company-selector-modal').addEventListener('click', (event) => {
+            if (event.target.matches('.company-button')) {
+                inizializzaApp(event.target.dataset.company);
+            }
         });
+
         document.getElementById('print-button').addEventListener('click', () => window.print());
         document.getElementById('change-company-button').addEventListener('click', () => location.reload());
         document.getElementById('date-selector').addEventListener('change', (e) => caricaGiornale(e.target.valueAsDate));
@@ -688,14 +678,18 @@
             const target = event.target;
             const row = target.closest('tr');
             if (!row) return;
-            const index = Array.from(tbody.children).indexOf(row);
             
-            if (target.matches('.button-edit')) {
+            const index = Array.from(tbody.children).indexOf(row);
+            const editButton = target.closest('.button-edit');
+            const deleteButton = target.closest('.button-delete');
+            const provvigioneCell = target.closest('.provvigione-editabile');
+
+            if (editButton) {
                 modificaMovimento(index);
-            } else if (target.matches('.button-delete')) {
+            } else if (deleteButton) {
                 cancellaMovimento(index);
-            } else if (target.closest('.provvigione-editabile')) {
-                rendiProvvigioneEditabile(target.closest('.provvigione-editabile'), index);
+            } else if (provvigioneCell) {
+                rendiProvvigioneEditabile(provvigioneCell, index);
             }
         });
     });
