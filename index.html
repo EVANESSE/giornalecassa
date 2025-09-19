@@ -6,6 +6,7 @@
     <title>Gestione Cassa (Corretta e Stabile)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
             --primary-color: #6c757d; --primary-color-light: #f8f9fa;
@@ -151,6 +152,7 @@
         .col-data-mensile { display: none; }
         body.vista-mensile .col-data-mensile { display: table-cell; }
         body.vista-mensile .col-impatto-cassa, body.vista-mensile .col-cassa-teorica { display: none; }
+        #add-movimento-form label { font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body id="app-body">
@@ -188,6 +190,7 @@
                     <button class="button-secondary" onclick="resetFiltriTabella()">Resetta</button>
                 </div>
                 <div class="action-group">
+                    <button class="button-save" onclick="apriFormAggiunta()"><i class="fa fa-plus"></i> Aggiungi Movimento</button>
                     <button class="button-save" onclick="salvaTutteLeModificheTabella()">Salva Modifiche</button>
                     <button class="button-secondary" onclick="document.getElementById('generic-modal').style.display = 'none'">Chiudi</button>
                 </div>
@@ -198,6 +201,17 @@
                     <thead></thead>
                     <tbody></tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="add-movimento-modal" style="display:none; z-index: 1001;">
+        <div class="modal-content" style="text-align: left; width: 400px;">
+            <h2 id="add-movimento-title" style="text-align: center;">Aggiungi Nuovo Movimento</h2>
+            <form id="add-movimento-form" onsubmit="event.preventDefault(); processaFormAggiunta();"></form>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="processaFormAggiunta()" class="button-save" style="width: 50%;">Salva</button>
+                <button type="button" class="button-secondary" style="width: 50%;" onclick="document.getElementById('add-movimento-modal').style.display = 'none'">Annulla</button>
             </div>
         </div>
     </div>
@@ -459,6 +473,7 @@
             const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
             for (const dKey in datiCompagnia) {
                 const movDate = new Date(dKey);
+                movDate.setMinutes(movDate.getMinutes() + movDate.getTimezoneOffset());
                 if (movDate.getMonth() === selectedMonth && movDate.getFullYear() === selectedYear) {
                     const movimentiDelGiorno = datiCompagnia[dKey].movimenti || [];
                     movimentiDelGiorno.forEach(m => {
@@ -467,7 +482,7 @@
                     });
                 }
             }
-            movimentiDaMostrare.sort((a, b) => new Date(a.dataMovimento) - new Date(b.dataMovimento));
+            movimentiDaMostrare.sort((a, b) => new Date(b.dataMovimento) - new Date(a.dataMovimento));
         } else {
             const dataKey = formatDate(data);
             const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
@@ -676,7 +691,7 @@
 
         (movimenti || []).forEach((m, index) => {
             const dataKeyOriginale = m.dataMovimento || formatDate(stato.dataSelezionata);
-            const indexOriginale = isSimplifiedView ? stato.datiCompleti[stato.compagniaSelezionata][dataKeyOriginale].movimenti.findIndex(orig => orig === m) : index;
+            const indexOriginale = isSimplifiedView ? (stato.datiCompleti[stato.compagniaSelezionata][dataKeyOriginale].movimenti || []).findIndex(orig => orig === m) : index;
 
             let impattoCassa = 0;
             if (!isSimplifiedView) {
@@ -879,21 +894,25 @@
 
     const configsTabelle = {
         'anticipi': {
+            type: 'anticipi',
             title: 'Gestione Anticipi',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', tipoAnticipo: 'Tipo Anticipo', anticipoDi: 'Anticipo di', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
             filterFn: mov => mov.metodologia === 'Anticipo'
         },
         'bonifici_allianz': {
+            type: 'bonifici_allianz',
             title: 'Gestione Bonifici (Allianz)',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
             filterFn: mov => mov.metodologia === 'Bonifico' && mov.compagnia === 'Allianz'
         },
         'bonifici_hdi_arag': {
+            type: 'bonifici_hdi_arag',
             title: 'Gestione Bonifici (HDI/ARAG)',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
             filterFn: mov => mov.metodologia === 'Bonifico' && (mov.compagnia === 'HDI' || mov.compagnia === 'ARAG')
         },
         'pos_hdi_arag': {
+            type: 'pos_hdi_arag',
             title: 'Gestione POS (HDI/ARAG)',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
             filterFn: mov => mov.metodologia === 'POS' && (mov.compagnia === 'HDI' || mov.compagnia === 'ARAG')
@@ -1068,6 +1087,94 @@
         }
     }
 
+    function apriFormAggiunta() {
+        const formContainer = document.getElementById('add-movimento-form');
+        formContainer.innerHTML = '';
+        const config = configTabellaCorrente;
+        document.getElementById('add-movimento-title').textContent = `Aggiungi a ${config.title}`;
+        
+        let formHtml = `
+            <label>Data:</label><input type="date" id="add-data" required value="${formatDate(new Date())}">
+            <label>Cliente:</label><input type="text" id="add-cliente" required>
+            <label>Polizza:</label><input type="text" id="add-polizza">
+            <label>Importo:</label><input type="number" id="add-importo" step="0.01" required>
+            <label>Note:</label><input type="text" id="add-note">
+        `;
+
+        const addCompagniaSelect = () => `
+            <label>Compagnia:</label>
+            <select id="add-compagnia">
+                <option>Allianz</option><option>HDI</option><option>Vittoria</option><option>ARAG</option><option>Helvetia</option>
+            </select>`;
+
+        switch(config.type) {
+            case 'anticipi':
+                formHtml += addCompagniaSelect();
+                formHtml += `
+                    <label>Tipo Anticipo:</label>
+                    <select id="add-tipoAnticipo">
+                        <option>Anticipo Contanti</option><option>Anticipo Assegno</option><option>Anticipo POS</option>
+                        <option>Anticipo Bonifico</option><option>Plafond</option><option>Sospeso Cassa</option>
+                    </select>
+                    <label>Anticipo di:</label><input type="text" id="add-anticipoDi">`;
+                break;
+            case 'bonifici_allianz':
+                formHtml += `<input type="hidden" id="add-compagnia" value="Allianz">`;
+                break;
+            case 'bonifici_hdi_arag':
+            case 'pos_hdi_arag':
+                 formHtml += `
+                    <label>Compagnia:</label>
+                    <select id="add-compagnia"><option>HDI</option><option>ARAG</option></select>`;
+                break;
+        }
+        formContainer.innerHTML = formHtml;
+        document.getElementById('add-movimento-modal').style.display = 'flex';
+    }
+
+    function processaFormAggiunta() {
+        const config = configTabellaCorrente;
+        const data = document.getElementById('add-data').value;
+        if (!data) { alert('Per favore, inserisci una data.'); return; }
+
+        const dataKey = formatDate(new Date(data));
+        const compagnia = document.getElementById('add-compagnia').value;
+        
+        const movimento = {
+            metodologia: '',
+            nomeCliente: document.getElementById('add-cliente').value,
+            numeroPolizza: document.getElementById('add-polizza').value,
+            importo: parseFloat(document.getElementById('add-importo').value) || 0,
+            note: document.getElementById('add-note').value,
+        };
+
+        switch(config.type) {
+            case 'anticipi':
+                movimento.metodologia = 'Anticipo';
+                movimento.tipoAnticipo = document.getElementById('add-tipoAnticipo').value;
+                movimento.anticipoDi = document.getElementById('add-anticipoDi').value;
+                break;
+            case 'bonifici_allianz':
+            case 'bonifici_hdi_arag':
+                movimento.metodologia = 'Bonifico';
+                break;
+            case 'pos_hdi_arag':
+                movimento.metodologia = 'POS';
+                break;
+        }
+
+        if (!stato.datiCompleti[compagnia]) stato.datiCompleti[compagnia] = {};
+        if (!stato.datiCompleti[compagnia][dataKey]) stato.datiCompleti[compagnia][dataKey] = creaNuovoGiorno(new Date(data));
+        if (!stato.datiCompleti[compagnia][dataKey].movimenti) stato.datiCompleti[compagnia][dataKey].movimenti = [];
+        
+        stato.datiCompleti[compagnia][dataKey].movimenti.push(movimento);
+        
+        document.getElementById('add-movimento-modal').style.display = 'none';
+        salvaTutteLeModificheTabella();
+        mostraTabella(config.type);
+    }
+
+
     // Rendi le funzioni visibili globalmente
     window.inizializzaApp = inizializzaApp;
     window.caricaGiornale = caricaGiornale;
@@ -1088,6 +1195,8 @@
     window.resetFiltriTabella = resetFiltriTabella;
     window.salvaModificaGenerica = salvaModificaGenerica;
     window.salvaTutteLeModificheTabella = salvaTutteLeModificheTabella;
+    window.apriFormAggiunta = apriFormAggiunta;
+    window.processaFormAggiunta = processaFormAggiunta;
 </script>
 </body>
 </html>
