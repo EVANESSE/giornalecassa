@@ -694,14 +694,14 @@
             const indexOriginale = isSimplifiedView ? (stato.datiCompleti[stato.compagniaSelezionata][dataKeyOriginale].movimenti || []).findIndex(orig => orig === m) : index;
 
             let impattoCassa = 0;
-            if (!isSimplifiedView) {
-                if (m.metodologia === 'Contanti' || m.metodologia === 'Assegno' || m.tipoAnticipo === 'Anticipo Contanti' || m.tipoAnticipo === 'Anticipo Assegno' ) {
-                    impattoCassa = m.importo;
-                } else if (m.metodologia === 'Rientro da Anticipo' && (m.rientroMetodo === 'Contanti' || m.rientroMetodo === 'Assegno')) {
-                    impattoCassa = m.importo;
-                }
-                impattoCassa += (m.arrotondamenti || 0) - (m.uscite || 0);
+            const isCashBased = (m.metodologia === 'Contanti' || m.metodologia === 'Assegno') ||
+                                (m.metodologia === 'Anticipo' && (m.tipoAnticipo === 'Anticipo Contanti' || m.tipoAnticipo === 'Anticipo Assegno')) ||
+                                (m.metodologia === 'Rientro da Anticipo' && (m.rientroMetodo === 'Contanti' || m.rientroMetodo === 'Assegno'));
+
+            if (isCashBased) {
+                impattoCassa = (m.importo || 0) + (m.arrotondamenti || 0);
             }
+            impattoCassa -= (m.uscite || 0);
 
             let metodoDisplay = m.metodologia;
             if (m.metodologia === 'Anticipo') {
@@ -807,12 +807,15 @@
         const movimenti = datiGiorno.movimenti || [];
         const totaleMovimentiCassa = movimenti.reduce((acc, m) => {
             let impatto = 0;
-            if (m.metodologia === 'Contanti' || m.metodologia === 'Assegno' || m.tipoAnticipo === 'Anticipo Contanti' || m.tipoAnticipo === 'Anticipo Assegno') {
-                impatto = m.importo;
-            } else if (m.metodologia === 'Rientro da Anticipo' && (m.rientroMetodo === 'Contanti' || m.rientroMetodo === 'Assegno')) {
-                impatto = m.importo;
+            const isCashBased = (m.metodologia === 'Contanti' || m.metodologia === 'Assegno') ||
+                                (m.metodologia === 'Anticipo' && (m.tipoAnticipo === 'Anticipo Contanti' || m.tipoAnticipo === 'Anticipo Assegno')) ||
+                                (m.metodologia === 'Rientro da Anticipo' && (m.rientroMetodo === 'Contanti' || m.rientroMetodo === 'Assegno'));
+
+            if (isCashBased) {
+                impatto = (m.importo || 0) + (m.arrotondamenti || 0);
             }
-            impatto += (m.arrotondamenti || 0) - (m.uscite || 0);
+            impatto -= (m.uscite || 0);
+
             return acc + impatto;
         }, 0);
         const cassaTeorica = riporto + totaleMovimentiCassa;
@@ -1134,10 +1137,12 @@
 
     function processaFormAggiunta() {
         const config = configTabellaCorrente;
-        const data = document.getElementById('add-data').value;
-        if (!data) { alert('Per favore, inserisci una data.'); return; }
+        const dataValue = document.getElementById('add-data').value;
+        if (!dataValue) { alert('Per favore, inserisci una data.'); return; }
 
-        const dataKey = formatDate(new Date(data));
+        let data = new Date(dataValue);
+        data.setMinutes(data.getMinutes() + data.getTimezoneOffset());
+        const dataKey = formatDate(data);
         const compagnia = document.getElementById('add-compagnia').value;
         
         const movimento = {
@@ -1164,14 +1169,14 @@
         }
 
         if (!stato.datiCompleti[compagnia]) stato.datiCompleti[compagnia] = {};
-        if (!stato.datiCompleti[compagnia][dataKey]) stato.datiCompleti[compagnia][dataKey] = creaNuovoGiorno(new Date(data));
+        if (!stato.datiCompleti[compagnia][dataKey]) stato.datiCompleti[compagnia][dataKey] = creaNuovoGiorno(new Date(dataKey));
         if (!stato.datiCompleti[compagnia][dataKey].movimenti) stato.datiCompleti[compagnia][dataKey].movimenti = [];
         
         stato.datiCompleti[compagnia][dataKey].movimenti.push(movimento);
         
         document.getElementById('add-movimento-modal').style.display = 'none';
+        mostraTabella(config.type); // Refresh the table
         salvaTutteLeModificheTabella();
-        mostraTabella(config.type);
     }
 
 
