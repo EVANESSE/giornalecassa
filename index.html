@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Cassa (Stabile)</title>
+    <title>Gestione Cassa (Finale)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
@@ -278,7 +278,6 @@
         creaCampiConteggio(datiGiorno.conteggioFisico);
         aggiornaTabellaMovimenti(datiGiorno.movimenti);
         
-        // CORREZIONE: Mostra la verifica salvata, se esiste
         const divRisultato = document.getElementById('risultatoVerifica');
         if (datiGiorno.verificaResult) {
             divRisultato.textContent = datiGiorno.verificaResult.text;
@@ -624,7 +623,6 @@
         return dataPrec;
     }
     
-    // Rendi le funzioni visibili globalmente
     window.inizializzaApp = inizializzaApp;
     window.caricaGiornale = caricaGiornale;
     window.processaFormMovimento = processaFormMovimento;
