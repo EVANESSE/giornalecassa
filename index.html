@@ -45,8 +45,8 @@
         .button-edit { background-color: #ffc107; color: #212529; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
         .button-delete { background-color: #dc3545; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
 
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; }
-        th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; table-layout: fixed; }
+        th, td { padding: 8px; border: 1px solid #ddd; text-align: left; word-wrap: break-word; }
         th { background-color: var(--primary-color-light); }
         .provvigione-editabile:hover { background-color: #fff3cd; cursor: pointer; }
         
@@ -61,50 +61,164 @@
         .decade-grid div { padding: 10px; background: #f8f9fa; border-radius: 4px; }
         .decade-grid strong { color: var(--primary-color); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 40px; border-radius: 10px; text-align: center; }
-        .modal-content .company-button { display: block; width: 300px; margin: 10px 0; font-size: 1.2rem; }
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.7); display: flex; 
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
         
-        .app-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 10px 20px; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 20px; gap: 15px; }
+        #company-selector-modal .modal-overlay-background {
+            background: radial-gradient(circle, #6c757d 0%, #212529 100%);
+            backdrop-filter: blur(3px);
+        }
+        #company-selector-modal .modal-wrapper {
+            display: flex; gap: 40px; align-items: flex-start;
+        }
+        #company-selector-modal .modal-content {
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #company-selector-modal .company-button {
+            width: 300px; 
+            margin: 15px 0; font-weight: bold; 
+            padding: 30px 10px;
+            border-bottom: 3px solid rgba(0,0,0,0.25); border-radius: 8px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+            background-image: linear-gradient(to top, rgba(0,0,0,0.2), transparent 40%);
+            transition: all 0.2s ease-in-out;
+        }
+        #company-selector-modal .company-button:hover {
+            transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.35); filter: brightness(1.1);
+        }
+        #company-selector-modal .utility-button { background-color: #6c757d; }
+
+        .modal-full {
+            padding: 20px; align-items: flex-start; overflow-y: auto;
+        }
+        .modal-full .modal-content-full {
+            width: 95%; max-width: 1800px; background: #fff;
+            padding: 20px; border-radius: 8px; text-align: left; margin-top: 2vh;
+        }
+        .modal-toolbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 15px; border-bottom: 2px solid #ccc; margin-bottom: 15px;
+            flex-wrap: wrap; gap: 15px;
+        }
+        .modal-toolbar .filter-group { display: flex; align-items: center; gap: 10px; }
+        .modal-toolbar .action-group { display: flex; align-items: center; gap: 10px; }
+        .modal-toolbar .filter-group button, .modal-toolbar .filter-group select, .modal-toolbar .filter-group input, .modal-toolbar .action-group button { 
+            width: auto; margin-bottom: 0; padding: 8px;
+        }
+        .generic-table td[contenteditable="true"]:hover { background-color: #fff3cd; cursor: text; }
+        .generic-table input, .generic-table select { padding: 4px; font-size: 0.9rem; border-radius: 3px; border: 1px solid #ccc;}
+        .generic-table input[type="checkbox"] { width: auto; transform: scale(1.2); }
+        .generic-table th.col-note, .generic-table td.col-note { width: 25%; }
+        
+        .riga-incassato { background-color: #d4edda !important; text-decoration: line-through; color: #555;}
+        .riga-vecchio { background-color: #fff3cd; }
+        .riga-critico { background-color: #f8d7da; }
+
+        .save-notification {
+            display: none; /* Hidden by default */
+            padding: 10px 15px; border-radius: 5px; text-align: center;
+            font-weight: bold; margin: -10px auto 10px auto;
+            opacity: 0; transition: opacity 0.5s ease-in-out;
+            color: white;
+        }
+        .save-notification.success { background-color: #28a745; }
+        .save-notification.error { background-color: #dc3545; }
+        
+        .app-header { 
+            display: flex; flex-wrap: wrap; justify-content: center; align-items: center; 
+            padding: 10px 20px; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 20px; gap: 25px; 
+        }
         .app-header .header-group { display: flex; align-items: center; gap: 10px; }
-        .app-header label { font-weight: bold; }
-        .app-header input[type="date"], .app-header button { width: auto; padding: 8px; margin-bottom: 0; }
         
         #status-indicator { font-weight: bold; padding: 5px 10px; border-radius: 5px; color: white; }
         #status-indicator.synced { background-color: #28a745; }
         #status-indicator.saving { background-color: #ffc107; color: black; }
         #status-indicator.error { background-color: #dc3545; }
+
+        .col-data-mensile { display: none; }
+        body.vista-mensile .col-data-mensile { display: table-cell; }
+        body.vista-mensile .col-impatto-cassa, body.vista-mensile .col-cassa-teorica { display: none; }
     </style>
 </head>
 <body id="app-body">
     <div class="modal-overlay" id="company-selector-modal">
-        <div class="modal-content">
-            <h2>Seleziona la Compagnia</h2>
-            <button class="company-button" onclick="inizializzaApp('Allianz')" style="background-color:#007bff">Allianz</button>
-            <button class="company-button" onclick="inizializzaApp('HDI')" style="background-color:#28a745">HDI</button>
-            <button class="company-button" onclick="inizializzaApp('Vittoria')" style="background-color:#6f42c1">Vittoria</button>
-            <button class="company-button" onclick="inizializzaApp('ARAG')" style="background-color:#ffc107">ARAG</button>
-            <button class="company-button" onclick="inizializzaApp('Helvetia')" style="background-color:#dc3545">Helvetia</button>
+        <div class="modal-overlay-background"></div>
+        <div class="modal-wrapper">
+            <div class="modal-content">
+                <h2>Seleziona la Compagnia</h2>
+                <button class="company-button" onclick="inizializzaApp('Allianz')" style="background-color:#007bff">Allianz</button>
+                <button class="company-button" onclick="inizializzaApp('HDI')" style="background-color:#28a745">HDI</button>
+                <button class="company-button" onclick="inizializzaApp('Vittoria')" style="background-color:#6f42c1">Vittoria</button>
+                <button class="company-button" onclick="inizializzaApp('ARAG')" style="background-color:#ffc107">ARAG</button>
+                <button class="company-button" onclick="inizializzaApp('Helvetia')" style="background-color:#dc3545">Helvetia</button>
+            </div>
+            <div class="modal-content">
+                <h2>Altre Funzioni</h2>
+                <button class="company-button utility-button" onclick="mostraTabella('anticipi')">ANTICIPI</button>
+                <button class="company-button utility-button" onclick="mostraTabella('bonifici_allianz')">BONIFICI ALLIANZ</button>
+                <button class="company-button utility-button" onclick="mostraTabella('bonifici_hdi_arag')">BONIFICI HDI/ARAG</button>
+                <button class="company-button utility-button" onclick="mostraTabella('pos_hdi_arag')">POS HDI/ARAG</button>
+            </div>
         </div>
     </div>
     
+    <div class="modal-overlay modal-full" id="generic-modal" style="display:none;">
+        <div class="modal-content-full">
+            <div class="modal-toolbar">
+                <h2 id="generic-modal-title"></h2>
+                <div class="filter-group">
+                    <label>Filtra per:</label>
+                    <select id="generic-filtro-anno"></select>
+                    <select id="generic-filtro-mese"></select>
+                    <input type="date" id="generic-filtro-giorno">
+                    <button onclick="applicaFiltriTabella()">Applica Filtri</button>
+                    <button class="button-secondary" onclick="resetFiltriTabella()">Resetta</button>
+                </div>
+                <div class="action-group">
+                    <button class="button-save" onclick="salvaTutteLeModificheTabella()">Salva Modifiche</button>
+                    <button class="button-secondary" onclick="document.getElementById('generic-modal').style.display = 'none'">Chiudi</button>
+                </div>
+            </div>
+            <div id="generic-modal-notification" class="save-notification"></div>
+            <div style="overflow-x: auto;">
+                <table id="generic-table" class="generic-table">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <div class="container" id="main-container">
         <h1 id="main-title">Registro Cassa</h1>
         
         <div class="app-header">
             <div class="header-group">
-                <label for="date-selector">Giornale del:</label>
+                <label for="date-selector">Visualizza movimenti del:</label>
                 <input type="date" id="date-selector" onchange="caricaGiornale(this.valueAsDate)">
             </div>
             <div class="header-group">
                 <div id="status-indicator"></div>
                 <button onclick="salvaStatoCorrente()" class="button-save">Salva Modifiche Online</button>
                 <button onclick="window.print()" class="button-secondary">Stampa</button>
-                <button onclick="location.reload()">Cambia Compagnia</button>
+                <button onclick="location.reload()">Chiudi</button>
             </div>
         </div>
     
-        <div class="box">
+        <div class="box" id="box-inizio-giornata">
             <h2>1. Inizio Giornata</h2>
             <label for="riportoIniziale"><strong>Riporto da Cassa Teorica Giorno Precedente (€):</strong></label>
             <input type="number" id="riportoIniziale" placeholder="0.00" step="0.01" oninput="aggiornaTuttiRiepiloghi()">
@@ -120,6 +234,27 @@
                         <option value="Contanti">Contanti</option><option value="Assegno">Assegno</option>
                         <option value="POS">POS</option><option value="Bonifico">Bonifico</option>
                     </select>
+
+                    <div id="divTipoPosAllianz" style="display:none;">
+                        <label for="tipoPosAllianz">Tipo POS:</label>
+                        <select id="tipoPosAllianz">
+                            <option value="POS Direzione">POS Direzione</option>
+                            <option value="POS Agenzia">POS Agenzia</option>
+                        </select>
+                    </div>
+
+                    <div id="divTipoAnticipo" style="display:none;">
+                        <label for="tipoAnticipo">Tipo Anticipo:</label>
+                        <select id="tipoAnticipo" onchange="aggiornaCampiCondizionali()">
+                            <option value="Anticipo Contanti">Anticipo Contanti</option>
+                            <option value="Anticipo Assegno">Anticipo Assegno</option>
+                            <option value="Anticipo POS">Anticipo POS</option>
+                            <option value="Anticipo Bonifico">Anticipo Bonifico</option>
+                            <option value="Plafond">Plafond</option>
+                            <option value="Sospeso Cassa">Sospeso Cassa</option>
+                        </select>
+                    </div>
+
                     <div id="divRientroMetodo" style="display:none;">
                         <label for="rientroMetodo">Metodo di Rientro:</label>
                         <select id="rientroMetodo" onchange="aggiornaCampiCondizionali()">
@@ -146,7 +281,7 @@
                 </form>
             </div>
     
-            <div class="box">
+            <div class="box" id="box-conteggio-cassa">
                 <h2>3. Conteggio Fisico Cassa</h2>
                 <div id="conteggioBanconote"></div>
                 <div id="conteggioMonete"></div>
@@ -163,13 +298,16 @@
             <h2>Riepilogo Movimenti di Cassa</h2>
             <table id="tabellaMovimenti">
                 <thead><tr>
+                    <th class="col-data-mensile">Data</th>
                     <th>Cliente</th><th>Polizza</th><th>Metodo</th><th>Importo (€)</th>
                     <th class="col-provvigioni">Provv.(€)</th>
-                    <th>Arroton. (€)</th><th>Uscite (€)</th><th>Impatto (€)</th><th>Azioni</th>
+                    <th>Arroton. (€)</th><th>Uscite (€)</th>
+                    <th class="col-impatto-cassa">Impatto (€)</th>
+                    <th>Azioni</th>
                 </tr></thead>
                 <tbody></tbody>
             </table>
-            <div class="riepilogo-totali">Cassa Teorica Finale (Riporto + Movimenti): € <span id="cassaTeorica">0.00</span></div>
+            <div class="riepilogo-totali col-cassa-teorica">Cassa Teorica Finale (Riporto + Movimenti): € <span id="cassaTeorica">0.00</span></div>
         </div>
         
         <div class="box" id="box-provvigioni" style="display:none;">
@@ -184,7 +322,7 @@
             </div>
         </div>
         
-        <div class="box">
+        <div class="box" id="box-verifica-finale">
             <h2>4. Verifica Finale</h2>
             <button onclick="verificaChiusura()" class="button-secondary">VERIFICA I CONTI</button>
             <div class="risultato-verifica" id="risultatoVerifica">In attesa di verifica...</div>
@@ -211,32 +349,66 @@
     const tagliMonete = [2, 1, 0.50, 0.20, 0.10, 0.05, 0.02, 0.01];
 
     async function caricaDatiDaFirebase() {
-        statusIndicator.textContent = 'Caricamento...';
-        statusIndicator.className = 'saving';
+        if(statusIndicator) {
+            statusIndicator.textContent = 'Caricamento...';
+            statusIndicator.className = 'saving';
+        }
         try {
             const doc = await dbRef.get();
             stato.datiCompleti = doc.exists ? doc.data() : {};
-            statusIndicator.textContent = 'Pronto';
-            statusIndicator.className = 'synced';
+            if(statusIndicator) {
+                statusIndicator.textContent = 'Pronto';
+                statusIndicator.className = 'synced';
+            }
         } catch (error) {
             console.error("Errore caricamento da Firebase: ", error);
-            statusIndicator.textContent = 'Errore Connessione';
-            statusIndicator.className = 'error';
+             if(statusIndicator) {
+                statusIndicator.textContent = 'Errore Connessione';
+                statusIndicator.className = 'error';
+            }
         }
     }
 
-    async function salvaStatoCorrente() {
-        statusIndicator.textContent = 'Salvataggio...';
-        statusIndicator.className = 'saving';
+    async function salvaStatoCorrente(silenzioso = false, notificationId = null) {
+        const indicator = notificationId ? document.getElementById(notificationId) : statusIndicator;
+        if (!silenzioso && indicator) {
+            indicator.textContent = 'Salvataggio in corso...';
+            indicator.className = 'save-notification success';
+            indicator.style.display = 'block';
+            indicator.style.opacity = '1';
+        }
+
         try {
-            salvaDatiLocali(); 
+            if(stato.compagniaSelezionata && stato.dataSelezionata) salvaDatiLocali(); 
             await dbRef.set(stato.datiCompleti);
-            statusIndicator.textContent = 'Salvato Online';
-            statusIndicator.className = 'synced';
+             if (indicator) {
+                indicator.textContent = 'Salvato con successo!';
+                indicator.className = 'save-notification success';
+                if(!notificationId) {
+                    indicator.className = 'synced';
+                }
+                indicator.style.opacity = '1';
+
+                if(notificationId){
+                    setTimeout(() => { 
+                        indicator.style.opacity = '0';
+                        setTimeout(() => { indicator.style.display = 'none'; }, 500);
+                    }, 2000);
+                }
+            }
         } catch (error) {
             console.error("Errore salvataggio su Firebase: ", error);
-            statusIndicator.textContent = 'Errore Salvataggio';
-            statusIndicator.className = 'error';
+            if(indicator) {
+                indicator.textContent = 'Errore Salvataggio';
+                indicator.className = notificationId ? 'save-notification error' : 'error';
+                indicator.style.opacity = '1';
+                 if(notificationId){
+                    setTimeout(() => { 
+                        indicator.style.opacity = '0';
+                        setTimeout(() => { indicator.style.display = 'none'; }, 500);
+                    }, 3000);
+                }
+            }
         }
     }
     
@@ -249,44 +421,75 @@
         await caricaDatiDaFirebase();
         
         document.getElementById('main-title').textContent = `Registro Cassa ${compagnia}`;
+        
         const showProvvigioni = compagnia === 'HDI' || compagnia === 'Vittoria';
         document.getElementById('box-provvigioni').style.display = showProvvigioni ? 'block' : 'none';
         
         const selectMetodo = document.getElementById('metodologia');
         selectMetodo.innerHTML = `<option value="Contanti">Contanti</option><option value="Assegno">Assegno</option><option value="POS">POS</option><option value="Bonifico">Bonifico</option>`;
-        if (showProvvigioni) {
-            selectMetodo.add(new Option('Anticipo', 'Anticipo'));
-            selectMetodo.add(new Option('Rientro da Anticipo', 'Rientro da Anticipo'));
+        
+        selectMetodo.add(new Option('Anticipo', 'Anticipo'));
+        selectMetodo.add(new Option('Rientro da Anticipo', 'Rientro da Anticipo'));
+        
+        const isSimplifiedView = compagnia === 'ARAG' || compagnia === 'Helvetia';
+        document.getElementById('box-inizio-giornata').style.display = isSimplifiedView ? 'none' : 'block';
+        document.getElementById('box-conteggio-cassa').style.display = isSimplifiedView ? 'none' : 'block';
+        document.getElementById('box-verifica-finale').style.display = isSimplifiedView ? 'none' : 'block';
+        
+        if (isSimplifiedView) {
+            document.body.classList.add('vista-mensile');
+            document.querySelector('#date-selector').labels[0].textContent = "Visualizza movimenti del mese:";
+        } else {
+            document.body.classList.remove('vista-mensile');
+            document.querySelector('#date-selector').labels[0].textContent = "Giornale del:";
         }
+
         document.getElementById('date-selector').valueAsDate = new Date();
         caricaGiornale(new Date());
     }
 
     function caricaGiornale(data) {
         stato.dataSelezionata = data;
-        const dataKey = formatDate(data);
-        const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
-        let datiGiorno = datiCompagnia[dataKey];
+        const isSimplifiedView = stato.compagniaSelezionata === 'ARAG' || stato.compagniaSelezionata === 'Helvetia';
 
-        if (!datiGiorno) {
-            datiGiorno = creaNuovoGiorno(data);
-            if (!stato.datiCompleti[stato.compagniaSelezionata]) stato.datiCompleti[stato.compagniaSelezionata] = {};
-            stato.datiCompleti[stato.compagniaSelezionata][dataKey] = datiGiorno;
-        }
-
-        document.getElementById('riportoIniziale').value = (datiGiorno.riportoIniziale || 0).toFixed(2);
-        creaCampiConteggio(datiGiorno.conteggioFisico);
-        aggiornaTabellaMovimenti(datiGiorno.movimenti);
-        
-        const divRisultato = document.getElementById('risultatoVerifica');
-        if (datiGiorno.verificaResult) {
-            divRisultato.textContent = datiGiorno.verificaResult.text;
-            divRisultato.className = datiGiorno.verificaResult.className;
+        let movimentiDaMostrare = [];
+        if (isSimplifiedView) {
+            const selectedMonth = data.getMonth();
+            const selectedYear = data.getFullYear();
+            const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
+            for (const dKey in datiCompagnia) {
+                const movDate = new Date(dKey);
+                if (movDate.getMonth() === selectedMonth && movDate.getFullYear() === selectedYear) {
+                    const movimentiDelGiorno = datiCompagnia[dKey].movimenti || [];
+                    movimentiDelGiorno.forEach(m => movimentiDaMostrare.push({ ...m, dataMovimento: dKey }));
+                }
+            }
+            movimentiDaMostrare.sort((a, b) => new Date(a.dataMovimento) - new Date(b.dataMovimento));
         } else {
-            divRisultato.textContent = 'In attesa di verifica...';
-            divRisultato.className = 'risultato-verifica';
+            const dataKey = formatDate(data);
+            const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
+            let datiGiorno = datiCompagnia[dataKey];
+
+            if (!datiGiorno) {
+                datiGiorno = creaNuovoGiorno(data);
+                if (!stato.datiCompleti[stato.compagniaSelezionata]) stato.datiCompleti[stato.compagniaSelezionata] = {};
+                stato.datiCompleti[stato.compagniaSelezionata][dataKey] = datiGiorno;
+            }
+
+            document.getElementById('riportoIniziale').value = (datiGiorno.riportoIniziale || 0).toFixed(2);
+            creaCampiConteggio(datiGiorno.conteggioFisico);
+            const divRisultato = document.getElementById('risultatoVerifica');
+            if (datiGiorno.verificaResult) {
+                divRisultato.textContent = datiGiorno.verificaResult.text;
+                divRisultato.className = datiGiorno.verificaResult.className;
+            } else {
+                divRisultato.textContent = 'In attesa di verifica...';
+                divRisultato.className = 'risultato-verifica';
+            }
+            movimentiDaMostrare = datiGiorno.movimenti || [];
         }
 
+        aggiornaTabellaMovimenti(movimentiDaMostrare);
         aggiornaTuttiRiepiloghi();
         annullaModifica();
     }
@@ -297,6 +500,10 @@
     }
 
     function salvaDatiLocali() {
+        if(!stato.compagniaSelezionata || !stato.dataSelezionata) return;
+        const isSimplifiedView = stato.compagniaSelezionata === 'ARAG' || stato.compagniaSelezionata === 'Helvetia';
+        if (isSimplifiedView) return;
+
         const dataKey = formatDate(stato.dataSelezionata);
         if (!stato.datiCompleti[stato.compagniaSelezionata]) stato.datiCompleti[stato.compagniaSelezionata] = {};
         if (!stato.datiCompleti[stato.compagniaSelezionata][dataKey]) stato.datiCompleti[stato.compagniaSelezionata][dataKey] = creaNuovoGiorno(stato.dataSelezionata);
@@ -305,13 +512,18 @@
         
         datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
         datiGiorno.conteggioFisico = raccogliDatiConteggio();
-        aggiornaTuttiRiepiloghi();
     }
 
     function processaFormMovimento() {
+        const dataPerSalvataggio = new Date(document.getElementById('date-selector').valueAsDate || new Date());
+        dataPerSalvataggio.setHours(12); // Evita problemi di fuso orario
+        const dataKey = formatDate(dataPerSalvataggio);
+
         const editingIndex = document.getElementById('editingIndex').value;
         const movimento = {
             metodologia: document.getElementById('metodologia').value,
+            tipoPosAllianz: document.getElementById('tipoPosAllianz').value,
+            tipoAnticipo: document.getElementById('tipoAnticipo').value,
             rientroMetodo: document.getElementById('rientroMetodo').value,
             numeroAssegno: document.getElementById('numeroAssegno').value,
             nomeCliente: document.getElementById('nomeCliente').value,
@@ -322,7 +534,9 @@
             uscite: parseFloat(document.getElementById('uscite').value) || 0,
         };
         
-        const dataKey = formatDate(stato.dataSelezionata);
+        if (!stato.datiCompleti[stato.compagniaSelezionata]) stato.datiCompleti[stato.compagniaSelezionata] = {};
+        if (!stato.datiCompleti[stato.compagniaSelezionata][dataKey]) stato.datiCompleti[stato.compagniaSelezionata][dataKey] = creaNuovoGiorno(dataPerSalvataggio);
+        
         const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
         (datiGiorno.movimenti = datiGiorno.movimenti || []);
 
@@ -333,16 +547,20 @@
         }
         
         annullaModifica();
-        aggiornaTabellaMovimenti(datiGiorno.movimenti);
-        aggiornaTuttiRiepiloghi();
+        caricaGiornale(dataPerSalvataggio);
+        salvaStatoCorrente();
     }
     
-    function modificaMovimento(index) {
-        const dataKey = formatDate(stato.dataSelezionata);
+    function modificaMovimento(index, dataMovimento) {
+        const dataKey = dataMovimento || formatDate(stato.dataSelezionata);
+        const isSimplifiedView = stato.compagniaSelezionata === 'ARAG' || stato.compagniaSelezionata === 'Helvetia';
+
         const movimento = stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti[index];
         
         document.getElementById('editingIndex').value = index;
         document.getElementById('metodologia').value = movimento.metodologia;
+        document.getElementById('tipoPosAllianz').value = movimento.tipoPosAllianz || 'POS Direzione';
+        document.getElementById('tipoAnticipo').value = movimento.tipoAnticipo || 'Anticipo Contanti';
         document.getElementById('rientroMetodo').value = movimento.rientroMetodo || 'Contanti';
         document.getElementById('numeroAssegno').value = movimento.numeroAssegno;
         document.getElementById('nomeCliente').value = movimento.nomeCliente;
@@ -351,8 +569,12 @@
         document.getElementById('provvigioni').value = movimento.provvigioni || '';
         document.getElementById('arrotondamenti').value = movimento.arrotondamenti;
         document.getElementById('uscite').value = movimento.uscite;
+
+        if (isSimplifiedView) {
+            document.getElementById('date-selector').value = dataKey;
+        }
         
-        document.getElementById('form-title').textContent = "Modifica Movimento";
+        document.getElementById('form-title').textContent = `Modifica Movimento del ${new Date(dataKey).toLocaleDateString('it-IT')}`;
         document.getElementById('form-buttons').innerHTML = `<button type="submit">Salva Modifiche</button><button type="button" class="button-secondary" onclick="annullaModifica()">Annulla</button>`;
         aggiornaCampiCondizionali();
         window.scrollTo(0, 0);
@@ -366,29 +588,29 @@
         aggiornaCampiCondizionali();
     }
 
-    function cancellaMovimento(index) {
+    function cancellaMovimento(index, dataMovimento) {
         if (confirm('Sei sicuro di voler eliminare questo movimento?')) {
-            const dataKey = formatDate(stato.dataSelezionata);
+            const dataKey = dataMovimento || formatDate(stato.dataSelezionata);
             stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti.splice(index, 1);
-            aggiornaTabellaMovimenti(stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti);
-            aggiornaTuttiRiepiloghi();
+            caricaGiornale(stato.dataSelezionata);
+            salvaStatoCorrente();
         }
     }
 
-    function rendiProvvigioneEditabile(cell, index) {
+    function rendiProvvigioneEditabile(cell, index, dataMovimento) {
         if (cell.querySelector('input')) return;
+        const dataKey = dataMovimento || formatDate(stato.dataSelezionata);
         const valoreCorrente = cell.textContent;
-        cell.innerHTML = `<input type="number" step="0.01" value="${valoreCorrente}" style="width: 80px; padding: 2px;" onblur="salvaProvvigioneModificata(this, ${index})" onkeydown="if(event.key === 'Enter') this.blur()"/>`;
+        cell.innerHTML = `<input type="number" step="0.01" value="${valoreCorrente}" style="width: 80px; padding: 2px;" onblur="salvaProvvigioneModificata(this, ${index}, '${dataKey}')" onkeydown="if(event.key === 'Enter') this.blur()"/>`;
         const input = cell.querySelector('input');
         input.focus();
     }
 
-    function salvaProvvigioneModificata(input, index) {
+    function salvaProvvigioneModificata(input, index, dataKey) {
         const nuovoValore = parseFloat(input.value) || 0;
-        const dataKey = formatDate(stato.dataSelezionata);
         stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti[index].provvigioni = nuovoValore;
-        aggiornaTabellaMovimenti(stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti);
-        aggiornaTuttiRiepiloghi();
+        caricaGiornale(stato.dataSelezionata);
+        salvaStatoCorrente();
     }
 
     function creaCampiConteggio(datiConteggio = {}) {
@@ -446,21 +668,31 @@
     }
     
     function aggiornaTabellaMovimenti(movimenti = []) {
+        const isSimplifiedView = stato.compagniaSelezionata === 'ARAG' || stato.compagniaSelezionata === 'Helvetia';
         const tbody = document.getElementById('tabellaMovimenti').querySelector('tbody');
         tbody.innerHTML = '';
         const showProvvigioni = stato.compagniaSelezionata === 'HDI' || stato.compagniaSelezionata === 'Vittoria';
 
         (movimenti || []).forEach((m, index) => {
+            const dataKeyOriginale = isSimplifiedView ? m.dataMovimento : formatDate(stato.dataSelezionata);
+            const indexOriginale = isSimplifiedView ? stato.datiCompleti[stato.compagniaSelezionata][dataKeyOriginale].movimenti.findIndex(orig => orig === m) : index;
+
             let impattoCassa = 0;
-            if (m.metodologia === 'Contanti' || m.metodologia === 'Assegno') {
-                impattoCassa = m.importo;
-            } else if (m.metodologia === 'Rientro da Anticipo' && (m.rientroMetodo === 'Contanti' || m.rientroMetodo === 'Assegno')) {
-                impattoCassa = m.importo;
+            if (!isSimplifiedView) {
+                if (m.metodologia === 'Contanti' || m.metodologia === 'Assegno' || m.tipoAnticipo === 'Anticipo Contanti' || m.tipoAnticipo === 'Anticipo Assegno' ) {
+                    impattoCassa = m.importo;
+                } else if (m.metodologia === 'Rientro da Anticipo' && (m.rientroMetodo === 'Contanti' || m.rientroMetodo === 'Assegno')) {
+                    impattoCassa = m.importo;
+                }
+                impattoCassa += (m.arrotondamenti || 0) - (m.uscite || 0);
             }
-            impattoCassa += (m.arrotondamenti || 0) - (m.uscite || 0);
 
             let metodoDisplay = m.metodologia;
-            if (m.metodologia === 'Assegno') {
+            if (m.metodologia === 'Anticipo') {
+                metodoDisplay = `Anticipo (${m.tipoAnticipo || ''})`;
+            } else if (m.metodologia === 'POS' && stato.compagniaSelezionata === 'Allianz') {
+                metodoDisplay = `POS (${m.tipoPosAllianz || ''})`;
+            } else if (m.metodologia === 'Assegno') {
                 metodoDisplay += ` ${m.numeroAssegno || ''}`;
             } else if (m.metodologia === 'Rientro da Anticipo') {
                 metodoDisplay += ` (${m.rientroMetodo || ''})`;
@@ -468,28 +700,33 @@
                      metodoDisplay += ` ${m.numeroAssegno || ''}`;
                 }
             }
-
+            
             const riga = tbody.insertRow();
             riga.innerHTML = `
+                <td class="col-data-mensile">${new Date(dataKeyOriginale).toLocaleDateString('it-IT')}</td>
                 <td>${m.nomeCliente || ''}</td>
                 <td>${m.numeroPolizza || ''}</td>
                 <td>${metodoDisplay || ''}</td>
                 <td>${(m.importo || 0).toFixed(2)}</td>
-                <td class="col-provvigioni provvigione-editabile" onclick="rendiProvvigioneEditabile(this, ${index})">${(m.provvigioni || 0).toFixed(2)}</td>
+                <td class="col-provvigioni provvigione-editabile" onclick="rendiProvvigioneEditabile(this, ${indexOriginale}, '${dataKeyOriginale}')">${(m.provvigioni || 0).toFixed(2)}</td>
                 <td>${(m.arrotondamenti || 0).toFixed(2)}</td>
                 <td>${(m.uscite || 0).toFixed(2)}</td>
-                <td><strong>${impattoCassa.toFixed(2)}</strong></td>
+                <td class="col-impatto-cassa"><strong>${impattoCassa.toFixed(2)}</strong></td>
                 <td>
-                    <button type="button" class="button-edit" onclick="modificaMovimento(${index})">Modifica</button>
-                    <button type="button" class="button-delete" onclick="cancellaMovimento(${index})">Elimina</button>
+                    <button type="button" class="button-edit" onclick="modificaMovimento(${indexOriginale}, '${dataKeyOriginale}')">Modifica</button>
+                    <button type="button" class="button-delete" onclick="cancellaMovimento(${indexOriginale}, '${dataKeyOriginale}')">Elimina</button>
                 </td>`;
         });
         document.querySelectorAll('.col-provvigioni').forEach(el => el.style.display = showProvvigioni ? '' : 'none');
     }
     
     function aggiornaTuttiRiepiloghi() {
-        calcolaCassaTeorica();
-        calcolaConteggioFisico();
+        if (!stato.compagniaSelezionata) return;
+        const isSimplifiedView = stato.compagniaSelezionata === 'ARAG' || stato.compagniaSelezionata === 'Helvetia';
+        if (!isSimplifiedView) {
+            calcolaCassaTeorica();
+            calcolaConteggioFisico();
+        }
         if (stato.compagniaSelezionata === 'HDI' || stato.compagniaSelezionata === 'Vittoria') {
             aggiornaRiepilogoProvvigioni();
         }
@@ -545,14 +782,16 @@
 
     function calcolaCassaTeorica() {
         const riporto = parseFloat(document.getElementById('riportoIniziale').value) || 0;
+        if(!stato.dataSelezionata || !stato.compagniaSelezionata) return riporto;
+        
         const dataKey = formatDate(stato.dataSelezionata);
         const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata]?.[dataKey];
-        if (!datiGiorno) return 0;
+        if (!datiGiorno) return riporto;
         
         const movimenti = datiGiorno.movimenti || [];
         const totaleMovimentiCassa = movimenti.reduce((acc, m) => {
             let impatto = 0;
-            if (m.metodologia === 'Contanti' || m.metodologia === 'Assegno') {
+            if (m.metodologia === 'Contanti' || m.metodologia === 'Assegno' || m.tipoAnticipo === 'Anticipo Contanti' || m.tipoAnticipo === 'Anticipo Assegno') {
                 impatto = m.importo;
             } else if (m.metodologia === 'Rientro da Anticipo' && (m.rientroMetodo === 'Contanti' || m.rientroMetodo === 'Assegno')) {
                 impatto = m.importo;
@@ -569,23 +808,30 @@
     }
         
     function aggiornaCampiCondizionali() {
+        if (!stato.compagniaSelezionata) return;
         const compagnia = stato.compagniaSelezionata;
         const metodologia = document.getElementById('metodologia').value;
         const rientroMetodo = document.getElementById('rientroMetodo').value;
+        const tipoAnticipo = document.getElementById('tipoAnticipo').value;
 
         const showProvvigioni = (compagnia === 'HDI' || compagnia === 'Vittoria') && metodologia !== 'Rientro da Anticipo';
         const showRientro = metodologia === 'Rientro da Anticipo';
-        const showAssegno = metodologia === 'Assegno' || (showRientro && rientroMetodo === 'Assegno');
+        const showAssegno = metodologia === 'Assegno' || (showRientro && rientroMetodo === 'Assegno') || (metodologia === 'Anticipo' && tipoAnticipo === 'Anticipo Assegno');
+        const showTipoAnticipo = metodologia === 'Anticipo';
+        const showTipoPosAllianz = metodologia === 'POS' && compagnia === 'Allianz';
         
         document.getElementById('divProvvigioni').style.display = showProvvigioni ? 'block' : 'none';
         document.getElementById('divRientroMetodo').style.display = showRientro ? 'block' : 'none';
         document.getElementById('divNumeroAssegno').style.display = showAssegno ? 'block' : 'none';
+        document.getElementById('divTipoAnticipo').style.display = showTipoAnticipo ? 'block' : 'none';
+        document.getElementById('divTipoPosAllianz').style.display = showTipoPosAllianz ? 'block' : 'none';
         
         if (!showProvvigioni) document.getElementById('provvigioni').value = '';
         if (!showAssegno) document.getElementById('numeroAssegno').value = '';
     }
 
     function aggiornaRiepilogoProvvigioni() {
+        if (!stato.dataSelezionata) return;
         const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
         const meseCorrente = stato.dataSelezionata.getMonth();
         const annoCorrente = stato.dataSelezionata.getFullYear();
@@ -622,7 +868,205 @@
         }
         return dataPrec;
     }
+
+    // ===============================================
+    // SISTEMA DI GESTIONE TABELLE GENERICHE
+    // ===============================================
     
+    let datiTabellaCorrente = [];
+    let configTabellaCorrente = {};
+
+    const configsTabelle = {
+        'anticipi': {
+            title: 'Gestione Anticipi',
+            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', tipoAnticipo: 'Tipo Anticipo', anticipoDi: 'Anticipo di', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
+            filterFn: mov => mov.metodologia === 'Anticipo'
+        },
+        'bonifici_allianz': {
+            title: 'Gestione Bonifici (Allianz)',
+            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
+            filterFn: mov => mov.metodologia === 'Bonifico' && mov.compagnia === 'Allianz'
+        },
+        'bonifici_hdi_arag': {
+            title: 'Gestione Bonifici (HDI/ARAG)',
+            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
+            filterFn: mov => mov.metodologia === 'Bonifico' && (mov.compagnia === 'HDI' || mov.compagnia === 'ARAG')
+        },
+        'pos_hdi_arag': {
+            title: 'Gestione POS (HDI/ARAG)',
+            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
+            filterFn: mov => mov.metodologia === 'POS' && (mov.compagnia === 'HDI' || mov.compagnia === 'ARAG')
+        }
+    };
+
+    async function mostraTabella(tipo) {
+        configTabellaCorrente = configsTabelle[tipo];
+        if (!configTabellaCorrente) return;
+
+        if (Object.keys(stato.datiCompleti).length === 0) await caricaDatiDaFirebase();
+
+        datiTabellaCorrente = [];
+        for (const compagnia in stato.datiCompleti) {
+            for (const dataKey in stato.datiCompleti[compagnia]) {
+                (stato.datiCompleti[compagnia][dataKey].movimenti || []).forEach((mov, index) => {
+                    const movimentoCompleto = { ...mov, compagnia, dataKey, originalIndex: index };
+                    if (configTabellaCorrente.filterFn(movimentoCompleto)) {
+                        datiTabellaCorrente.push(movimentoCompleto);
+                    }
+                });
+            }
+        }
+        
+        document.getElementById('generic-modal-title').textContent = configTabellaCorrente.title;
+        popolaFiltri(datiTabellaCorrente);
+        applicaFiltriTabella();
+        document.getElementById('generic-modal').style.display = 'flex';
+    }
+
+    function popolaFiltri(dati) {
+        const annoSelect = document.getElementById('generic-filtro-anno');
+        const meseSelect = document.getElementById('generic-filtro-mese');
+        
+        const years = new Set(dati.map(d => new Date(d.dataKey).getFullYear()));
+        years.add(new Date().getFullYear());
+        const sortedYears = Array.from(years).sort((a, b) => b - a);
+        
+        annoSelect.innerHTML = '<option value="tutti">Tutti</option>';
+        sortedYears.forEach(y => annoSelect.innerHTML += `<option value="${y}">${y}</option>`);
+
+        meseSelect.innerHTML = '<option value="tutti">Tutti</option>';
+        const mesi = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
+        mesi.forEach((mese, index) => meseSelect.innerHTML += `<option value="${index}">${mese}</option>`);
+        
+        resetFiltriTabella();
+    }
+    
+    function applicaFiltriTabella() {
+        const anno = document.getElementById('generic-filtro-anno').value;
+        const mese = document.getElementById('generic-filtro-mese').value;
+        const giorno = document.getElementById('generic-filtro-giorno').value;
+        
+        let datiFiltrati = datiTabellaCorrente;
+
+        if (giorno) {
+            datiFiltrati = datiFiltrati.filter(d => d.dataKey === giorno);
+        } else {
+            if (anno !== 'tutti') {
+                datiFiltrati = datiFiltrati.filter(d => new Date(d.dataKey).getFullYear() == anno);
+            }
+            if (mese !== 'tutti') {
+                datiFiltrati = datiFiltrati.filter(d => new Date(d.dataKey).getMonth() == mese);
+            }
+        }
+        popolaTabellaGenerica(datiFiltrati);
+    }
+
+    function resetFiltriTabella() {
+        document.getElementById('generic-filtro-anno').value = 'tutti';
+        document.getElementById('generic-filtro-mese').value = 'tutti';
+        document.getElementById('generic-filtro-giorno').value = '';
+        applicaFiltriTabella();
+    }
+
+    function popolaTabellaGenerica(dati) {
+        const table = document.getElementById('generic-table');
+        const thead = table.querySelector('thead');
+        const tbody = table.querySelector('tbody');
+        thead.innerHTML = '';
+        tbody.innerHTML = '';
+
+        const headerRow = thead.insertRow();
+        for (const key in configTabellaCorrente.columns) {
+            const th = document.createElement('th');
+            th.textContent = configTabellaCorrente.columns[key];
+            if (th.textContent === 'Note') th.classList.add('col-note');
+            headerRow.appendChild(th);
+        }
+
+        dati.sort((a, b) => new Date(b.dataKey) - new Date(a.dataKey));
+
+        dati.forEach(d => {
+            const riga = tbody.insertRow();
+            riga.dataset.compagnia = d.compagnia;
+            riga.dataset.key = d.dataKey;
+            riga.dataset.index = d.originalIndex;
+            
+            for (const key in configTabellaCorrente.columns) {
+                const cell = riga.insertCell();
+                cell.dataset.property = key;
+                
+                let content = d[key] || '';
+                switch(key) {
+                    case 'dataKey':
+                        cell.textContent = new Date(content).toLocaleDateString('it-IT');
+                        break;
+                    case 'importo':
+                        cell.textContent = (content || 0).toFixed(2);
+                        cell.contentEditable = true;
+                        cell.onblur = (e) => salvaModificaGenerica(e.target);
+                        break;
+                    case 'nomeCliente':
+                    case 'numeroPolizza':
+                    case 'note':
+                        cell.textContent = content;
+                        cell.contentEditable = true;
+                        if (key === 'note') cell.classList.add('col-note');
+                        cell.onblur = (e) => salvaModificaGenerica(e.target);
+                        break;
+                    case 'anticipoDi':
+                        cell.innerHTML = `<input type="text" value="${content}" onchange="salvaModificaGenerica(this)">`;
+                        break;
+                    case 'dataEstinzione':
+                        cell.innerHTML = `<input type="date" value="${content}" onchange="salvaModificaGenerica(this)">`;
+                        break;
+                    case 'incassato':
+                        cell.innerHTML = `<input type="checkbox" ${content ? 'checked' : ''} onchange="salvaModificaGenerica(this)">`;
+                        break;
+                    default:
+                        cell.textContent = content;
+                }
+            }
+            aggiornaStileRiga(riga);
+        });
+    }
+    
+    function salvaModificaGenerica(el) {
+        const cell = el.closest('td');
+        const riga = cell.closest('tr');
+        const proprieta = cell.dataset.property;
+        const { compagnia, key, index } = riga.dataset;
+
+        if (stato.datiCompleti[compagnia]?.[key]?.movimenti?.[index]) {
+            let valore;
+            if (el.isContentEditable) {
+                 valore = proprieta === 'importo' ? parseFloat(el.textContent.replace(',', '.')) || 0 : el.textContent;
+            } else {
+                valore = el.type === 'checkbox' ? el.checked : el.value;
+            }
+            
+            stato.datiCompleti[compagnia][key].movimenti[index][proprieta] = valore;
+            aggiornaStileRiga(riga);
+        }
+    }
+    
+    function salvaTutteLeModificheTabella() {
+        salvaStatoCorrente(false, 'generic-modal-notification');
+    }
+
+    function aggiornaStileRiga(riga) {
+        const { compagnia, key, index } = riga.dataset;
+        const movimento = stato.datiCompleti[compagnia][key].movimenti[index];
+        riga.className = '';
+
+        if (movimento.incassato) {
+            riga.classList.add('riga-incassato');
+        } else {
+            const diffGiorni = Math.floor((new Date() - new Date(key)) / (1000 * 60 * 60 * 24));
+            if (diffGiorni > 30) riga.classList.add('riga-critico');
+            else if (diffGiorni > 15) riga.classList.add('riga-vecchio');
+        }
+    }
+
     // Rendi le funzioni visibili globalmente
     window.inizializzaApp = inizializzaApp;
     window.caricaGiornale = caricaGiornale;
@@ -638,6 +1082,11 @@
     window.salvaDatiLocali = salvaDatiLocali;
     window.salvaStatoCorrente = salvaStatoCorrente;
     window.aggiornaTuttiRiepiloghi = aggiornaTuttiRiepiloghi;
+    window.mostraTabella = mostraTabella;
+    window.applicaFiltriTabella = applicaFiltriTabella;
+    window.resetFiltriTabella = resetFiltriTabella;
+    window.salvaModificaGenerica = salvaModificaGenerica;
+    window.salvaTutteLeModificheTabella = salvaTutteLeModificheTabella;
 </script>
 </body>
 </html>
