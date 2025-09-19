@@ -128,7 +128,7 @@
         .riga-critico { background-color: #f8d7da; }
 
         .save-notification {
-            display: none; /* Hidden by default */
+            display: none;
             padding: 10px 15px; border-radius: 5px; text-align: center;
             font-weight: bold; margin: -10px auto 10px auto;
             opacity: 0; transition: opacity 0.5s ease-in-out;
@@ -461,7 +461,10 @@
                 const movDate = new Date(dKey);
                 if (movDate.getMonth() === selectedMonth && movDate.getFullYear() === selectedYear) {
                     const movimentiDelGiorno = datiCompagnia[dKey].movimenti || [];
-                    movimentiDelGiorno.forEach(m => movimentiDaMostrare.push({ ...m, dataMovimento: dKey }));
+                    movimentiDelGiorno.forEach(m => {
+                        m.dataMovimento = dKey; 
+                        movimentiDaMostrare.push(m);
+                    });
                 }
             }
             movimentiDaMostrare.sort((a, b) => new Date(a.dataMovimento) - new Date(b.dataMovimento));
@@ -515,8 +518,8 @@
     }
 
     function processaFormMovimento() {
-        const dataPerSalvataggio = new Date(document.getElementById('date-selector').valueAsDate || new Date());
-        dataPerSalvataggio.setHours(12); // Evita problemi di fuso orario
+        let dataPerSalvataggio = new Date(document.getElementById('date-selector').valueAsDate || new Date());
+        dataPerSalvataggio.setMinutes(dataPerSalvataggio.getMinutes() + dataPerSalvataggio.getTimezoneOffset());
         const dataKey = formatDate(dataPerSalvataggio);
 
         const editingIndex = document.getElementById('editingIndex').value;
@@ -553,8 +556,6 @@
     
     function modificaMovimento(index, dataMovimento) {
         const dataKey = dataMovimento || formatDate(stato.dataSelezionata);
-        const isSimplifiedView = stato.compagniaSelezionata === 'ARAG' || stato.compagniaSelezionata === 'Helvetia';
-
         const movimento = stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti[index];
         
         document.getElementById('editingIndex').value = index;
@@ -570,9 +571,9 @@
         document.getElementById('arrotondamenti').value = movimento.arrotondamenti;
         document.getElementById('uscite').value = movimento.uscite;
 
-        if (isSimplifiedView) {
-            document.getElementById('date-selector').value = dataKey;
-        }
+        let dateToSet = new Date(dataKey);
+        dateToSet.setMinutes(dateToSet.getMinutes() + dateToSet.getTimezoneOffset());
+        document.getElementById('date-selector').valueAsDate = dateToSet;
         
         document.getElementById('form-title').textContent = `Modifica Movimento del ${new Date(dataKey).toLocaleDateString('it-IT')}`;
         document.getElementById('form-buttons').innerHTML = `<button type="submit">Salva Modifiche</button><button type="button" class="button-secondary" onclick="annullaModifica()">Annulla</button>`;
@@ -674,7 +675,7 @@
         const showProvvigioni = stato.compagniaSelezionata === 'HDI' || stato.compagniaSelezionata === 'Vittoria';
 
         (movimenti || []).forEach((m, index) => {
-            const dataKeyOriginale = isSimplifiedView ? m.dataMovimento : formatDate(stato.dataSelezionata);
+            const dataKeyOriginale = m.dataMovimento || formatDate(stato.dataSelezionata);
             const indexOriginale = isSimplifiedView ? stato.datiCompleti[stato.compagniaSelezionata][dataKeyOriginale].movimenti.findIndex(orig => orig === m) : index;
 
             let impattoCassa = 0;
