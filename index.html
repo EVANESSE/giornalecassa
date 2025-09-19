@@ -277,6 +277,17 @@
         document.getElementById('riportoIniziale').value = (datiGiorno.riportoIniziale || 0).toFixed(2);
         creaCampiConteggio(datiGiorno.conteggioFisico);
         aggiornaTabellaMovimenti(datiGiorno.movimenti);
+        
+        // CORREZIONE: Mostra la verifica salvata, se esiste
+        const divRisultato = document.getElementById('risultatoVerifica');
+        if (datiGiorno.verificaResult) {
+            divRisultato.textContent = datiGiorno.verificaResult.text;
+            divRisultato.className = datiGiorno.verificaResult.className;
+        } else {
+            divRisultato.textContent = 'In attesa di verifica...';
+            divRisultato.className = 'risultato-verifica';
+        }
+
         aggiornaTuttiRiepiloghi();
         annullaModifica();
     }
@@ -507,8 +518,8 @@
         const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
         const datiGiornoPrec = datiCompagnia[dataKeyPrec];
         
-        if (datiGiornoPrec && datiGiornoPrec.cassaTeorica) { // CORREZIONE: usa la cassaTeorica
-            return datiGiornoPrec.cassaTeorica;
+        if (datiGiornoPrec) {
+            return datiGiornoPrec.cassaTeorica || 0;
         }
         return 0;
     }
@@ -516,14 +527,20 @@
     function verificaChiusura() {
         const teorica = calcolaCassaTeorica();
         const fisica = calcolaConteggioFisico();
-        const differenza = fisica - teorica;
+        const differenza = teorica - fisica;
         const divRisultato = document.getElementById('risultatoVerifica');
+        const dataKey = formatDate(stato.dataSelezionata);
+        const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
+
         if (Math.abs(differenza) < 0.01) {
             divRisultato.textContent = `✅ I CONTI TORNANO! Differenza: € 0.00`;
             divRisultato.className = 'risultato-verifica ok';
         } else {
             divRisultato.textContent = `❌ ATTENZIONE! Differenza di cassa: € ${differenza.toFixed(2)}`;
             divRisultato.className = 'risultato-verifica errore';
+        }
+        if (datiGiorno) {
+            datiGiorno.verificaResult = { text: divRisultato.textContent, className: divRisultato.className };
         }
     }
 
@@ -546,7 +563,6 @@
         }, 0);
         const cassaTeorica = riporto + totaleMovimentiCassa;
         
-        // CORREZIONE: Salva la cassa teorica calcolata nello stato
         datiGiorno.cassaTeorica = cassaTeorica;
 
         document.getElementById('cassaTeorica').textContent = cassaTeorica.toFixed(2);
