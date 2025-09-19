@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestione Cassa (Stabile)</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
         :root {
             --primary-color: #6c757d; --primary-color-light: #f8f9fa;
@@ -78,11 +80,11 @@
     <div class="modal-overlay" id="company-selector-modal">
         <div class="modal-content">
             <h2>Seleziona la Compagnia</h2>
-            <button class="company-button" data-company="Allianz" style="background-color:#007bff">Allianz</button>
-            <button class="company-button" data-company="HDI" style="background-color:#28a745">HDI</button>
-            <button class="company-button" data-company="Vittoria" style="background-color:#6f42c1">Vittoria</button>
-            <button class="company-button" data-company="ARAG" style="background-color:#ffc107">ARAG</button>
-            <button class="company-button" data-company="Helvetia" style="background-color:#dc3545">Helvetia</button>
+            <button class="company-button" onclick="inizializzaApp('Allianz')" style="background-color:#007bff">Allianz</button>
+            <button class="company-button" onclick="inizializzaApp('HDI')" style="background-color:#28a745">HDI</button>
+            <button class="company-button" onclick="inizializzaApp('Vittoria')" style="background-color:#6f42c1">Vittoria</button>
+            <button class="company-button" onclick="inizializzaApp('ARAG')" style="background-color:#ffc107">ARAG</button>
+            <button class="company-button" onclick="inizializzaApp('Helvetia')" style="background-color:#dc3545">Helvetia</button>
         </div>
     </div>
     
@@ -92,35 +94,35 @@
         <div class="app-header">
             <div class="header-group">
                 <label for="date-selector">Giornale del:</label>
-                <input type="date" id="date-selector">
+                <input type="date" id="date-selector" onchange="caricaGiornale(this.valueAsDate)">
             </div>
             <div class="header-group">
-                <div id="status-indicator" class="saving">Inizializzazione...</div>
-                <button id="save-all-button" class="button-save">Salva Modifiche Online</button>
-                <button id="print-button" class="button-secondary">Stampa</button>
-                <button id="change-company-button">Cambia Compagnia</button>
+                <div id="status-indicator"></div>
+                <button onclick="salvaStatoCorrente()" class="button-save">Salva Modifiche Online</button>
+                <button onclick="window.print()" class="button-secondary">Stampa</button>
+                <button onclick="location.reload()">Cambia Compagnia</button>
             </div>
         </div>
     
         <div class="box">
             <h2>1. Inizio Giornata</h2>
             <label for="riportoIniziale"><strong>Riporto da Conteggio Giorno Precedente (€):</strong></label>
-            <input type="number" id="riportoIniziale" placeholder="0.00" step="0.01">
+            <input type="number" id="riportoIniziale" placeholder="0.00" step="0.01" oninput="salvaDatiLocali()">
         </div>
     
         <div class="grid-container">
             <div class="box">
                 <h2 id="form-title">2. Registrazione Movimento</h2>
-                <form id="formMovimento">
+                <form id="formMovimento" onsubmit="event.preventDefault(); processaFormMovimento();">
                     <input type="hidden" id="editingIndex" value="">
                     <label for="metodologia">Metodologia Incasso:</label>
-                    <select id="metodologia">
+                    <select id="metodologia" onchange="aggiornaCampiCondizionali()">
                         <option value="Contanti">Contanti</option><option value="Assegno">Assegno</option>
                         <option value="POS">POS</option><option value="Bonifico">Bonifico</option>
                     </select>
                     <div id="divRientroMetodo" style="display:none;">
                         <label for="rientroMetodo">Metodo di Rientro:</label>
-                        <select id="rientroMetodo">
+                        <select id="rientroMetodo" onchange="aggiornaCampiCondizionali()">
                             <option value="Contanti">Contanti</option><option value="Assegno">Assegno</option>
                             <option value="POS">POS</option><option value="Bonifico">Bonifico</option>
                         </select>
@@ -151,7 +153,7 @@
                 <div id="box-conteggio-assegni">
                     <h3>Assegni in Cassa</h3>
                     <div id="lista-conteggio-assegni"></div>
-                    <button id="add-assegno-button" class="button-secondary" style="width: auto; padding: 5px 10px; font-size: 0.9rem;">+ Aggiungi Assegno</button>
+                    <button onclick="aggiungiCampoAssegnoConteggio()" class="button-secondary" style="width: auto; padding: 5px 10px; font-size: 0.9rem;">+ Aggiungi Assegno</button>
                 </div>
                 <div class="riepilogo-totali">Totale Contato Fisicamente: € <span id="totaleConteggioFisico">0.00</span></div>
             </div>
@@ -184,15 +186,12 @@
         
         <div class="box">
             <h2>4. Verifica Finale</h2>
-            <button id="btnVerifica" class="button-secondary">VERIFICA I CONTI</button>
+            <button onclick="verificaChiusura()" class="button-secondary">VERIFICA I CONTI</button>
             <div class="risultato-verifica" id="risultatoVerifica">In attesa di verifica...</div>
         </div>
     </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+<script>
     const firebaseConfig = {
       apiKey: "AIzaSyD41OqDrIwwH7PrK_ywmYRYVrR_KAehiU8",
       authDomain: "giornalecassa.firebaseapp.com",
@@ -202,9 +201,9 @@
       appId: "1:655250052165:web:8cead9e63e7dd951773f2c"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const dbRef = doc(db, "gestione-cassa", "databaseCompleto");
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const dbRef = db.collection("gestione-cassa").doc("databaseCompleto");
     const statusIndicator = document.getElementById('status-indicator');
 
     let stato = { compagniaSelezionata: null, dataSelezionata: null, datiCompleti: {} };
@@ -215,8 +214,8 @@
         statusIndicator.textContent = 'Caricamento...';
         statusIndicator.className = 'saving';
         try {
-            const docSnap = await getDoc(dbRef);
-            stato.datiCompleti = docSnap.exists() ? docSnap.data() : {};
+            const doc = await dbRef.get();
+            stato.datiCompleti = doc.exists ? doc.data() : {};
             statusIndicator.textContent = 'Pronto';
             statusIndicator.className = 'synced';
         } catch (error) {
@@ -231,7 +230,7 @@
         statusIndicator.className = 'saving';
         try {
             salvaDatiLocali(); 
-            await setDoc(dbRef, stato.datiCompleti);
+            await dbRef.set(stato.datiCompleti);
             statusIndicator.textContent = 'Salvato Online';
             statusIndicator.className = 'synced';
         } catch (error) {
@@ -259,7 +258,6 @@
             selectMetodo.add(new Option('Anticipo', 'Anticipo'));
             selectMetodo.add(new Option('Rientro da Anticipo', 'Rientro da Anticipo'));
         }
-
         document.getElementById('date-selector').valueAsDate = new Date();
         caricaGiornale(new Date());
     }
@@ -345,8 +343,7 @@
         document.getElementById('uscite').value = movimento.uscite;
         
         document.getElementById('form-title').textContent = "Modifica Movimento";
-        document.getElementById('form-buttons').innerHTML = `<button type="submit">Salva Modifiche</button><button type="button" class="button-secondary" id="cancel-edit-button">Annulla</button>`;
-        document.getElementById('cancel-edit-button').addEventListener('click', annullaModifica);
+        document.getElementById('form-buttons').innerHTML = `<button type="submit">Salva Modifiche</button><button type="button" class="button-secondary" onclick="annullaModifica()">Annulla</button>`;
         aggiornaCampiCondizionali();
         window.scrollTo(0, 0);
     }
@@ -371,19 +368,16 @@
     function rendiProvvigioneEditabile(cell, index) {
         if (cell.querySelector('input')) return;
         const valoreCorrente = cell.textContent;
-        cell.innerHTML = `<input type="number" step="0.01" value="${valoreCorrente}" style="width: 80px; padding: 2px;"/>`;
+        cell.innerHTML = `<input type="number" step="0.01" value="${valoreCorrente}" style="width: 80px; padding: 2px;" onblur="salvaProvvigioneModificata(this, ${index})" onkeydown="if(event.key === 'Enter') this.blur()"/>`;
         const input = cell.querySelector('input');
         input.focus();
-        const save = () => salvaProvvigioneModificata(input, index, cell);
-        input.addEventListener('blur', save);
-        input.addEventListener('keydown', (event) => { if (event.key === 'Enter') input.blur(); });
     }
 
-    function salvaProvvigioneModificata(input, index, cell) {
+    function salvaProvvigioneModificata(input, index) {
         const nuovoValore = parseFloat(input.value) || 0;
         const dataKey = formatDate(stato.dataSelezionata);
         stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti[index].provvigioni = nuovoValore;
-        cell.textContent = nuovoValore.toFixed(2);
+        aggiornaTabellaMovimenti(stato.datiCompleti[stato.compagniaSelezionata][dataKey].movimenti);
         aggiornaTuttiRiepiloghi();
     }
 
@@ -398,17 +392,12 @@
             const div = tipo === 'banconote' ? divBanconote : divMonete;
             const valoreSalvato = datiConteggio?.[tipo]?.[taglio] || '';
             const idTaglio = taglio.toString().replace('.', '_');
-            const input = document.createElement('input');
-            input.type = 'number'; input.dataset.valore = taglio; input.dataset.tipo = tipo;
-            input.value = valoreSalvato; input.placeholder = 'N° pezzi';
-            input.addEventListener('input', salvaDatiLocali);
-
-            const grid = document.createElement('div');
-            grid.className = 'conteggio-grid';
-            grid.innerHTML = `<label style="font-weight: bold;">€ ${taglio.toFixed(2)}</label>`;
-            grid.appendChild(input);
-            grid.innerHTML += `<span id="subtotale-${idTaglio}">€ 0.00</span>`;
-            div.appendChild(grid);
+            div.innerHTML += `
+                <div class="conteggio-grid" style="display: grid; grid-template-columns: 1fr 2fr 2fr; align-items: center; gap: 5px; margin-bottom: 5px;">
+                    <label style="font-weight: bold;">€ ${taglio.toFixed(2)}</label>
+                    <input type="number" oninput="salvaDatiLocali()" data-valore="${taglio}" data-tipo="${tipo}" value="${valoreSalvato}" placeholder="N° pezzi">
+                    <span id="subtotale-${idTaglio}">€ 0.00</span>
+                </div>`;
         });
 
         const divAssegni = document.getElementById('lista-conteggio-assegni');
@@ -423,17 +412,10 @@
         const divAssegni = document.getElementById('lista-conteggio-assegni');
         const div = document.createElement('div');
         div.style.display = 'flex'; div.style.gap = '5px'; div.style.marginBottom = '5px';
-        const input = document.createElement('input');
-        input.type = 'number'; input.step = '0.01'; input.className = 'conteggio-assegno';
-        input.placeholder = 'Importo Assegno'; input.value = importo;
-        const button = document.createElement('button');
-        button.className = 'button-delete'; button.style.width = 'auto'; button.textContent = 'X';
-
-        input.addEventListener('input', salvaDatiLocali);
-        button.addEventListener('click', () => { div.remove(); salvaDatiLocali(); });
-        
-        div.appendChild(input);
-        div.appendChild(button);
+        div.innerHTML = `
+            <input type="number" step="0.01" class="conteggio-assegno" placeholder="Importo Assegno" value="${importo}" oninput="salvaDatiLocali()">
+            <button type="button" class="button-delete" style="width:auto;" onclick="this.parentElement.remove(); salvaDatiLocali();">X</button>
+        `;
         divAssegni.appendChild(div);
     }
 
@@ -478,19 +460,18 @@
             }
 
             const riga = tbody.insertRow();
-            riga.dataset.index = index;
             riga.innerHTML = `
                 <td>${m.nomeCliente || ''}</td>
                 <td>${m.numeroPolizza || ''}</td>
                 <td>${metodoDisplay || ''}</td>
                 <td>${(m.importo || 0).toFixed(2)}</td>
-                <td class="col-provvigioni provvigione-editabile">${(m.provvigioni || 0).toFixed(2)}</td>
+                <td class="col-provvigioni provvigione-editabile" onclick="rendiProvvigioneEditabile(this, ${index})">${(m.provvigioni || 0).toFixed(2)}</td>
                 <td>${(m.arrotondamenti || 0).toFixed(2)}</td>
                 <td>${(m.uscite || 0).toFixed(2)}</td>
                 <td><strong>${impattoCassa.toFixed(2)}</strong></td>
                 <td>
-                    <button class="button-edit">Modifica</button>
-                    <button class="button-delete">Elimina</button>
+                    <button type="button" class="button-edit" onclick="modificaMovimento(${index})">Modifica</button>
+                    <button type="button" class="button-delete" onclick="cancellaMovimento(${index})">Elimina</button>
                 </td>`;
         });
         document.querySelectorAll('.col-provvigioni').forEach(el => el.style.display = showProvvigioni ? '' : 'none');
@@ -631,38 +612,20 @@
         return dataPrec;
     }
     
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.company-button').forEach(button => {
-            button.addEventListener('click', () => inizializzaApp(button.dataset.company));
-        });
-        document.getElementById('print-button').addEventListener('click', () => window.print());
-        document.getElementById('change-company-button').addEventListener('click', () => location.reload());
-        document.getElementById('date-selector').addEventListener('change', (e) => caricaGiornale(e.target.valueAsDate));
-        document.getElementById('riportoIniziale').addEventListener('input', salvaDatiLocali);
-        document.getElementById('formMovimento').addEventListener('submit', processaFormMovimento);
-        document.getElementById('metodologia').addEventListener('change', aggiornaCampiCondizionali);
-        document.getElementById('rientroMetodo').addEventListener('change', aggiornaCampiCondizionali);
-        document.getElementById('add-assegno-button').addEventListener('click', () => aggiungiCampoAssegnoConteggio());
-        document.getElementById('btnVerifica').addEventListener('click', verificaChiusura);
-        document.getElementById('save-all-button').addEventListener('click', salvaStatoCorrente);
-        
-        const tabellaBody = document.getElementById('tabellaMovimenti').querySelector('tbody');
-        tabellaBody.addEventListener('click', (event) => {
-            const target = event.target;
-            const row = target.closest('tr');
-            if (!row) return;
-            
-            const index = parseInt(row.dataset.index);
-            
-            if (target.matches('.button-edit')) {
-                modificaMovimento(index);
-            } else if (target.matches('.button-delete')) {
-                cancellaMovimento(index);
-            } else if (target.closest('.provvigione-editabile')) {
-                rendiProvvigioneEditabile(target.closest('.provvigione-editabile'), index);
-            }
-        });
-    });
+    // Rendi le funzioni visibili globalmente
+    window.inizializzaApp = inizializzaApp;
+    window.caricaGiornale = caricaGiornale;
+    window.processaFormMovimento = processaFormMovimento;
+    window.aggiornaCampiCondizionali = aggiornaCampiCondizionali;
+    window.aggiungiCampoAssegnoConteggio = aggiungiCampoAssegnoConteggio;
+    window.modificaMovimento = modificaMovimento;
+    window.cancellaMovimento = cancellaMovimento;
+    window.annullaModifica = annullaModifica;
+    window.rendiProvvigioneEditabile = rendiProvvigioneEditabile;
+    window.salvaProvvigioneModificata = salvaProvvigioneModificata;
+    window.verificaChiusura = verificaChiusura;
+    window.salvaDatiLocali = salvaDatiLocali;
+    window.salvaStatoCorrente = salvaStatoCorrente;
 </script>
 </body>
 </html>
