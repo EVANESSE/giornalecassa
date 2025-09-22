@@ -101,8 +101,22 @@
             transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.35); filter: brightness(1.1);
         }
         #company-selector-modal .utility-button { background-color: #6c757d; }
-        .backup-button { background-color: #17a2b8; padding: 15px 10px; width: 250px; margin-top: 10px; }
-
+        .backup-container {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            z-index: 1001;
+            display: flex;
+            gap: 10px;
+        }
+        .header-backup-button {
+            width: auto;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            background-color: #6c757d;
+            border-radius: 5px;
+            margin-bottom: 0;
+        }
 
         .modal-full {
             padding: 20px; align-items: flex-start; overflow-y: auto;
@@ -189,6 +203,13 @@
             }
             #print-page-2 {
                 page-break-before: always;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                height: 257mm; /* Altezza area di stampa A4 per spingere il footer */
+            }
+            .simplified-print #print-verifica-container {
+                display: none !important;
             }
             #print-header {
                 text-align: center;
@@ -229,7 +250,7 @@
                  padding: 5px 0;
                  border-bottom: 1px dotted #eee;
              }
-             #print-conteggio-container input { display: none; } /* Nasconde i campi input */
+             #print-conteggio-container input { display: none; }
              #print-conteggio-container label { font-weight: bold; }
              #print-conteggio-container .riepilogo-totali {
                  font-size: 1.3rem;
@@ -265,17 +286,17 @@
 <body id="app-body">
     <div class="modal-overlay" id="company-selector-modal">
         <div class="modal-overlay-background"></div>
-        <div class="modal-wrapper">
-            <div class="modal-content">
-                <h2>Backup Dati</h2>
-                <button class="company-button backup-button" onclick="esportaBackup()">
-                    <i class="fa fa-download"></i> Esporta Backup
-                </button>
-                <button class="company-button backup-button" onclick="importaBackup()">
-                    <i class="fa fa-upload"></i> Importa Backup
-                </button>
-            </div>
 
+        <div class="backup-container">
+            <button class="header-backup-button" onclick="esportaBackup()">
+                <i class="fa fa-download"></i> Esporta Backup
+            </button>
+            <button class="header-backup-button" onclick="importaBackup()">
+                <i class="fa fa-upload"></i> Importa Backup
+            </button>
+        </div>
+
+        <div class="modal-wrapper">
             <div class="modal-content">
                 <h2>Seleziona la Compagnia</h2>
                 <button class="company-button" onclick="inizializzaApp('Allianz')" style="background-color:#007bff">Allianz</button>
@@ -464,7 +485,6 @@
         <div id="print-page-1">
             <h1 id="print-header"></h1>
             <div id="print-table-container"></div>
-            <div id="print-riporto-container"></div>
             <div id="print-cassa-teorica-container"></div>
         </div>
         <div id="print-page-2">
@@ -1096,6 +1116,10 @@
     }
 
     function stampaPersonalizzata() {
+        const isSimplifiedView = stato.compagniaSelezionata === 'ARAG' || stato.compagniaSelezionata === 'Helvetia';
+        const printLayout = document.getElementById('print-layout');
+        printLayout.classList.toggle('simplified-print', isSimplifiedView);
+
         const compagnia = stato.compagniaSelezionata;
         const data = document.getElementById('date-selector').valueAsDate.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
         document.getElementById('print-header').textContent = `Giornale Cassa del ${data} - Compagnia: ${compagnia}`;
@@ -1108,7 +1132,7 @@
         const cassaTeoricaOrig = document.querySelector('.col-cassa-teorica');
         const cassaTeoricaContainerPrint = document.getElementById('print-cassa-teorica-container');
         cassaTeoricaContainerPrint.innerHTML = '';
-        cassaTeoricaContainerPrint.appendChild(cassaTeoricaOrig.cloneNode(true));
+        if (cassaTeoricaOrig) cassaTeoricaContainerPrint.appendChild(cassaTeoricaOrig.cloneNode(true));
 
         const conteggioOrig = document.getElementById('box-conteggio-cassa');
         const conteggioContainerPrint = document.getElementById('print-conteggio-container');
