@@ -152,17 +152,7 @@
         .col-data-mensile { display: none; }
         body.vista-mensile .col-data-mensile { display: table-cell; }
         body.vista-mensile .col-impatto-cassa, body.vista-mensile .col-cassa-teorica { display: none; }
-        
-        #add-movimento-form label {
-            display: block;
-            margin-top: 12px;
-            margin-bottom: 4px;
-            font-weight: bold;
-            font-size: 0.85rem;
-            color: var(--primary-color);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        #add-movimento-form label { font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body id="app-body">
@@ -183,11 +173,6 @@
                 <button class="company-button utility-button" onclick="mostraTabella('bonifici_allianz')">BONIFICI ALLIANZ</button>
                 <button class="company-button utility-button" onclick="mostraTabella('bonifici_hdi_arag')">BONIFICI HDI/ARAG</button>
                 <button class="company-button utility-button" onclick="mostraTabella('pos_hdi_arag')">POS HDI/ARAG</button>
-                <div style="display: flex; gap: 10px; width: 100%; margin-top: 20px;">
-                    <button class="button-secondary" onclick="esportaDati()"><i class="fa fa-download"></i> Esporta Backup</button>
-                    <button class="button-secondary" onclick="document.getElementById('import-file-input').click()"><i class="fa fa-upload"></i> Importa Backup</button>
-                    <input type="file" id="import-file-input" style="display: none;" onchange="importaDati(event)" accept=".json">
-                </div>
             </div>
         </div>
     </div>
@@ -221,7 +206,7 @@
     </div>
 
     <div class="modal-overlay" id="add-movimento-modal" style="display:none; z-index: 1001;">
-        <div class="modal-content" style="text-align: left; width: 400px; max-height: 80vh; overflow-y: auto;">
+        <div class="modal-content" style="text-align: left; width: 400px;">
             <h2 id="add-movimento-title" style="text-align: center;">Aggiungi Nuovo Movimento</h2>
             <form id="add-movimento-form" onsubmit="event.preventDefault(); processaFormAggiunta();"></form>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -378,12 +363,23 @@
     const tagliMonete = [2, 1, 0.50, 0.20, 0.10, 0.05, 0.02, 0.01];
 
     async function caricaDatiDaFirebase() {
+        if(statusIndicator) {
+            statusIndicator.textContent = 'Caricamento...';
+            statusIndicator.className = 'saving';
+        }
         try {
             const doc = await dbRef.get();
             stato.datiCompleti = doc.exists ? doc.data() : {};
+            if(statusIndicator) {
+                statusIndicator.textContent = 'Pronto';
+                statusIndicator.className = 'synced';
+            }
         } catch (error) {
             console.error("Errore caricamento da Firebase: ", error);
-            alert("Impossibile caricare i dati. Controlla la connessione e ricarica la pagina.");
+             if(statusIndicator) {
+                statusIndicator.textContent = 'Errore Connessione';
+                statusIndicator.className = 'error';
+            }
         }
     }
 
@@ -397,7 +393,7 @@
         }
 
         try {
-            salvaDatiLocali(); 
+            if(stato.compagniaSelezionata && stato.dataSelezionata) salvaDatiLocali(); 
             await dbRef.set(stato.datiCompleti);
              if (indicator) {
                 indicator.textContent = 'Salvato con successo!';
@@ -431,11 +427,10 @@
     }
     
     async function inizializzaApp(compagnia) {
-        document.getElementById('company-selector-modal').style.display = 'none';
-        document.getElementById('main-container').style.display = 'block';
-        
         stato.compagniaSelezionata = compagnia;
         document.body.className = `theme-${compagnia.toLowerCase()}`;
+        document.getElementById('company-selector-modal').style.display = 'none';
+        document.getElementById('main-container').style.display = 'block';
         
         await caricaDatiDaFirebase();
         
@@ -535,7 +530,6 @@
         
         datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
         datiGiorno.conteggioFisico = raccogliDatiConteggio();
-        datiGiorno.cassaTeorica = calcolaCassaTeorica();
     }
 
     function processaFormMovimento() {
@@ -932,7 +926,7 @@
         configTabellaCorrente = configsTabelle[tipo];
         if (!configTabellaCorrente) return;
 
-        await caricaDatiDaFirebase();
+        if (Object.keys(stato.datiCompleti).length === 0) await caricaDatiDaFirebase();
 
         datiTabellaCorrente = [];
         for (const compagnia in stato.datiCompleti) {
@@ -1103,41 +1097,38 @@
         document.getElementById('add-movimento-title').textContent = `Aggiungi a ${config.title}`;
         
         let formHtml = `
-            <label for="add-data">Data:</label>
-            <input type="date" id="add-data" required value="${formatDate(new Date())}">
-            <label for="add-cliente">Cliente:</label>
-            <input type="text" id="add-cliente" required>
-            <label for="add-polizza">Polizza:</label>
-            <input type="text" id="add-polizza">
-            <label for="add-importo">Importo:</label>
-            <input type="number" id="add-importo" step="0.01" required>
-            <label for="add-note">Note:</label>
-            <input type="text" id="add-note">
+            <label>Data:</label><input type="date" id="add-data" required value="${formatDate(new Date())}">
+            <label>Cliente:</label><input type="text" id="add-cliente" required>
+            <label>Polizza:</label><input type="text" id="add-polizza">
+            <label>Importo:</label><input type="number" id="add-importo" step="0.01" required>
+            <label>Note:</label><input type="text" id="add-note">
         `;
 
-        const addCompagniaSelect = (options) => {
-            let optionsHtml = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
-            return `<label for="add-compagnia">Compagnia:</label><select id="add-compagnia">${optionsHtml}</select>`;
-        };
+        const addCompagniaSelect = () => `
+            <label>Compagnia:</label>
+            <select id="add-compagnia">
+                <option>Allianz</option><option>HDI</option><option>Vittoria</option><option>ARAG</option><option>Helvetia</option>
+            </select>`;
 
         switch(config.type) {
             case 'anticipi':
-                formHtml += addCompagniaSelect(['Allianz', 'HDI', 'Vittoria', 'ARAG', 'Helvetia']);
+                formHtml += addCompagniaSelect();
                 formHtml += `
-                    <label for="add-tipoAnticipo">Tipo Anticipo:</label>
+                    <label>Tipo Anticipo:</label>
                     <select id="add-tipoAnticipo">
                         <option>Anticipo Contanti</option><option>Anticipo Assegno</option><option>Anticipo POS</option>
                         <option>Anticipo Bonifico</option><option>Plafond</option><option>Sospeso Cassa</option>
                     </select>
-                    <label for="add-anticipoDi">Anticipo di:</label>
-                    <input type="text" id="add-anticipoDi">`;
+                    <label>Anticipo di:</label><input type="text" id="add-anticipoDi">`;
                 break;
             case 'bonifici_allianz':
                 formHtml += `<input type="hidden" id="add-compagnia" value="Allianz">`;
                 break;
             case 'bonifici_hdi_arag':
             case 'pos_hdi_arag':
-                 formHtml += addCompagniaSelect(['HDI', 'ARAG']);
+                 formHtml += `
+                    <label>Compagnia:</label>
+                    <select id="add-compagnia"><option>HDI</option><option>ARAG</option></select>`;
                 break;
         }
         formContainer.innerHTML = formHtml;
@@ -1184,51 +1175,8 @@
         stato.datiCompleti[compagnia][dataKey].movimenti.push(movimento);
         
         document.getElementById('add-movimento-modal').style.display = 'none';
-        mostraTabella(config.type);
+        mostraTabella(config.type); // Refresh the table
         salvaTutteLeModificheTabella();
-    }
-    
-    function esportaDati() {
-        caricaDatiDaFirebase().then(() => {
-            try {
-                const dataStr = JSON.stringify(stato.datiCompleti, null, 2);
-                const dataBlob = new Blob([dataStr], {type: "application/json"});
-                const url = URL.createObjectURL(dataBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `backup_cassa_${formatDate(new Date())}.json`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            } catch (error) {
-                alert("Errore durante la creazione del file di backup.");
-                console.error("Errore esportazione:", error);
-            }
-        });
-    }
-    
-    function importaDati(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            try {
-                const datiImportati = JSON.parse(e.target.result);
-                if (confirm("ATTENZIONE: Stai per sovrascrivere tutti i dati presenti online con il contenuto di questo file. Sei sicuro di voler procedere?")) {
-                    await dbRef.set(datiImportati);
-                    stato.datiCompleti = datiImportati;
-                    alert("Importazione completata con successo! L'applicazione verrà ricaricata.");
-                    location.reload();
-                }
-            } catch (error) {
-                alert("Errore durante l'importazione del file: " + error.message);
-            } finally {
-                event.target.value = '';
-            }
-        };
-        reader.readAsText(file);
     }
 
 
@@ -1254,8 +1202,6 @@
     window.salvaTutteLeModificheTabella = salvaTutteLeModificheTabella;
     window.apriFormAggiunta = apriFormAggiunta;
     window.processaFormAggiunta = processaFormAggiunta;
-    window.esportaDati = esportaDati;
-    window.importaDati = importaDati;
 </script>
 </body>
 </html>
