@@ -152,7 +152,18 @@
         .col-data-mensile { display: none; }
         body.vista-mensile .col-data-mensile { display: table-cell; }
         body.vista-mensile .col-impatto-cassa, body.vista-mensile .col-cassa-teorica { display: none; }
-        #add-movimento-form label { font-weight: bold; margin-top: 10px; display: block; }
+        
+        /* MODIFICA: Stile etichette più leggibile */
+        #add-movimento-form label {
+            display: block;
+            margin-top: 12px;
+            margin-bottom: 4px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body id="app-body">
@@ -1181,6 +1192,7 @@
         mostraTabella(config.type);
         salvaTutteLeModificheTabella();
     }
+
 
     // Rendi le funzioni visibili globalmente
     window.inizializzaApp = inizializzaApp;
