@@ -101,6 +101,8 @@
             transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.35); filter: brightness(1.1);
         }
         #company-selector-modal .utility-button { background-color: #6c757d; }
+        .backup-button { background-color: #17a2b8; padding: 15px 10px; width: 250px; margin-top: 10px; }
+
 
         .modal-full {
             padding: 20px; align-items: flex-start; overflow-y: auto;
@@ -152,13 +154,36 @@
         .col-data-mensile { display: none; }
         body.vista-mensile .col-data-mensile { display: table-cell; }
         body.vista-mensile .col-impatto-cassa, body.vista-mensile .col-cassa-teorica { display: none; }
-        #add-movimento-form label { font-weight: bold; margin-top: 10px; }
+        
+        /* Stili per migliorare la leggibilità del form di aggiunta */
+        #add-movimento-form label { 
+            font-weight: bold; 
+            margin-top: 15px; 
+            font-size: 1.1rem;
+            display: block;
+            color: #333;
+        }
+        #add-movimento-title {
+            font-size: 1.8rem;
+            color: #333;
+        }
+
     </style>
 </head>
 <body id="app-body">
     <div class="modal-overlay" id="company-selector-modal">
         <div class="modal-overlay-background"></div>
         <div class="modal-wrapper">
+            <div class="modal-content">
+                <h2>Backup Dati</h2>
+                <button class="company-button backup-button" onclick="esportaBackup()">
+                    <i class="fa fa-download"></i> Esporta Backup
+                </button>
+                <button class="company-button backup-button" onclick="importaBackup()">
+                    <i class="fa fa-upload"></i> Importa Backup
+                </button>
+            </div>
+
             <div class="modal-content">
                 <h2>Seleziona la Compagnia</h2>
                 <button class="company-button" onclick="inizializzaApp('Allianz')" style="background-color:#007bff">Allianz</button>
@@ -206,7 +231,7 @@
     </div>
 
     <div class="modal-overlay" id="add-movimento-modal" style="display:none; z-index: 1001;">
-        <div class="modal-content" style="text-align: left; width: 400px;">
+        <div class="modal-content" style="text-align: left; width: 450px; padding: 30px;">
             <h2 id="add-movimento-title" style="text-align: center;">Aggiungi Nuovo Movimento</h2>
             <form id="add-movimento-form" onsubmit="event.preventDefault(); processaFormAggiunta();"></form>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -362,6 +387,10 @@
     const tagliBanconote = [500, 200, 100, 50, 20, 10, 5];
     const tagliMonete = [2, 1, 0.50, 0.20, 0.10, 0.05, 0.02, 0.01];
 
+    document.addEventListener('DOMContentLoaded', () => {
+        caricaDatiDaFirebase();
+    });
+
     async function caricaDatiDaFirebase() {
         if(statusIndicator) {
             statusIndicator.textContent = 'Caricamento...';
@@ -385,7 +414,7 @@
 
     async function salvaStatoCorrente(silenzioso = false, notificationId = null) {
         const indicator = notificationId ? document.getElementById(notificationId) : statusIndicator;
-        if (!silenzioso && indicator) {
+        if (!silenzioso && indicator && statusIndicator) {
             indicator.textContent = 'Salvataggio in corso...';
             indicator.className = 'save-notification success';
             indicator.style.display = 'block';
@@ -398,8 +427,8 @@
              if (indicator) {
                 indicator.textContent = 'Salvato con successo!';
                 indicator.className = 'save-notification success';
-                if(!notificationId) {
-                    indicator.className = 'synced';
+                if(!notificationId && statusIndicator) {
+                    statusIndicator.className = 'synced';
                 }
                 indicator.style.opacity = '1';
 
@@ -432,7 +461,9 @@
         document.getElementById('company-selector-modal').style.display = 'none';
         document.getElementById('main-container').style.display = 'block';
         
-        await caricaDatiDaFirebase();
+        if (Object.keys(stato.datiCompleti).length === 0) {
+           await caricaDatiDaFirebase();
+        }
         
         document.getElementById('main-title').textContent = `Registro Cassa ${compagnia}`;
         
@@ -463,6 +494,7 @@
     }
 
     function caricaGiornale(data) {
+        if (!data) return;
         stato.dataSelezionata = data;
         const isSimplifiedView = stato.compagniaSelezionata === 'ARAG' || stato.compagniaSelezionata === 'Helvetia';
 
@@ -884,7 +916,6 @@
         document.getElementById('decade3-result').textContent = (decadi[3].titoli - decadi[3].provvigioni).toFixed(2);
     }
     
-    // NUOVA FUNZIONE formatDate PIÙ STABILE
     function formatDate(date) {
         const year = date.getFullYear();
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -899,6 +930,66 @@
             dataPrec.setDate(dataPrec.getDate() - 1);
         }
         return dataPrec;
+    }
+
+    // ===============================================
+    // FUNZIONI DI BACKUP
+    // ===============================================
+    
+    function esportaBackup() {
+        if (Object.keys(stato.datiCompleti).length === 0) {
+            alert("Nessun dato da esportare. Prova a caricare prima una compagnia.");
+            return;
+        }
+        try {
+            const datiJson = JSON.stringify(stato.datiCompleti, null, 2);
+            const blob = new Blob([datiJson], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup_cassa_${formatDate(new Date())}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert("Backup esportato con successo!");
+        } catch (error) {
+            console.error("Errore durante l'esportazione del backup:", error);
+            alert("Si è verificato un errore durante l'esportazione.");
+        }
+    }
+
+    function importaBackup() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json,application/json';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const datiImportati = JSON.parse(event.target.result);
+                    // Semplice controllo di validità
+                    if (typeof datiImportati === 'object' && datiImportati !== null && !Array.isArray(datiImportati)) {
+                        if (confirm("Sei sicuro di voler importare questo backup? I dati attuali verranno sovrascritti.")) {
+                            stato.datiCompleti = datiImportati;
+                            await salvaStatoCorrente();
+                            alert("Backup importato e salvato online con successo! La pagina verrà ricaricata.");
+                            location.reload();
+                        }
+                    } else {
+                        throw new Error("Formato file non valido.");
+                    }
+                } catch (error) {
+                    console.error("Errore durante l'importazione del backup:", error);
+                    alert("Impossibile importare il backup. Il file potrebbe essere corrotto o non avere il formato corretto.");
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
     }
 
     // ===============================================
@@ -963,7 +1054,10 @@
         const annoSelect = document.getElementById('generic-filtro-anno');
         const meseSelect = document.getElementById('generic-filtro-mese');
         
-        const years = new Set(dati.map(d => new Date(d.dataKey).getFullYear()));
+        const years = new Set(dati.map(d => {
+            const [year] = d.dataKey.split('-');
+            return parseInt(year);
+        }));
         years.add(new Date().getFullYear());
         const sortedYears = Array.from(years).sort((a, b) => b - a);
         
@@ -988,10 +1082,13 @@
             datiFiltrati = datiFiltrati.filter(d => d.dataKey === giorno);
         } else {
             if (anno !== 'tutti') {
-                datiFiltrati = datiFiltrati.filter(d => new Date(d.dataKey).getFullYear() == anno);
+                datiFiltrati = datiFiltrati.filter(d => d.dataKey.startsWith(anno));
             }
             if (mese !== 'tutti') {
-                datiFiltrati = datiFiltrati.filter(d => new Date(d.dataKey).getMonth() == mese);
+                datiFiltrati = datiFiltrati.filter(d => {
+                    const [, month] = d.dataKey.split('-');
+                    return parseInt(month) - 1 == mese;
+                });
             }
         }
         popolaTabellaGenerica(datiFiltrati);
@@ -1098,7 +1195,9 @@
         if (movimento.incassato) {
             riga.classList.add('riga-incassato');
         } else {
-            const diffGiorni = Math.floor((new Date() - new Date(key)) / (1000 * 60 * 60 * 24));
+            const [year, month, day] = key.split('-').map(Number);
+            const dataMovimento = new Date(year, month - 1, day);
+            const diffGiorni = Math.floor((new Date() - dataMovimento) / (1000 * 60 * 60 * 24));
             if (diffGiorni > 30) riga.classList.add('riga-critico');
             else if (diffGiorni > 15) riga.classList.add('riga-vecchio');
         }
@@ -1151,10 +1250,10 @@
 
     function processaFormAggiunta() {
         const config = configTabellaCorrente;
-        const dataValue = document.getElementById('add-data').value;
-        if (!dataValue) { alert('Per favore, inserisci una data.'); return; }
+        const dataInput = document.getElementById('add-data');
+        if (!dataInput.value) { alert('Per favore, inserisci una data.'); return; }
 
-        const data = new Date(document.getElementById('add-data').valueAsDate);
+        const data = new Date(dataInput.valueAsDate);
         const dataKey = formatDate(data);
         const compagnia = document.getElementById('add-compagnia').value;
         
@@ -1211,7 +1310,7 @@
     window.salvaDatiLocali = salvaDatiLocali;
     window.salvaStatoCorrente = salvaStatoCorrente;
     window.aggiornaTuttiRiepiloghi = aggiornaTuttiRiepiloghi;
-    window.calcolaConteggioFisico = calcolaConteggioFisico; // Aggiunta per renderla accessibile
+    window.calcolaConteggioFisico = calcolaConteggioFisico;
     window.mostraTabella = mostraTabella;
     window.applicaFiltriTabella = applicaFiltriTabella;
     window.resetFiltriTabella = resetFiltriTabella;
@@ -1219,6 +1318,8 @@
     window.salvaTutteLeModificheTabella = salvaTutteLeModificheTabella;
     window.apriFormAggiunta = apriFormAggiunta;
     window.processaFormAggiunta = processaFormAggiunta;
+    window.esportaBackup = esportaBackup;
+    window.importaBackup = importaBackup;
 </script>
 </body>
 </html>
