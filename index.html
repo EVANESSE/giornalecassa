@@ -167,6 +167,99 @@
             color: #333;
         }
 
+        /* STILI PER LA STAMPA PERSONALIZZATA */
+        @media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+                margin: 0;
+            }
+            body > *:not(#print-layout) {
+                display: none !important;
+            }
+            #print-layout {
+                display: block !important;
+                font-family: Arial, sans-serif;
+                color: #000;
+            }
+            #print-page-1, #print-page-2 {
+                width: 100%;
+                padding: 20mm 15mm;
+                box-sizing: border-box;
+            }
+            #print-page-2 {
+                page-break-before: always;
+            }
+            #print-header {
+                text-align: center;
+                border-bottom: 2px solid #333;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+                font-size: 1.5rem;
+                color: #000;
+            }
+            #print-table-container table {
+                width: 100%;
+                font-size: 10pt;
+                border-collapse: collapse;
+            }
+            #print-table-container th, #print-table-container td {
+                border: 1px solid #ccc;
+                padding: 6px;
+                text-align: left;
+            }
+            #print-table-container th {
+                background-color: #f0f0f0 !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+            #print-conteggio-container, #print-verifica-container {
+                margin-top: 20px;
+            }
+             #print-conteggio-container h2, #print-conteggio-container h3 {
+                color: #000;
+                border-bottom: 1px solid #ccc;
+                padding-bottom: 5px;
+             }
+             #print-conteggio-container .conteggio-grid {
+                 display: grid; 
+                 grid-template-columns: 1fr 2fr 2fr; 
+                 align-items: center; 
+                 gap: 5px;
+                 padding: 5px 0;
+                 border-bottom: 1px dotted #eee;
+             }
+             #print-conteggio-container input { display: none; } /* Nasconde i campi input */
+             #print-conteggio-container label { font-weight: bold; }
+             #print-conteggio-container .riepilogo-totali {
+                 font-size: 1.3rem;
+                 margin-top: 20px;
+                 background: #f0f0f0 !important;
+                 border: 1px solid #ccc;
+                 -webkit-print-color-adjust: exact;
+                 color-adjust: exact;
+             }
+            #print-verifica-container .risultato-verifica {
+                font-size: 1.4rem;
+                padding: 20px;
+                text-align: center;
+                border: 2px solid #333;
+                border-radius: 5px;
+            }
+             #print-verifica-container .risultato-verifica.ok {
+                background-color: #d4edda !important;
+                color: #155724 !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+             }
+             #print-verifica-container .risultato-verifica.errore {
+                background-color: #f8d7da !important;
+                color: #721c24 !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+             }
+        }
+
     </style>
 </head>
 <body id="app-body">
@@ -251,7 +344,7 @@
             <div class="header-group">
                 <div id="status-indicator"></div>
                 <button onclick="salvaStatoCorrente()" class="button-save">Salva Modifiche Online</button>
-                <button onclick="window.print()" class="button-secondary">Stampa</button>
+                <button onclick="stampaPersonalizzata()" class="button-secondary">Stampa</button>
                 <button onclick="location.reload()">Chiudi</button>
             </div>
         </div>
@@ -366,6 +459,20 @@
             <div class="risultato-verifica" id="risultatoVerifica">In attesa di verifica...</div>
         </div>
     </div>
+
+    <div id="print-layout" style="display: none;">
+        <div id="print-page-1">
+            <h1 id="print-header"></h1>
+            <div id="print-table-container"></div>
+            <div id="print-riporto-container"></div>
+            <div id="print-cassa-teorica-container"></div>
+        </div>
+        <div id="print-page-2">
+            <div id="print-conteggio-container"></div>
+            <div id="print-verifica-container"></div>
+        </div>
+    </div>
+
 
 <script>
     const firebaseConfig = {
@@ -536,7 +643,6 @@
                 divRisultato.textContent = 'In attesa di verifica...';
                 divRisultato.className = 'risultato-verifica';
             }
-            // Filtra i movimenti da mostrare nel giornale cassa, escludendo quelli manuali
             movimentiDaMostrare = (datiGiorno.movimenti || []).filter(m => !m.isManuallyAdded);
         }
 
@@ -840,7 +946,6 @@
         const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata]?.[dataKey];
         if (!datiGiorno) return riporto;
         
-        // Filtra i movimenti per il calcolo, escludendo quelli manuali
         const movimenti = (datiGiorno.movimenti || []).filter(m => !m.isManuallyAdded);
         const totaleMovimentiCassa = movimenti.reduce((acc, m) => {
             const isCashBased = (m.metodologia === 'Contanti' || m.metodologia === 'Assegno') ||
@@ -932,7 +1037,7 @@
     }
 
     // ===============================================
-    // FUNZIONI DI BACKUP
+    // FUNZIONI DI BACKUP E STAMPA
     // ===============================================
     
     function esportaBackup() {
@@ -988,6 +1093,37 @@
             reader.readAsText(file);
         };
         input.click();
+    }
+
+    function stampaPersonalizzata() {
+        const compagnia = stato.compagniaSelezionata;
+        const data = document.getElementById('date-selector').valueAsDate.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        document.getElementById('print-header').textContent = `Giornale Cassa del ${data} - Compagnia: ${compagnia}`;
+
+        const tableOrig = document.getElementById('tabellaMovimenti');
+        const tableContainerPrint = document.getElementById('print-table-container');
+        tableContainerPrint.innerHTML = '';
+        tableContainerPrint.appendChild(tableOrig.cloneNode(true));
+        
+        const cassaTeoricaOrig = document.querySelector('.col-cassa-teorica');
+        const cassaTeoricaContainerPrint = document.getElementById('print-cassa-teorica-container');
+        cassaTeoricaContainerPrint.innerHTML = '';
+        cassaTeoricaContainerPrint.appendChild(cassaTeoricaOrig.cloneNode(true));
+
+        const conteggioOrig = document.getElementById('box-conteggio-cassa');
+        const conteggioContainerPrint = document.getElementById('print-conteggio-container');
+        conteggioContainerPrint.innerHTML = '';
+        const conteggioClonato = conteggioOrig.cloneNode(true)
+        const addCheckButton = conteggioClonato.querySelector('button');
+        if(addCheckButton) addCheckButton.remove();
+        conteggioContainerPrint.appendChild(conteggioClonato);
+
+        const verificaOrig = document.getElementById('risultatoVerifica');
+        const verificaContainerPrint = document.getElementById('print-verifica-container');
+        verificaContainerPrint.innerHTML = '';
+        verificaContainerPrint.appendChild(verificaOrig.cloneNode(true));
+        
+        window.print();
     }
 
     // ===============================================
@@ -1264,8 +1400,7 @@
             <div id="altra-compagnia-div" style="display:none;">
                 <label>Nome Altra Compagnia:</label>
                 <input type="text" id="add-altra-compagnia">
-            </div>
-            `;
+            </div>`;
 
         switch(config.type) {
             case 'anticipi':
@@ -1375,6 +1510,7 @@
     window.importaBackup = importaBackup;
     window.cancellaMovimentoGenerico = cancellaMovimentoGenerico;
     window.toggleAltraCompagniaInput = toggleAltraCompagniaInput;
+    window.stampaPersonalizzata = stampaPersonalizzata;
 </script>
 </body>
 </html>
