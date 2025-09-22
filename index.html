@@ -536,7 +536,8 @@
                 divRisultato.textContent = 'In attesa di verifica...';
                 divRisultato.className = 'risultato-verifica';
             }
-            movimentiDaMostrare = datiGiorno.movimenti || [];
+            // Filtra i movimenti da mostrare nel giornale cassa, escludendo quelli manuali
+            movimentiDaMostrare = (datiGiorno.movimenti || []).filter(m => !m.isManuallyAdded);
         }
 
         aggiornaTabellaMovimenti(movimentiDaMostrare);
@@ -839,7 +840,8 @@
         const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata]?.[dataKey];
         if (!datiGiorno) return riporto;
         
-        const movimenti = datiGiorno.movimenti || [];
+        // Filtra i movimenti per il calcolo, escludendo quelli manuali
+        const movimenti = (datiGiorno.movimenti || []).filter(m => !m.isManuallyAdded);
         const totaleMovimentiCassa = movimenti.reduce((acc, m) => {
             const isCashBased = (m.metodologia === 'Contanti' || m.metodologia === 'Assegno') ||
                                 (m.metodologia === 'Rientro da Anticipo' && (m.rientroMetodo === 'Contanti' || m.rientroMetodo === 'Assegno'));
@@ -1143,13 +1145,13 @@
                            cell.onblur = (e) => salvaModificaGenerica(e.target);
                         }
                         break;
-                    case 'note': // ***** CAMPO NOTE SEMPRE EDITABILE *****
+                    case 'note':
                         cell.textContent = content;
                         cell.contentEditable = true;
                         cell.onblur = (e) => salvaModificaGenerica(e.target);
                         cell.classList.add('col-note');
                         break;
-                    case 'anticipoDi': // ***** CAMPO ANTICIPO DI SEMPRE EDITABILE *****
+                    case 'anticipoDi':
                         cell.innerHTML = `<input type="text" value="${content}" onchange="salvaModificaGenerica(this)">`;
                         break;
                     case 'dataEstinzione':
@@ -1234,6 +1236,11 @@
         }
     }
 
+    function toggleAltraCompagniaInput(selectedValue) {
+        const div = document.getElementById('altra-compagnia-div');
+        div.style.display = (selectedValue === 'Altra') ? 'block' : 'none';
+    }
+
     function apriFormAggiunta() {
         const formContainer = document.getElementById('add-movimento-form');
         formContainer.innerHTML = '';
@@ -1250,9 +1257,15 @@
 
         const addCompagniaSelect = () => `
             <label>Compagnia:</label>
-            <select id="add-compagnia">
+            <select id="add-compagnia" onchange="toggleAltraCompagniaInput(this.value)">
                 <option>Allianz</option><option>HDI</option><option>Vittoria</option><option>ARAG</option><option>Helvetia</option>
-            </select>`;
+                <option value="Altra">Altra Compagnia</option>
+            </select>
+            <div id="altra-compagnia-div" style="display:none;">
+                <label>Nome Altra Compagnia:</label>
+                <input type="text" id="add-altra-compagnia">
+            </div>
+            `;
 
         switch(config.type) {
             case 'anticipi':
@@ -1286,7 +1299,15 @@
 
         const data = new Date(dataInput.valueAsDate);
         const dataKey = formatDate(data);
-        const compagnia = document.getElementById('add-compagnia').value;
+        
+        let compagnia = document.getElementById('add-compagnia').value;
+        if (compagnia === 'Altra') {
+            compagnia = document.getElementById('add-altra-compagnia').value.trim();
+            if (!compagnia) {
+                alert('Per favore, inserisci il nome della compagnia.');
+                return;
+            }
+        }
         
         const movimento = {
             metodologia: '',
@@ -1353,6 +1374,7 @@
     window.esportaBackup = esportaBackup;
     window.importaBackup = importaBackup;
     window.cancellaMovimentoGenerico = cancellaMovimentoGenerico;
+    window.toggleAltraCompagniaInput = toggleAltraCompagniaInput;
 </script>
 </body>
 </html>
