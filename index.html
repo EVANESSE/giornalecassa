@@ -153,7 +153,6 @@
         body.vista-mensile .col-data-mensile { display: table-cell; }
         body.vista-mensile .col-impatto-cassa, body.vista-mensile .col-cassa-teorica { display: none; }
         
-        /* MODIFICA: Stile etichette più leggibile */
         #add-movimento-form label {
             display: block;
             margin-top: 12px;
@@ -184,6 +183,11 @@
                 <button class="company-button utility-button" onclick="mostraTabella('bonifici_allianz')">BONIFICI ALLIANZ</button>
                 <button class="company-button utility-button" onclick="mostraTabella('bonifici_hdi_arag')">BONIFICI HDI/ARAG</button>
                 <button class="company-button utility-button" onclick="mostraTabella('pos_hdi_arag')">POS HDI/ARAG</button>
+                 <div style="display: flex; gap: 10px; width: 100%; margin-top: 20px;">
+                    <button class="button-secondary" onclick="esportaDati()"><i class="fa fa-download"></i> Esporta Backup</button>
+                    <button class="button-secondary" onclick="document.getElementById('import-file-input').click()"><i class="fa fa-upload"></i> Importa Backup</button>
+                    <input type="file" id="import-file-input" style="display: none;" onchange="importaDati(event)" accept=".json">
+                </div>
             </div>
         </div>
     </div>
@@ -541,6 +545,7 @@
         
         datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
         datiGiorno.conteggioFisico = raccogliDatiConteggio();
+        datiGiorno.cassaTeorica = calcolaCassaTeorica(); 
     }
 
     function processaFormMovimento() {
@@ -937,7 +942,7 @@
         configTabellaCorrente = configsTabelle[tipo];
         if (!configTabellaCorrente) return;
 
-        if (Object.keys(stato.datiCompleti).length === 0) await caricaDatiDaFirebase();
+        await caricaDatiDaFirebase();
 
         datiTabellaCorrente = [];
         for (const compagnia in stato.datiCompleti) {
@@ -1192,6 +1197,49 @@
         mostraTabella(config.type);
         salvaTutteLeModificheTabella();
     }
+    
+    function esportaDati() {
+        caricaDatiDaFirebase().then(() => {
+            try {
+                const dataStr = JSON.stringify(stato.datiCompleti, null, 2);
+                const dataBlob = new Blob([dataStr], {type: "application/json"});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `backup_cassa_${formatDate(new Date())}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                alert("Errore durante la creazione del file di backup.");
+                console.error("Errore esportazione:", error);
+            }
+        });
+    }
+    
+    function importaDati(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const datiImportati = JSON.parse(e.target.result);
+                if (confirm("ATTENZIONE: Stai per sovrascrivere tutti i dati presenti online con il contenuto di questo file. Sei sicuro di voler procedere?")) {
+                    stato.datiCompleti = datiImportati;
+                    await dbRef.set(stato.datiCompleti);
+                    alert("Importazione completata con successo! L'applicazione verrà ricaricata.");
+                    location.reload();
+                }
+            } catch (error) {
+                alert("Errore durante l'importazione del file: " + error.message);
+            } finally {
+                event.target.value = '';
+            }
+        };
+        reader.readAsText(file);
+    }
 
 
     // Rendi le funzioni visibili globalmente
@@ -1216,6 +1264,8 @@
     window.salvaTutteLeModificheTabella = salvaTutteLeModificheTabella;
     window.apriFormAggiunta = apriFormAggiunta;
     window.processaFormAggiunta = processaFormAggiunta;
+    window.esportaDati = esportaDati;
+    window.importaDati = importaDati;
 </script>
 </body>
 </html>
