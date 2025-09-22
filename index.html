@@ -183,7 +183,7 @@
                 <button class="company-button utility-button" onclick="mostraTabella('bonifici_allianz')">BONIFICI ALLIANZ</button>
                 <button class="company-button utility-button" onclick="mostraTabella('bonifici_hdi_arag')">BONIFICI HDI/ARAG</button>
                 <button class="company-button utility-button" onclick="mostraTabella('pos_hdi_arag')">POS HDI/ARAG</button>
-                 <div style="display: flex; gap: 10px; width: 100%; margin-top: 20px;">
+                <div style="display: flex; gap: 10px; width: 100%; margin-top: 20px;">
                     <button class="button-secondary" onclick="esportaDati()"><i class="fa fa-download"></i> Esporta Backup</button>
                     <button class="button-secondary" onclick="document.getElementById('import-file-input').click()"><i class="fa fa-upload"></i> Importa Backup</button>
                     <input type="file" id="import-file-input" style="display: none;" onchange="importaDati(event)" accept=".json">
@@ -378,23 +378,12 @@
     const tagliMonete = [2, 1, 0.50, 0.20, 0.10, 0.05, 0.02, 0.01];
 
     async function caricaDatiDaFirebase() {
-        if(statusIndicator) {
-            statusIndicator.textContent = 'Caricamento...';
-            statusIndicator.className = 'saving';
-        }
         try {
             const doc = await dbRef.get();
             stato.datiCompleti = doc.exists ? doc.data() : {};
-            if(statusIndicator) {
-                statusIndicator.textContent = 'Pronto';
-                statusIndicator.className = 'synced';
-            }
         } catch (error) {
             console.error("Errore caricamento da Firebase: ", error);
-             if(statusIndicator) {
-                statusIndicator.textContent = 'Errore Connessione';
-                statusIndicator.className = 'error';
-            }
+            alert("Impossibile caricare i dati. Controlla la connessione e ricarica la pagina.");
         }
     }
 
@@ -408,7 +397,7 @@
         }
 
         try {
-            if(stato.compagniaSelezionata && stato.dataSelezionata) salvaDatiLocali(); 
+            salvaDatiLocali(); 
             await dbRef.set(stato.datiCompleti);
              if (indicator) {
                 indicator.textContent = 'Salvato con successo!';
@@ -442,10 +431,11 @@
     }
     
     async function inizializzaApp(compagnia) {
-        stato.compagniaSelezionata = compagnia;
-        document.body.className = `theme-${compagnia.toLowerCase()}`;
         document.getElementById('company-selector-modal').style.display = 'none';
         document.getElementById('main-container').style.display = 'block';
+        
+        stato.compagniaSelezionata = compagnia;
+        document.body.className = `theme-${compagnia.toLowerCase()}`;
         
         await caricaDatiDaFirebase();
         
@@ -545,7 +535,7 @@
         
         datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
         datiGiorno.conteggioFisico = raccogliDatiConteggio();
-        datiGiorno.cassaTeorica = calcolaCassaTeorica(); 
+        datiGiorno.cassaTeorica = calcolaCassaTeorica();
     }
 
     function processaFormMovimento() {
@@ -1227,8 +1217,8 @@
             try {
                 const datiImportati = JSON.parse(e.target.result);
                 if (confirm("ATTENZIONE: Stai per sovrascrivere tutti i dati presenti online con il contenuto di questo file. Sei sicuro di voler procedere?")) {
+                    await dbRef.set(datiImportati);
                     stato.datiCompleti = datiImportati;
-                    await dbRef.set(stato.datiCompleti);
                     alert("Importazione completata con successo! L'applicazione verrà ricaricata.");
                     location.reload();
                 }
