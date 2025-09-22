@@ -617,9 +617,6 @@
         document.getElementById('arrotondamenti').value = movimento.arrotondamenti;
         document.getElementById('uscite').value = movimento.uscite;
 
-        // ***** CORREZIONE BUG DATA *****
-        // Imposta il valore del date picker usando la stringa YYYY-MM-DD (dataKey), 
-        // che è il metodo più affidabile e immune da problemi di fuso orario.
         document.getElementById('date-selector').value = dataKey;
         
         const [year, month, day] = dataKey.split('-').map(Number);
@@ -729,11 +726,10 @@
             const dataKeyOriginale = m.dataMovimento || formatDate(stato.dataSelezionata);
             const indexOriginale = isSimplifiedView ? (stato.datiCompleti[stato.compagniaSelezionata][dataKeyOriginale].movimenti || []).findIndex(orig => orig === m) : index;
 
-            let impattoCassa = 0;
             const isCashBased = (m.metodologia === 'Contanti' || m.metodologia === 'Assegno') ||
-                                (m.metodologia === 'Anticipo' && (m.tipoAnticipo === 'Anticipo Contanti' || m.tipoAnticipo === 'Anticipo Assegno')) ||
                                 (m.metodologia === 'Rientro da Anticipo' && (m.rientroMetodo === 'Contanti' || m.rientroMetodo === 'Assegno'));
 
+            let impattoCassa = 0;
             if (isCashBased) {
                 impattoCassa = (m.importo || 0) + (m.arrotondamenti || 0);
             }
@@ -845,11 +841,10 @@
         
         const movimenti = datiGiorno.movimenti || [];
         const totaleMovimentiCassa = movimenti.reduce((acc, m) => {
-            let impatto = 0;
             const isCashBased = (m.metodologia === 'Contanti' || m.metodologia === 'Assegno') ||
-                                (m.metodologia === 'Anticipo' && (m.tipoAnticipo === 'Anticipo Contanti' || m.tipoAnticipo === 'Anticipo Assegno')) ||
                                 (m.metodologia === 'Rientro da Anticipo' && (m.rientroMetodo === 'Contanti' || m.rientroMetodo === 'Assegno'));
 
+            let impatto = 0;
             if (isCashBased) {
                 impatto = (m.importo || 0) + (m.arrotondamenti || 0);
             }
@@ -1116,7 +1111,6 @@
             if (th.textContent === 'Note') th.classList.add('col-note');
             headerRow.appendChild(th);
         }
-        // Aggiungi header per la colonna Azioni
         const thAzioni = document.createElement('th');
         thAzioni.textContent = 'Azioni';
         headerRow.appendChild(thAzioni);
@@ -1124,6 +1118,7 @@
         dati.sort((a, b) => new Date(b.dataKey) - new Date(a.dataKey));
 
         dati.forEach(d => {
+            const isLocked = !d.isManuallyAdded;
             const riga = tbody.insertRow();
             riga.dataset.compagnia = d.compagnia;
             riga.dataset.key = d.dataKey;
@@ -1132,42 +1127,49 @@
             for (const key in configTabellaCorrente.columns) {
                 const cell = riga.insertCell();
                 cell.dataset.property = key;
-                
                 let content = d[key] || '';
+
                 switch(key) {
                     case 'dataKey':
                         const [year, month, day] = content.split('-').map(Number);
                         cell.textContent = new Date(year, month-1, day).toLocaleDateString('it-IT');
                         break;
                     case 'importo':
-                        cell.textContent = (content || 0).toFixed(2);
-                        cell.contentEditable = true;
-                        cell.onblur = (e) => salvaModificaGenerica(e.target);
-                        break;
                     case 'nomeCliente':
                     case 'numeroPolizza':
-                    case 'note':
+                        cell.textContent = (key === 'importo') ? (content || 0).toFixed(2) : content;
+                        if (!isLocked) {
+                           cell.contentEditable = true;
+                           cell.onblur = (e) => salvaModificaGenerica(e.target);
+                        }
+                        break;
+                    case 'note': // ***** CAMPO NOTE SEMPRE EDITABILE *****
                         cell.textContent = content;
                         cell.contentEditable = true;
-                        if (key === 'note') cell.classList.add('col-note');
                         cell.onblur = (e) => salvaModificaGenerica(e.target);
+                        cell.classList.add('col-note');
                         break;
-                    case 'anticipoDi':
+                    case 'anticipoDi': // ***** CAMPO ANTICIPO DI SEMPRE EDITABILE *****
                         cell.innerHTML = `<input type="text" value="${content}" onchange="salvaModificaGenerica(this)">`;
                         break;
                     case 'dataEstinzione':
-                        cell.innerHTML = `<input type="date" value="${content}" onchange="salvaModificaGenerica(this)">`;
+                        cell.innerHTML = `<input type="date" value="${content}" onchange="salvaModificaGenerica(this)" ${isLocked ? 'disabled' : ''}>`;
                         break;
                     case 'incassato':
-                        cell.innerHTML = `<input type="checkbox" ${content ? 'checked' : ''} onchange="salvaModificaGenerica(this)">`;
+                        cell.innerHTML = `<input type="checkbox" ${content ? 'checked' : ''} onchange="salvaModificaGenerica(this)" ${isLocked ? 'disabled' : ''}>`;
                         break;
                     default:
                         cell.textContent = content;
                 }
             }
-            // Aggiungi cella con il pulsante Elimina
+            
             const cellaAzioni = riga.insertCell();
-            cellaAzioni.innerHTML = `<button class="button-delete" onclick="cancellaMovimentoGenerico(this)">Elimina</button>`;
+            cellaAzioni.style.textAlign = 'center';
+            if (isLocked) {
+                cellaAzioni.innerHTML = `<i class="fa fa-lock" title="Modificabile/Eliminabile solo dal giornale di cassa di riferimento"></i>`;
+            } else {
+                cellaAzioni.innerHTML = `<button class="button-delete" onclick="cancellaMovimentoGenerico(this)">Elimina</button>`;
+            }
             
             aggiornaStileRiga(riga);
         });
@@ -1292,6 +1294,7 @@
             numeroPolizza: document.getElementById('add-polizza').value,
             importo: parseFloat(document.getElementById('add-importo').value) || 0,
             note: document.getElementById('add-note').value,
+            isManuallyAdded: true
         };
 
         switch(config.type) {
