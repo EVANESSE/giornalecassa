@@ -152,7 +152,7 @@
         .col-data-mensile { display: none; }
         body.vista-mensile .col-data-mensile { display: table-cell; }
         body.vista-mensile .col-impatto-cassa, body.vista-mensile .col-cassa-teorica { display: none; }
-        #add-movimento-form label { font-weight: bold; margin-top: 10px; }
+        #add-movimento-form label { font-weight: bold; margin-top: 10px; display: block; }
     </style>
 </head>
 <body id="app-body">
@@ -206,7 +206,7 @@
     </div>
 
     <div class="modal-overlay" id="add-movimento-modal" style="display:none; z-index: 1001;">
-        <div class="modal-content" style="text-align: left; width: 400px;">
+        <div class="modal-content" style="text-align: left; width: 400px; max-height: 80vh; overflow-y: auto;">
             <h2 id="add-movimento-title" style="text-align: center;">Aggiungi Nuovo Movimento</h2>
             <form id="add-movimento-form" onsubmit="event.preventDefault(); processaFormAggiunta();"></form>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -1097,38 +1097,41 @@
         document.getElementById('add-movimento-title').textContent = `Aggiungi a ${config.title}`;
         
         let formHtml = `
-            <label>Data:</label><input type="date" id="add-data" required value="${formatDate(new Date())}">
-            <label>Cliente:</label><input type="text" id="add-cliente" required>
-            <label>Polizza:</label><input type="text" id="add-polizza">
-            <label>Importo:</label><input type="number" id="add-importo" step="0.01" required>
-            <label>Note:</label><input type="text" id="add-note">
+            <label for="add-data">Data:</label>
+            <input type="date" id="add-data" required value="${formatDate(new Date())}">
+            <label for="add-cliente">Cliente:</label>
+            <input type="text" id="add-cliente" required>
+            <label for="add-polizza">Polizza:</label>
+            <input type="text" id="add-polizza">
+            <label for="add-importo">Importo:</label>
+            <input type="number" id="add-importo" step="0.01" required>
+            <label for="add-note">Note:</label>
+            <input type="text" id="add-note">
         `;
 
-        const addCompagniaSelect = () => `
-            <label>Compagnia:</label>
-            <select id="add-compagnia">
-                <option>Allianz</option><option>HDI</option><option>Vittoria</option><option>ARAG</option><option>Helvetia</option>
-            </select>`;
+        const addCompagniaSelect = (options) => {
+            let optionsHtml = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+            return `<label for="add-compagnia">Compagnia:</label><select id="add-compagnia">${optionsHtml}</select>`;
+        };
 
         switch(config.type) {
             case 'anticipi':
-                formHtml += addCompagniaSelect();
+                formHtml += addCompagniaSelect(['Allianz', 'HDI', 'Vittoria', 'ARAG', 'Helvetia']);
                 formHtml += `
-                    <label>Tipo Anticipo:</label>
+                    <label for="add-tipoAnticipo">Tipo Anticipo:</label>
                     <select id="add-tipoAnticipo">
                         <option>Anticipo Contanti</option><option>Anticipo Assegno</option><option>Anticipo POS</option>
                         <option>Anticipo Bonifico</option><option>Plafond</option><option>Sospeso Cassa</option>
                     </select>
-                    <label>Anticipo di:</label><input type="text" id="add-anticipoDi">`;
+                    <label for="add-anticipoDi">Anticipo di:</label>
+                    <input type="text" id="add-anticipoDi">`;
                 break;
             case 'bonifici_allianz':
                 formHtml += `<input type="hidden" id="add-compagnia" value="Allianz">`;
                 break;
             case 'bonifici_hdi_arag':
             case 'pos_hdi_arag':
-                 formHtml += `
-                    <label>Compagnia:</label>
-                    <select id="add-compagnia"><option>HDI</option><option>ARAG</option></select>`;
+                 formHtml += addCompagniaSelect(['HDI', 'ARAG']);
                 break;
         }
         formContainer.innerHTML = formHtml;
@@ -1175,10 +1178,9 @@
         stato.datiCompleti[compagnia][dataKey].movimenti.push(movimento);
         
         document.getElementById('add-movimento-modal').style.display = 'none';
-        mostraTabella(config.type); // Refresh the table
+        mostraTabella(config.type);
         salvaTutteLeModificheTabella();
     }
-
 
     // Rendi le funzioni visibili globalmente
     window.inizializzaApp = inizializzaApp;
