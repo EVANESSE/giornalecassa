@@ -155,7 +155,6 @@
         body.vista-mensile .col-data-mensile { display: table-cell; }
         body.vista-mensile .col-impatto-cassa, body.vista-mensile .col-cassa-teorica { display: none; }
         
-        /* Stili per migliorare la leggibilità del form di aggiunta */
         #add-movimento-form label { 
             font-weight: bold; 
             margin-top: 15px; 
@@ -618,10 +617,13 @@
         document.getElementById('arrotondamenti').value = movimento.arrotondamenti;
         document.getElementById('uscite').value = movimento.uscite;
 
+        // ***** CORREZIONE BUG DATA *****
+        // Imposta il valore del date picker usando la stringa YYYY-MM-DD (dataKey), 
+        // che è il metodo più affidabile e immune da problemi di fuso orario.
+        document.getElementById('date-selector').value = dataKey;
+        
         const [year, month, day] = dataKey.split('-').map(Number);
         const dateToSet = new Date(year, month - 1, day);
-        document.getElementById('date-selector').valueAsDate = dateToSet;
-        
         document.getElementById('form-title').textContent = `Modifica Movimento del ${dateToSet.toLocaleDateString('it-IT')}`;
         document.getElementById('form-buttons').innerHTML = `<button type="submit">Salva Modifiche</button><button type="button" class="button-secondary" onclick="annullaModifica()">Annulla</button>`;
         aggiornaCampiCondizionali();
@@ -687,7 +689,7 @@
             aggiungiCampoAssegnoConteggio(importo);
         });
         
-        calcolaConteggioFisico(); // Calcola il totale una volta creati i campi
+        calcolaConteggioFisico();
     }
 
     function aggiungiCampoAssegnoConteggio(importo = '') {
@@ -971,7 +973,6 @@
             reader.onload = async (event) => {
                 try {
                     const datiImportati = JSON.parse(event.target.result);
-                    // Semplice controllo di validità
                     if (typeof datiImportati === 'object' && datiImportati !== null && !Array.isArray(datiImportati)) {
                         if (confirm("Sei sicuro di voler importare questo backup? I dati attuali verranno sovrascritti.")) {
                             stato.datiCompleti = datiImportati;
@@ -1115,6 +1116,10 @@
             if (th.textContent === 'Note') th.classList.add('col-note');
             headerRow.appendChild(th);
         }
+        // Aggiungi header per la colonna Azioni
+        const thAzioni = document.createElement('th');
+        thAzioni.textContent = 'Azioni';
+        headerRow.appendChild(thAzioni);
 
         dati.sort((a, b) => new Date(b.dataKey) - new Date(a.dataKey));
 
@@ -1160,8 +1165,32 @@
                         cell.textContent = content;
                 }
             }
+            // Aggiungi cella con il pulsante Elimina
+            const cellaAzioni = riga.insertCell();
+            cellaAzioni.innerHTML = `<button class="button-delete" onclick="cancellaMovimentoGenerico(this)">Elimina</button>`;
+            
             aggiornaStileRiga(riga);
         });
+    }
+
+    async function cancellaMovimentoGenerico(buttonEl) {
+        const riga = buttonEl.closest('tr');
+        const { compagnia, key, index } = riga.dataset;
+
+        if (confirm('Sei sicuro di voler eliminare definitivamente questo movimento?')) {
+            const movimenti = stato.datiCompleti[compagnia]?.[key]?.movimenti;
+            
+            if (movimenti && movimenti[index] !== undefined) {
+                movimenti.splice(index, 1);
+                
+                await salvaStatoCorrente(true); 
+                alert('Movimento eliminato.');
+                mostraTabella(configTabellaCorrente.type); 
+            } else {
+                alert('Errore: movimento non trovato. Potrebbe essere già stato eliminato.');
+                mostraTabella(configTabellaCorrente.type);
+            }
+        }
     }
     
     function salvaModificaGenerica(el) {
@@ -1290,7 +1319,7 @@
         stato.datiCompleti[compagnia][dataKey].movimenti.push(movimento);
         
         document.getElementById('add-movimento-modal').style.display = 'none';
-        mostraTabella(config.type); // Refresh the table
+        mostraTabella(config.type);
         salvaTutteLeModificheTabella();
     }
 
@@ -1320,6 +1349,7 @@
     window.processaFormAggiunta = processaFormAggiunta;
     window.esportaBackup = esportaBackup;
     window.importaBackup = importaBackup;
+    window.cancellaMovimentoGenerico = cancellaMovimentoGenerico;
 </script>
 </body>
 </html>
