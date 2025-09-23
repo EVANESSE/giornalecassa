@@ -41,7 +41,8 @@
         }
         button.button-save { background-color: #28a745; font-size: 1.1rem; padding: 12px;}
         button:hover { filter: brightness(90%); }
-        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        button:disabled, fieldset:disabled button { background-color: #ccc; cursor: not-allowed; }
+        fieldset:disabled { opacity: 0.6; }
         .button-secondary { background-color: #6c757d; }
         .button-edit { background-color: #ffc107; color: #212529; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
         .button-delete { background-color: #dc3545; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
@@ -96,11 +97,16 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
             background-image: linear-gradient(to top, rgba(0,0,0,0.2), transparent 40%);
             transition: all 0.2s ease-in-out;
+            font-size: 1.4rem;
         }
         #company-selector-modal .company-button:hover {
             transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.35); filter: brightness(1.1);
         }
-        #company-selector-modal .utility-button { background-color: #6c757d; }
+        #company-selector-modal .utility-button { 
+            background-color: #6c757d; 
+            color: #FFD700;
+            text-shadow: 0 0 5px rgba(255,255,255,0.5), 0 0 8px #FFD700;
+        }
         .backup-container {
             position: absolute;
             top: 30px;
@@ -113,7 +119,7 @@
             width: auto;
             padding: 8px 15px;
             font-size: 0.9rem;
-            background-color: #6c757d;
+            background-color: #17a2b8;
             border-radius: 5px;
             margin-bottom: 0;
         }
@@ -206,7 +212,7 @@
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
-                height: 257mm; /* Altezza area di stampa A4 per spingere il footer */
+                height: 257mm;
             }
             .simplified-print #print-verifica-container {
                 display: none !important;
@@ -289,10 +295,10 @@
 
         <div class="backup-container">
             <button class="header-backup-button" onclick="esportaBackup()">
-                <i class="fa fa-download"></i> Esporta Backup
+                <i class="fa fa-download"></i> Esporta
             </button>
             <button class="header-backup-button" onclick="importaBackup()">
-                <i class="fa fa-upload"></i> Importa Backup
+                <i class="fa fa-upload"></i> Importa
             </button>
         </div>
 
@@ -366,6 +372,7 @@
                 <div id="status-indicator"></div>
                 <button onclick="salvaStatoCorrente()" class="button-save">Salva Modifiche Online</button>
                 <button onclick="stampaPersonalizzata()" class="button-secondary">Stampa</button>
+                <button id="btn-festa" class="button-secondary" style="display: none;">Festa/Chiusura</button>
                 <button onclick="location.reload()">Chiudi</button>
             </div>
         </div>
@@ -377,73 +384,73 @@
         </div>
     
         <div class="grid-container">
-            <div class="box">
-                <h2 id="form-title">2. Registrazione Movimento</h2>
-                <form id="formMovimento" onsubmit="event.preventDefault(); processaFormMovimento();">
-                    <input type="hidden" id="editingIndex" value="">
-                    <label for="metodologia">Metodologia Incasso:</label>
-                    <select id="metodologia" onchange="aggiornaCampiCondizionali()">
-                        <option value="Contanti">Contanti</option><option value="Assegno">Assegno</option>
-                        <option value="POS">POS</option><option value="Bonifico">Bonifico</option>
-                    </select>
-
-                    <div id="divTipoPosAllianz" style="display:none;">
-                        <label for="tipoPosAllianz">Tipo POS:</label>
-                        <select id="tipoPosAllianz">
-                            <option value="POS Direzione">POS Direzione</option>
-                            <option value="POS Agenzia">POS Agenzia</option>
-                        </select>
-                    </div>
-
-                    <div id="divTipoAnticipo" style="display:none;">
-                        <label for="tipoAnticipo">Tipo Anticipo:</label>
-                        <select id="tipoAnticipo" onchange="aggiornaCampiCondizionali()">
-                            <option value="Anticipo Contanti">Anticipo Contanti</option>
-                            <option value="Anticipo Assegno">Anticipo Assegno</option>
-                            <option value="Anticipo POS">Anticipo POS</option>
-                            <option value="Anticipo Bonifico">Anticipo Bonifico</option>
-                            <option value="Plafond">Plafond</option>
-                            <option value="Sospeso Cassa">Sospeso Cassa</option>
-                        </select>
-                    </div>
-
-                    <div id="divRientroMetodo" style="display:none;">
-                        <label for="rientroMetodo">Metodo di Rientro:</label>
-                        <select id="rientroMetodo" onchange="aggiornaCampiCondizionali()">
+            <fieldset id="form-movimento-fieldset">
+                <div class="box">
+                    <h2 id="form-title">2. Registrazione Movimento</h2>
+                    <form id="formMovimento" onsubmit="event.preventDefault(); processaFormMovimento();">
+                        <input type="hidden" id="editingIndex" value="">
+                        <label for="metodologia">Metodologia Incasso:</label>
+                        <select id="metodologia" onchange="aggiornaCampiCondizionali()">
                             <option value="Contanti">Contanti</option><option value="Assegno">Assegno</option>
                             <option value="POS">POS</option><option value="Bonifico">Bonifico</option>
                         </select>
-                    </div>
-                    <div id="divNumeroAssegno" style="display:none;">
-                        <label for="numeroAssegno">Numero Assegno:</label>
-                        <input type="text" id="numeroAssegno" placeholder="N° Assegno">
-                    </div>
-                    <label for="nomeCliente">Nome Cliente:</label><input type="text" id="nomeCliente" required>
-                    <label for="numeroPolizza">Numero Polizza:</label><input type="text" id="numeroPolizza">
-                    <label for="importo">Importo Titolo (€):</label><input type="number" id="importo" step="0.01" placeholder="0.00" required>
-                    <div id="divProvvigioni" style="display:none;">
-                        <label for="provvigioni">Provvigioni (€):</label>
-                        <input type="number" id="provvigioni" step="0.01" placeholder="0.00">
-                    </div>
-                    <label for="arrotondamenti">Arrotondamenti (€):</label><input type="number" id="arrotondamenti" step="0.01" placeholder="Es. -0.02">
-                    <label for="uscite">Uscite Cassa (€):</label><input type="number" id="uscite" step="0.01" placeholder="0.00">
-                    <div id="form-buttons">
-                        <button type="submit">Aggiungi Movimento</button>
-                    </div>
-                </form>
-            </div>
-    
-            <div class="box" id="box-conteggio-cassa">
-                <h2>3. Conteggio Fisico Cassa</h2>
-                <div id="conteggioBanconote"></div>
-                <div id="conteggioMonete"></div>
-                <div id="box-conteggio-assegni">
-                    <h3>Assegni in Cassa</h3>
-                    <div id="lista-conteggio-assegni"></div>
-                    <button onclick="aggiungiCampoAssegnoConteggio()" class="button-secondary" style="width: auto; padding: 5px 10px; font-size: 0.9rem;">+ Aggiungi Assegno</button>
+                        <div id="divTipoPosAllianz" style="display:none;">
+                            <label for="tipoPosAllianz">Tipo POS:</label>
+                            <select id="tipoPosAllianz">
+                                <option value="POS Direzione">POS Direzione</option>
+                                <option value="POS Agenzia">POS Agenzia</option>
+                            </select>
+                        </div>
+                        <div id="divTipoAnticipo" style="display:none;">
+                            <label for="tipoAnticipo">Tipo Anticipo:</label>
+                            <select id="tipoAnticipo" onchange="aggiornaCampiCondizionali()">
+                                <option value="Anticipo Contanti">Anticipo Contanti</option>
+                                <option value="Anticipo Assegno">Anticipo Assegno</option>
+                                <option value="Anticipo POS">Anticipo POS</option>
+                                <option value="Anticipo Bonifico">Anticipo Bonifico</option>
+                                <option value="Plafond">Plafond</option>
+                                <option value="Sospeso Cassa">Sospeso Cassa</option>
+                            </select>
+                        </div>
+                        <div id="divRientroMetodo" style="display:none;">
+                            <label for="rientroMetodo">Metodo di Rientro:</label>
+                            <select id="rientroMetodo" onchange="aggiornaCampiCondizionali()">
+                                <option value="Contanti">Contanti</option><option value="Assegno">Assegno</option>
+                                <option value="POS">POS</option><option value="Bonifico">Bonifico</option>
+                            </select>
+                        </div>
+                        <div id="divNumeroAssegno" style="display:none;">
+                            <label for="numeroAssegno">Numero Assegno:</label>
+                            <input type="text" id="numeroAssegno" placeholder="N° Assegno">
+                        </div>
+                        <label for="nomeCliente">Nome Cliente:</label><input type="text" id="nomeCliente" required>
+                        <label for="numeroPolizza">Numero Polizza:</label><input type="text" id="numeroPolizza">
+                        <label for="importo">Importo Titolo (€):</label><input type="number" id="importo" step="0.01" placeholder="0.00" required>
+                        <div id="divProvvigioni" style="display:none;">
+                            <label for="provvigioni">Provvigioni (€):</label>
+                            <input type="number" id="provvigioni" step="0.01" placeholder="0.00">
+                        </div>
+                        <label for="arrotondamenti">Arrotondamenti (€):</label><input type="number" id="arrotondamenti" step="0.01" placeholder="Es. -0.02">
+                        <label for="uscite">Uscite Cassa (€):</label><input type="number" id="uscite" step="0.01" placeholder="0.00">
+                        <div id="form-buttons">
+                            <button type="submit">Aggiungi Movimento</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="riepilogo-totali">Totale Contato Fisicamente: € <span id="totaleConteggioFisico">0.00</span></div>
-            </div>
+            </fieldset>
+            <fieldset id="box-conteggio-cassa-fieldset">
+                <div class="box" id="box-conteggio-cassa">
+                    <h2>3. Conteggio Fisico Cassa</h2>
+                    <div id="conteggioBanconote"></div>
+                    <div id="conteggioMonete"></div>
+                    <div id="box-conteggio-assegni">
+                        <h3>Assegni in Cassa</h3>
+                        <div id="lista-conteggio-assegni"></div>
+                        <button onclick="aggiungiCampoAssegnoConteggio()" class="button-secondary" style="width: auto; padding: 5px 10px; font-size: 0.9rem;">+ Aggiungi Assegno</button>
+                    </div>
+                    <div class="riepilogo-totali">Totale Contato Fisicamente: € <span id="totaleConteggioFisico">0.00</span></div>
+                </div>
+            </fieldset>
         </div>
     
         <div class="box">
@@ -599,6 +606,10 @@
         const selectMetodo = document.getElementById('metodologia');
         selectMetodo.innerHTML = `<option value="Contanti">Contanti</option><option value="Assegno">Assegno</option><option value="POS">POS</option><option value="Bonifico">Bonifico</option>`;
         
+        if (compagnia === 'Allianz') {
+             selectMetodo.add(new Option('Finanziamento Allianz Bank', 'Finanziamento Allianz Bank'));
+        }
+
         selectMetodo.add(new Option('Anticipo', 'Anticipo'));
         selectMetodo.add(new Option('Rientro da Anticipo', 'Rientro da Anticipo'));
         
@@ -607,6 +618,8 @@
         document.getElementById('box-conteggio-cassa').style.display = isSimplifiedView ? 'none' : 'block';
         document.getElementById('box-verifica-finale').style.display = isSimplifiedView ? 'none' : 'block';
         
+        document.getElementById('btn-festa').style.display = isSimplifiedView ? 'none' : 'inline-block';
+
         if (isSimplifiedView) {
             document.body.classList.add('vista-mensile');
             document.querySelector('#date-selector').labels[0].textContent = "Visualizza movimenti del mese:";
@@ -664,6 +677,7 @@
                 divRisultato.className = 'risultato-verifica';
             }
             movimentiDaMostrare = (datiGiorno.movimenti || []).filter(m => !m.isManuallyAdded);
+            impostaStatoGiornata(datiGiorno.isGiornoFestivo);
         }
 
         aggiornaTabellaMovimenti(movimentiDaMostrare);
@@ -1057,7 +1071,7 @@
     }
 
     // ===============================================
-    // FUNZIONI DI BACKUP E STAMPA
+    // FUNZIONI DI BACKUP, STAMPA E FESTIVITA'
     // ===============================================
     
     function esportaBackup() {
@@ -1149,6 +1163,44 @@
         
         window.print();
     }
+
+    function impostaStatoGiornata(isFestivo) {
+        document.getElementById('form-movimento-fieldset').disabled = isFestivo;
+        document.getElementById('box-conteggio-cassa-fieldset').disabled = isFestivo;
+        
+        const btn = document.getElementById('btn-festa');
+        if (isFestivo) {
+            btn.textContent = 'Riattiva Giorno';
+            btn.onclick = annullaChiusuraFestiva;
+            btn.style.backgroundColor = '#28a745';
+        } else {
+            btn.textContent = 'Festa/Chiusura';
+            btn.onclick = gestisciChiusuraFestiva;
+            btn.style.backgroundColor = '#6c757d';
+        }
+    }
+
+    async function gestisciChiusuraFestiva() {
+        if (confirm("Sei sicuro di voler impostare questo giorno come festivo? Non sarà più possibile inserire movimenti e il saldo verrà riportato al giorno successivo.")) {
+            const dataKey = formatDate(stato.dataSelezionata);
+            const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
+            datiGiorno.isGiornoFestivo = true;
+            datiGiorno.cassaTeorica = datiGiorno.riportoIniziale;
+            await salvaStatoCorrente(true);
+            caricaGiornale(stato.dataSelezionata);
+        }
+    }
+    
+    async function annullaChiusuraFestiva() {
+        if (confirm("Vuoi riattivare questo giorno per l'inserimento?")) {
+            const dataKey = formatDate(stato.dataSelezionata);
+            const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
+            delete datiGiorno.isGiornoFestivo;
+            await salvaStatoCorrente(true);
+            caricaGiornale(stato.dataSelezionata);
+        }
+    }
+
 
     // ===============================================
     // SISTEMA DI GESTIONE TABELLE GENERICHE
@@ -1535,6 +1587,8 @@
     window.cancellaMovimentoGenerico = cancellaMovimentoGenerico;
     window.toggleAltraCompagniaInput = toggleAltraCompagniaInput;
     window.stampaPersonalizzata = stampaPersonalizzata;
+    window.gestisciChiusuraFestiva = gestisciChiusuraFestiva;
+    window.annullaChiusuraFestiva = annullaChiusuraFestiva;
 </script>
 </body>
 </html>
