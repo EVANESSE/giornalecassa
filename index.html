@@ -106,13 +106,14 @@
         #company-selector-modal .utility-button { 
             background-color: #6c757d; 
             font-weight: 900;
-            text-shadow: 0 1px 0 rgba(0,0,0,0.4);
+            text-shadow: 0 1px 1px rgba(0,0,0,0.6);
         }
-        #company-selector-modal .modal-content:last-of-type .utility-button:nth-of-type(1) { color: #f39c12; }
+        .silver { color: #C0C0C0; }
+        .hdi-green { color: #28a745; }
+        .arag-yellow { color: #ffc107; }
+        #company-selector-modal .modal-content:last-of-type .utility-button:nth-of-type(1) { color: #C0C0C0; }
         #company-selector-modal .modal-content:last-of-type .utility-button:nth-of-type(2) { color: #3498db; }
-        #company-selector-modal .modal-content:last-of-type .utility-button:nth-of-type(3) { color: #9b59b6; }
-        #company-selector-modal .modal-content:last-of-type .utility-button:nth-of-type(4) { color: #e74c3c; }
-
+        
         .backup-container {
             position: absolute;
             top: 30px;
@@ -324,8 +325,12 @@
                 <h2>Altre Funzioni</h2>
                 <button class="company-button utility-button" onclick="mostraTabella('anticipi')">ANTICIPI</button>
                 <button class="company-button utility-button" onclick="mostraTabella('bonifici_allianz')">BONIFICI ALLIANZ</button>
-                <button class="company-button utility-button" onclick="mostraTabella('bonifici_hdi_arag')">BONIFICI HDI/ARAG</button>
-                <button class="company-button utility-button" onclick="mostraTabella('pos_hdi_arag')">POS HDI/ARAG</button>
+                <button class="company-button utility-button" onclick="mostraTabella('bonifici_hdi_arag')">
+                    <span class="silver">BONIFICI </span><span class="hdi-green">HDI</span><span class="silver">/</span><span class="arag-yellow">ARAG</span>
+                </button>
+                <button class="company-button utility-button" onclick="mostraTabella('pos_hdi_arag')">
+                    <span class="silver">POS </span><span class="hdi-green">HDI</span><span class="silver">/</span><span class="arag-yellow">ARAG</span>
+                </button>
             </div>
         </div>
     </div>
@@ -755,6 +760,7 @@
         (datiGiorno.movimenti = datiGiorno.movimenti || []);
         
         const metodologia = document.getElementById('metodologia').value;
+        const editingIndex = document.getElementById('editingIndex').value;
 
         if (metodologia === 'Incasso Multiplo') {
             const importoTotale = parseFloat(document.getElementById('importo').value) || 0;
@@ -787,7 +793,18 @@
                 rientroMetodo: document.getElementById('rientroMetodo').value,
                 numeroAssegno: document.getElementById('numeroAssegno').value,
             };
-            datiGiorno.movimenti.push(movimento);
+
+            if (editingIndex !== "") {
+                const movimentiOriginali = datiGiorno.movimenti;
+                const movimentiFiltrati = movimentiOriginali.filter(m => !m.isManuallyAdded);
+                const movimentoDaModificare = movimentiFiltrati[editingIndex];
+                const indiceOriginale = movimentiOriginali.indexOf(movimentoDaModificare);
+                if (indiceOriginale > -1) {
+                    datiGiorno.movimenti[indiceOriginale] = movimento;
+                }
+            } else {
+                datiGiorno.movimenti.push(movimento);
+            }
         }
         
         annullaModifica();
@@ -1282,6 +1299,7 @@
         }
     }
 
+
     // ===============================================
     // SISTEMA DI GESTIONE TABELLE GENERICHE
     // ===============================================
@@ -1447,10 +1465,10 @@
                         cell.innerHTML = `<input type="text" value="${content}" onchange="salvaModificaGenerica(this)">`;
                         break;
                     case 'dataEstinzione':
-                        cell.innerHTML = `<input type="date" value="${content}" onchange="salvaModificaGenerica(this)" ${isLocked ? 'disabled' : ''}>`;
+                        cell.innerHTML = `<input type="date" value="${content}" onchange="salvaModificaGenerica(this)">`;
                         break;
                     case 'incassato':
-                        cell.innerHTML = `<input type="checkbox" ${content ? 'checked' : ''} onchange="salvaModificaGenerica(this)" ${isLocked ? 'disabled' : ''}>`;
+                        cell.innerHTML = `<input type="checkbox" ${content ? 'checked' : ''} onchange="salvaModificaGenerica(this)">`;
                         break;
                     default:
                         cell.textContent = content;
