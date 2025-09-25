@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --primary-color: #6c757d; --primary-color-light: #f8f9fa;
+            --primary-color: #6c757d;
+            --primary-color-light: #f8f9fa;
         }
         body.theme-allianz { --primary-color: #007bff; --primary-color-light: #cce5ff; }
         body.theme-hdi { --primary-color: #28a745; --primary-color-light: #d4edda; }
@@ -22,7 +23,8 @@
             background-color: #f0f2f5; color: #333; margin: 0; padding: 20px;
         }
         .container {
-            max-width: 1400px; margin: auto; background: #fff; padding: 25px;
+            max-width: 1400px;
+            margin: auto; background: #fff; padding: 25px;
             border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none;
         }
         h1, h2, h3 { color: var(--primary-color); }
@@ -67,73 +69,95 @@
         .modal-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.7); display: flex; 
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            justify-content: center; align-items: center; z-index: 1000;
         }
         
         #company-selector-modal .modal-overlay-background {
-            background: radial-gradient(circle, #6c757d 0%, #212529 100%);
-            backdrop-filter: blur(3px);
+            background: radial-gradient(circle, #6c757d 0%, #212529 100%); backdrop-filter: blur(3px);
         }
         #company-selector-modal .modal-wrapper {
             display: flex; gap: 40px; align-items: flex-start;
         }
         #company-selector-modal .modal-content {
-            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 30px 30px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff); border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2); border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px 30px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
         }
         #company-selector-modal .company-button {
-            width: 300px; 
-            margin: 15px 0; font-weight: bold; 
-            padding: 30px 10px;
+            width: 300px; margin: 15px 0; font-weight: bold; padding: 30px 10px;
             border-bottom: 3px solid rgba(0,0,0,0.25); border-radius: 8px;
             background-image: linear-gradient(to top, rgba(0,0,0,0.2), transparent 40%);
-            transition: all 0.2s ease-in-out;
-            font-size: 1.4rem;
+            transition: all 0.2s ease-in-out; font-size: 1.4rem;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
         }
         #company-selector-modal .company-button:hover {
             transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.35); filter: brightness(1.1);
         }
-        #company-selector-modal .utility-button { 
-            background-color: #6c757d; 
-            font-weight: 900;
-            text-shadow: 0 1px 1px rgba(0,0,0,0.6);
-        }
-        .silver { color: #C0C0C0; }
-        .hdi-green { color: #28a745; }
-        .arag-yellow { color: #ffc107; }
-        #company-selector-modal .modal-content:last-of-type .utility-button:nth-of-type(1) { color: #C0C0C0; }
-        #company-selector-modal .modal-content:last-of-type .utility-button:nth-of-type(2) { color: #3498db; }
         
-        .backup-container {
-            position: absolute;
-            top: 30px;
-            right: 40px;
-            z-index: 1001;
+        /* === NUOVI STILI PER LA SEZIONE "ALTRE FUNZIONI" === */
+        #utility-section {
+            background: linear-gradient(145deg, #e6e6e6, #ffffff);
+        }
+        .utility-grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        .utility-button {
+            width: 150px;
+            height: 150px;
+            margin: 0;
+            padding: 10px;
+            border-radius: 15px;
+            border: 1px solid #b0b0b0;
+            background: linear-gradient(145deg, #f0f0f0, #cacaca);
+            box-shadow: 7px 7px 15px #babecc, -7px -7px 15px #ffffff;
+            color: #333;
+            text-shadow: 1px 1px 1px #fff;
+            font-size: 1rem;
+            font-weight: bold;
             display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .utility-button:hover {
+            box-shadow: 4px 4px 10px #babecc, -4px -4px 10px #ffffff;
+            transform: scale(0.98);
+            color: #007bff;
+        }
+        .utility-button:active {
+            box-shadow: inset 5px 5px 10px #babecc, inset -5px -5px 10px #ffffff;
+            transform: scale(0.95);
+            color: #28a745;
+        }
+        .utility-button i {
+            color: #555;
+            transition: color 0.2s ease-in-out;
+        }
+        .utility-button:hover i {
+            color: #007bff;
+        }
+        .utility-button:active i {
+            color: #28a745;
+        }
+        /* === FINE NUOVI STILI === */
+
+        .backup-container {
+            position: absolute; top: 30px; right: 40px;
+            z-index: 1001; display: flex; gap: 10px;
         }
         .header-backup-button {
-            width: auto;
-            padding: 8px 15px;
-            font-size: 0.9rem;
-            background-color: #17a2b8;
-            border-radius: 5px;
-            margin-bottom: 0;
+            width: auto; padding: 8px 15px; font-size: 0.9rem;
+            background-color: #17a2b8; border-radius: 5px; margin-bottom: 0;
         }
 
-        .modal-full {
-            padding: 20px; align-items: flex-start; overflow-y: auto;
-        }
+        .modal-full { padding: 20px; align-items: flex-start; overflow-y: auto; }
         .modal-full .modal-content-full {
             width: 95%; max-width: 1800px; background: #fff;
             padding: 20px; border-radius: 8px; text-align: left; margin-top: 2vh;
@@ -158,18 +182,16 @@
         .riga-critico { background-color: #f8d7da; }
 
         .save-notification {
-            display: none;
-            padding: 10px 15px; border-radius: 5px; text-align: center;
+            display: none; padding: 10px 15px; border-radius: 5px; text-align: center;
             font-weight: bold; margin: -10px auto 10px auto;
-            opacity: 0; transition: opacity 0.5s ease-in-out;
-            color: white;
+            opacity: 0; transition: opacity 0.5s ease-in-out; color: white;
         }
         .save-notification.success { background-color: #28a745; }
         .save-notification.error { background-color: #dc3545; }
         
         .app-header { 
             display: flex; flex-wrap: wrap; justify-content: center; align-items: center; 
-            padding: 10px 20px; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 20px; gap: 10px; 
+            padding: 10px 20px; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 20px; gap: 10px;
         }
         .app-header .header-group { display: flex; align-items: center; gap: 10px; }
         
@@ -183,120 +205,119 @@
         body.vista-mensile .col-impatto-cassa, body.vista-mensile .col-cassa-teorica { display: none; }
         
         #add-movimento-form label { 
-            font-weight: bold; 
-            margin-top: 15px; 
-            font-size: 1.1rem;
-            display: block;
-            color: #333;
+            font-weight: bold; margin-top: 15px; 
+            font-size: 1.1rem; display: block; color: #333;
         }
-        #add-movimento-title {
-            font-size: 1.8rem;
-            color: #333;
-        }
+        #add-movimento-title { font-size: 1.8rem; color: #333; }
 
         #divIncassoMultiplo { border: 2px dashed var(--primary-color); padding: 15px; margin-top: 15px; border-radius: 5px; }
         #divIncassoMultiplo hr { margin: 20px 0; }
+        
+        /* NUOVI STILI PER IL TOGGLE DEL RIPORTO */
+        .riporto-toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .switch-label {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+        input:checked + .slider {
+            background-color: #28a745; /* Verde per 'Manuale' */
+        }
+        input:not(:checked) + .slider {
+            background-color: #007bff; /* Blu per 'Automatico' */
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .slider.round {
+            border-radius: 34px;
+        }
+        .slider.round:before {
+            border-radius: 50%;
+        }
+        /* FINE NUOVI STILI */
 
         /* STILI PER LA STAMPA PERSONALIZZATA */
         @media print {
-            body {
-                background-color: #fff;
-                padding: 0;
-                margin: 0;
-            }
-            body > *:not(#print-layout) {
-                display: none !important;
-            }
-            #print-layout {
-                display: block !important;
-                font-family: Arial, sans-serif;
-                color: #000;
-            }
-            #print-page-1, #print-page-2 {
-                width: 100%;
-                padding: 20mm 15mm;
-                box-sizing: border-box;
-            }
+            body { background-color: #fff; padding: 0; margin: 0; }
+            body > *:not(#print-layout) { display: none !important; }
+            #print-layout { display: block !important; font-family: Arial, sans-serif; color: #000; }
+            #print-page-1, #print-page-2 { width: 100%; padding: 20mm 15mm; box-sizing: border-box; }
             #print-page-2 {
-                page-break-before: always;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                height: 257mm;
+                page-break-before: always; display: flex; flex-direction: column;
+                justify-content: space-between; height: 257mm;
             }
-            .simplified-print #print-verifica-container {
-                display: none !important;
-            }
+            .simplified-print #print-verifica-container { display: none !important; }
             #print-header {
-                text-align: center;
-                border-bottom: 2px solid #333;
-                padding-bottom: 15px;
-                margin-bottom: 20px;
-                font-size: 1.5rem;
-                color: #000;
+                text-align: center; border-bottom: 2px solid #333;
+                padding-bottom: 15px; margin-bottom: 20px; font-size: 1.5rem; color: #000;
             }
-            #print-table-container table {
-                width: 100%;
-                font-size: 10pt;
-                border-collapse: collapse;
+            #print-table-container table { width: 100%; font-size: 10pt; border-collapse: collapse; }
+            #print-table-container th, #print-table-container td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+            #print-table-container th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; color-adjust: exact; }
+            #print-conteggio-container, #print-verifica-container { margin-top: 20px; }
+            #print-conteggio-container h2, #print-conteggio-container h3 {
+                color: #000; border-bottom: 1px solid #ccc; padding-bottom: 5px;
             }
-            #print-table-container th, #print-table-container td {
-                border: 1px solid #ccc;
-                padding: 6px;
-                text-align: left;
+            #print-conteggio-container .conteggio-grid {
+                display: grid; grid-template-columns: 1fr 2fr 2fr; 
+                align-items: center; gap: 5px; padding: 5px 0; border-bottom: 1px dotted #eee;
             }
-            #print-table-container th {
-                background-color: #f0f0f0 !important;
-                -webkit-print-color-adjust: exact;
-                color-adjust: exact;
+            #print-conteggio-container input { display: none; }
+            #print-conteggio-container label { font-weight: bold; }
+            #print-conteggio-container .riepilogo-totali {
+                font-size: 1.3rem; margin-top: 20px; background: #f0f0f0 !important;
+                border: 1px solid #ccc; -webkit-print-color-adjust: exact; color-adjust: exact;
             }
-            #print-conteggio-container, #print-verifica-container {
-                margin-top: 20px;
-            }
-             #print-conteggio-container h2, #print-conteggio-container h3 {
-                color: #000;
-                border-bottom: 1px solid #ccc;
-                padding-bottom: 5px;
-             }
-             #print-conteggio-container .conteggio-grid {
-                 display: grid; 
-                 grid-template-columns: 1fr 2fr 2fr; 
-                 align-items: center; 
-                 gap: 5px;
-                 padding: 5px 0;
-                 border-bottom: 1px dotted #eee;
-             }
-             #print-conteggio-container input { display: none; }
-             #print-conteggio-container label { font-weight: bold; }
-             #print-conteggio-container .riepilogo-totali {
-                 font-size: 1.3rem;
-                 margin-top: 20px;
-                 background: #f0f0f0 !important;
-                 border: 1px solid #ccc;
-                 -webkit-print-color-adjust: exact;
-                 color-adjust: exact;
-             }
             #print-verifica-container .risultato-verifica {
-                font-size: 1.4rem;
-                padding: 20px;
-                text-align: center;
-                border: 2px solid #333;
-                border-radius: 5px;
+                font-size: 1.4rem; padding: 20px; text-align: center;
+                border: 2px solid #333; border-radius: 5px;
             }
-             #print-verifica-container .risultato-verifica.ok {
-                background-color: #d4edda !important;
-                color: #155724 !important;
-                -webkit-print-color-adjust: exact;
-                color-adjust: exact;
-             }
-             #print-verifica-container .risultato-verifica.errore {
-                background-color: #f8d7da !important;
-                color: #721c24 !important;
-                -webkit-print-color-adjust: exact;
-                color-adjust: exact;
-             }
+            #print-verifica-container .risultato-verifica.ok {
+                background-color: #d4edda !important; color: #155724 !important;
+                -webkit-print-color-adjust: exact; color-adjust: exact;
+            }
+            #print-verifica-container .risultato-verifica.errore {
+                background-color: #f8d7da !important; color: #721c24 !important;
+                -webkit-print-color-adjust: exact; color-adjust: exact;
+            }
         }
-
     </style>
 </head>
 <body id="app-body">
@@ -304,12 +325,8 @@
         <div class="modal-overlay-background"></div>
 
         <div class="backup-container">
-            <button class="header-backup-button" onclick="esportaBackup()">
-                <i class="fa fa-download"></i> Esporta
-            </button>
-            <button class="header-backup-button" onclick="importaBackup()">
-                <i class="fa fa-upload"></i> Importa
-            </button>
+            <button class="header-backup-button" onclick="esportaBackup()"><i class="fa fa-download"></i> Esporta</button>
+            <button class="header-backup-button" onclick="importaBackup()"><i class="fa fa-upload"></i> Importa</button>
         </div>
 
         <div class="modal-wrapper">
@@ -321,18 +338,30 @@
                 <button class="company-button" onclick="inizializzaApp('ARAG')" style="background-color:#ffc107">ARAG</button>
                 <button class="company-button" onclick="inizializzaApp('Helvetia')" style="background-color:#dc3545">Helvetia</button>
             </div>
-            <div class="modal-content">
+           
+            <div class="modal-content" id="utility-section">
                 <h2>Altre Funzioni</h2>
-                <button class="company-button utility-button" onclick="mostraTabella('anticipi')">ANTICIPI</button>
-                <button class="company-button utility-button" onclick="mostraTabella('bonifici_allianz')">BONIFICI ALLIANZ</button>
-                <button class="company-button utility-button" onclick="mostraTabella('bonifici_hdi_arag')">
-                    <span class="silver">BONIFICI </span><span class="hdi-green">HDI</span><span class="silver">/</span><span class="arag-yellow">ARAG</span>
-                </button>
-                <button class="company-button utility-button" onclick="mostraTabella('pos_hdi_arag')">
-                    <span class="silver">POS </span><span class="hdi-green">HDI</span><span class="silver">/</span><span class="arag-yellow">ARAG</span>
-                </button>
+                <div class="utility-grid-container">
+                    <button class="utility-button" onclick="mostraTabella('anticipi')">
+                        <i class="fas fa-hand-holding-usd fa-2x"></i>
+                        <span>ANTICIPO</span>
+                    </button>
+                    <button class="utility-button" onclick="mostraTabella('bonifici_allianz')">
+                        <i class="fas fa-university fa-2x"></i>
+                        <span>BONIFICI ALLIANZ</span>
+                    </button>
+                    <button class="utility-button" onclick="mostraTabella('bonifici_hdi_arag')">
+                        <i class="fas fa-exchange-alt fa-2x"></i>
+                        <span>BONIFICI HDI/ARAG</span>
+                    </button>
+                    <button class="utility-button" onclick="mostraTabella('pos_hdi_arag')">
+                        <i class="far fa-credit-card fa-2x"></i>
+                        <span>POS HDI/ARAG</span>
+                    </button>
+                </div>
             </div>
         </div>
+  
     </div>
     
     <div class="modal-overlay modal-full" id="generic-modal" style="display:none;">
@@ -393,6 +422,13 @@
     
         <div class="box" id="box-inizio-giornata">
             <h2>1. Inizio Giornata</h2>
+            <div class="riporto-toggle-container">
+                <label for="riporto-mode-toggle" class="switch-label" id="riporto-mode-label">Riporto Automatico</label>
+                <label class="switch">
+                    <input type="checkbox" id="riporto-mode-toggle" onchange="toggleRiportoMode(this.checked)">
+                    <span class="slider round"></span>
+                </label>
+            </div>
             <label for="riportoIniziale"><strong>Riporto da Cassa Teorica Giorno Precedente (€):</strong></label>
             <input type="number" id="riportoIniziale" placeholder="0.00" step="0.01" oninput="aggiornaTuttiRiepiloghi()">
         </div>
@@ -534,7 +570,6 @@
         </div>
     </div>
 
-
 <script>
     const firebaseConfig = {
       apiKey: "AIzaSyD41OqDrIwwH7PrK_ywmYRYVrR_KAehiU8",
@@ -553,7 +588,6 @@
     let stato = { compagniaSelezionata: null, dataSelezionata: null, datiCompleti: {} };
     const tagliBanconote = [500, 200, 100, 50, 20, 10, 5];
     const tagliMonete = [2, 1, 0.50, 0.20, 0.10, 0.05, 0.02, 0.01];
-
     document.addEventListener('DOMContentLoaded', () => {
         caricaDatiDaFirebase();
     });
@@ -572,7 +606,7 @@
             }
         } catch (error) {
             console.error("Errore caricamento da Firebase: ", error);
-             if(statusIndicator) {
+            if(statusIndicator) {
                 statusIndicator.textContent = 'Errore Connessione';
                 statusIndicator.className = 'error';
             }
@@ -589,7 +623,7 @@
         }
 
         try {
-            if(stato.compagniaSelezionata && stato.dataSelezionata) salvaDatiLocali(); 
+            if(stato.compagniaSelezionata && stato.dataSelezionata) salvaDatiLocali();
             await dbRef.set(stato.datiCompleti);
              if (indicator) {
                 indicator.textContent = 'Salvato con successo!';
@@ -598,7 +632,6 @@
                     statusIndicator.className = 'synced';
                 }
                 indicator.style.opacity = '1';
-
                 if(notificationId){
                     setTimeout(() => { 
                         indicator.style.opacity = '0';
@@ -612,7 +645,7 @@
                 indicator.textContent = 'Errore Salvataggio';
                 indicator.className = notificationId ? 'save-notification error' : 'error';
                 indicator.style.opacity = '1';
-                 if(notificationId){
+                if(notificationId){
                     setTimeout(() => { 
                         indicator.style.opacity = '0';
                         setTimeout(() => { indicator.style.display = 'none'; }, 500);
@@ -633,13 +666,10 @@
         }
         
         document.getElementById('main-title').textContent = `Registro Cassa ${compagnia}`;
-        
         const showProvvigioni = compagnia === 'HDI' || compagnia === 'Vittoria';
         document.getElementById('box-provvigioni').style.display = showProvvigioni ? 'block' : 'none';
-        
         const selectMetodo = document.getElementById('metodologia');
         selectMetodo.innerHTML = `<option value="Contanti">Contanti</option><option value="Assegno">Assegno</option><option value="POS">POS</option><option value="Bonifico">Bonifico</option>`;
-        
         if (compagnia === 'Allianz') {
              selectMetodo.add(new Option('Finanziamento Allianz Bank', 'Finanziamento Allianz Bank'));
         }
@@ -649,7 +679,6 @@
 
         selectMetodo.add(new Option('Anticipo', 'Anticipo'));
         selectMetodo.add(new Option('Rientro da Anticipo', 'Rientro da Anticipo'));
-        
         const isSimplifiedView = compagnia === 'ARAG' || compagnia === 'Helvetia';
         document.getElementById('box-inizio-giornata').style.display = isSimplifiedView ? 'none' : 'block';
         document.getElementById('box-conteggio-cassa').style.display = isSimplifiedView ? 'none' : 'block';
@@ -669,6 +698,28 @@
         caricaGiornale(new Date());
     }
 
+    // NUOVA FUNZIONE: Gestisce il cambio tra modalità Automatica e Manuale
+    function toggleRiportoMode(isManual) {
+        const inputRiporto = document.getElementById('riportoIniziale');
+        const label = document.getElementById('riporto-mode-label');
+        const dataKey = formatDate(stato.dataSelezionata);
+        const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
+
+        if (isManual) {
+            inputRiporto.readOnly = false;
+            label.textContent = 'Riporto Manuale';
+            datiGiorno.riportoIsManual = true;
+        } else {
+            inputRiporto.readOnly = true;
+            label.textContent = 'Riporto Automatico';
+            delete datiGiorno.riportoIsManual;
+            inputRiporto.value = calcolaRiporto(stato.dataSelezionata).toFixed(2);
+            aggiornaTuttiRiepiloghi();
+        }
+        salvaStatoCorrente(true);
+    }
+
+    // FUNZIONE 'caricaGiornale' MODIFICATA
     function caricaGiornale(data) {
         if (!data) return;
         stato.dataSelezionata = data;
@@ -696,14 +747,29 @@
             const dataKey = formatDate(data);
             const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
             let datiGiorno = datiCompagnia[dataKey];
-
             if (!datiGiorno) {
                 datiGiorno = creaNuovoGiorno(data);
                 if (!stato.datiCompleti[stato.compagniaSelezionata]) stato.datiCompleti[stato.compagniaSelezionata] = {};
                 stato.datiCompleti[stato.compagniaSelezionata][dataKey] = datiGiorno;
             }
 
-            document.getElementById('riportoIniziale').value = (datiGiorno.riportoIniziale || 0).toFixed(2);
+            const inputRiporto = document.getElementById('riportoIniziale');
+            const toggle = document.getElementById('riporto-mode-toggle');
+            const label = document.getElementById('riporto-mode-label');
+
+            if (datiGiorno.riportoIsManual) {
+                toggle.checked = true;
+                label.textContent = 'Riporto Manuale';
+                inputRiporto.readOnly = false;
+                inputRiporto.value = (datiGiorno.riportoIniziale || 0).toFixed(2);
+            } else {
+                toggle.checked = false;
+                label.textContent = 'Riporto Automatico';
+                inputRiporto.readOnly = true;
+                datiGiorno.riportoIniziale = calcolaRiporto(data);
+                inputRiporto.value = datiGiorno.riportoIniziale.toFixed(2);
+            }
+            
             creaCampiConteggio(datiGiorno.conteggioFisico);
             const divRisultato = document.getElementById('risultatoVerifica');
             if (datiGiorno.verificaResult) {
@@ -727,6 +793,7 @@
         return { riportoIniziale: riporto, movimenti: [], conteggioFisico: {}, cassaTeorica: riporto };
     }
 
+    // FUNZIONE 'salvaDatiLocali' MODIFICATA
     function salvaDatiLocali() {
         if(!stato.compagniaSelezionata || !stato.dataSelezionata) return;
         const isSimplifiedView = stato.compagniaSelezionata === 'ARAG' || stato.compagniaSelezionata === 'Helvetia';
@@ -738,7 +805,10 @@
         
         const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
         
-        datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
+        if (datiGiorno.riportoIsManual) {
+            datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
+        }
+        
         datiGiorno.conteggioFisico = raccogliDatiConteggio();
     }
 
@@ -761,12 +831,10 @@
         
         const metodologia = document.getElementById('metodologia').value;
         const editingIndex = document.getElementById('editingIndex').value;
-
         if (metodologia === 'Incasso Multiplo') {
             const importoTotale = parseFloat(document.getElementById('importo').value) || 0;
             const importo1 = parseFloat(document.getElementById('importoMultiplo1').value) || 0;
             const importo2 = parseFloat(document.getElementById('importoMultiplo2').value) || 0;
-            
             if (Math.abs(importoTotale - (importo1 + importo2)) > 0.01) {
                 alert("La somma delle due parti non corrisponde all'importo totale del titolo.");
                 return;
@@ -793,7 +861,6 @@
                 rientroMetodo: document.getElementById('rientroMetodo').value,
                 numeroAssegno: document.getElementById('numeroAssegno').value,
             };
-
             if (editingIndex !== "") {
                 const movimentiOriginali = datiGiorno.movimenti;
                 const movimentiFiltrati = movimentiOriginali.filter(m => !m.isManuallyAdded);
@@ -829,7 +896,6 @@
         document.getElementById('provvigioni').value = movimento.provvigioni || '';
         document.getElementById('arrotondamenti').value = movimento.arrotondamenti;
         document.getElementById('uscite').value = movimento.uscite;
-
         document.getElementById('date-selector').value = dataKey;
         
         const [year, month, day] = dataKey.split('-').map(Number);
@@ -855,7 +921,6 @@
             const movimentiFiltrati = movimentiOriginali.filter(m => !m.isManuallyAdded);
             const movimentoDaCancellare = movimentiFiltrati[index];
             const indiceOriginale = movimentiOriginali.indexOf(movimentoDaCancellare);
-
             if (indiceOriginale > -1) {
                 movimentiOriginali.splice(indiceOriginale, 1);
                 caricaGiornale(stato.dataSelezionata);
@@ -886,7 +951,6 @@
         const divMonete = document.getElementById('conteggioMonete');
         divBanconote.innerHTML = '<h3>Banconote</h3>';
         divMonete.innerHTML = '<h3>Monete</h3>';
-
         [...tagliBanconote, ...tagliMonete].forEach(taglio => {
             const tipo = taglio >= 5 ? 'banconote' : 'monete';
             const div = tipo === 'banconote' ? divBanconote : divMonete;
@@ -899,14 +963,12 @@
                     <span id="subtotale-${idTaglio}">€ 0.00</span>
                 </div>`;
         });
-
         const divAssegni = document.getElementById('lista-conteggio-assegni');
         divAssegni.innerHTML = '';
         const assegniSalvati = datiConteggio?.assegni || [];
         assegniSalvati.forEach((importo) => {
             aggiungiCampoAssegnoConteggio(importo);
         });
-        
         calcolaConteggioFisico();
     }
 
@@ -942,7 +1004,6 @@
         const tbody = document.getElementById('tabellaMovimenti').querySelector('tbody');
         tbody.innerHTML = '';
         const showProvvigioni = stato.compagniaSelezionata === 'HDI' || stato.compagniaSelezionata === 'Vittoria';
-
         (movimenti || []).forEach((m, index) => {
             const dataKeyOriginale = m.dataMovimento || formatDate(stato.dataSelezionata);
             
@@ -956,6 +1017,7 @@
             impattoCassa -= (m.uscite || 0);
 
             let metodoDisplay = m.metodologia;
+    
             if (m.metodologia === 'Anticipo') {
                 metodoDisplay = `Anticipo (${m.tipoAnticipo || ''})`;
             } else if (m.metodologia === 'POS' && stato.compagniaSelezionata === 'Allianz') {
@@ -972,7 +1034,6 @@
             const riga = tbody.insertRow();
             const [year, month, day] = dataKeyOriginale.split('-').map(Number);
             const dataLocale = new Date(year, month-1, day);
-            
             riga.innerHTML = `
                 <td class="col-data-mensile">${dataLocale.toLocaleDateString('it-IT')}</td>
                 <td>${m.nomeCliente || ''}</td>
@@ -1024,7 +1085,6 @@
         const dataKeyPrec = formatDate(giornoPrecedenteLavorativo);
         const datiCompagnia = stato.datiCompleti[stato.compagniaSelezionata] || {};
         const datiGiornoPrec = datiCompagnia[dataKeyPrec];
-        
         if (datiGiornoPrec) {
             return datiGiornoPrec.cassaTeorica || 0;
         }
@@ -1058,7 +1118,6 @@
         const dataKey = formatDate(stato.dataSelezionata);
         const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata]?.[dataKey];
         if (!datiGiorno) return riporto;
-        
         const movimenti = (datiGiorno.movimenti || []).filter(m => !m.isManuallyAdded);
         const totaleMovimentiCassa = movimenti.reduce((acc, m) => {
             const isCashBased = (m.metodologia === 'Contanti' || m.metodologia === 'Assegno') ||
@@ -1082,14 +1141,12 @@
         
     function aggiornaCampiCondizionali() {
         if (!stato.compagniaSelezionata) return;
-        
         const metodologia = document.getElementById('metodologia').value;
         const isMultiplo = metodologia === 'Incasso Multiplo';
         
         document.getElementById('divIncassoMultiplo').style.display = isMultiplo ? 'block' : 'none';
         document.getElementById('campi-standard').style.display = isMultiplo ? 'none' : 'block';
         document.getElementById('label-importo').textContent = isMultiplo ? 'Importo Totale Titolo (€):' : 'Importo Titolo (€):';
-
         if (isMultiplo) {
             const opzioniBase = Array.from(document.getElementById('metodologia').options)
                                     .filter(opt => !['Incasso Multiplo'].includes(opt.value))
@@ -1105,10 +1162,10 @@
         const compagnia = stato.compagniaSelezionata;
         const rientroMetodo = document.getElementById('rientroMetodo').value;
         const tipoAnticipo = document.getElementById('tipoAnticipo').value;
-
         const showProvvigioni = (compagnia === 'HDI' || compagnia === 'Vittoria') && metodologia !== 'Rientro da Anticipo';
         const showRientro = metodologia === 'Rientro da Anticipo';
-        const showAssegno = metodologia === 'Assegno' || (showRientro && rientroMetodo === 'Assegno') || (metodologia === 'Anticipo' && tipoAnticipo === 'Anticipo Assegno');
+        const showAssegno = metodologia === 'Assegno' ||
+                            (showRientro && rientroMetodo === 'Assegno') || (metodologia === 'Anticipo' && tipoAnticipo === 'Anticipo Assegno');
         const showTipoAnticipo = metodologia === 'Anticipo';
         const showTipoPosAllianz = metodologia === 'POS' && compagnia === 'Allianz';
         
@@ -1130,7 +1187,6 @@
 
         let totaleProvvigioniMese = 0;
         const decadi = { 1: { titoli: 0, provvigioni: 0 }, 2: { titoli: 0, provvigioni: 0 }, 3: { titoli: 0, provvigioni: 0 } };
-
         for (const dataKey in datiCompagnia) {
             const [year, month, day] = dataKey.split('-').map(Number);
             const dataGiornale = new Date(year, month - 1, day);
@@ -1139,6 +1195,7 @@
                 (datiCompagnia[dataKey].movimenti || []).forEach(m => {
                     const giorno = dataGiornale.getDate();
                     totaleProvvigioniMese += (m.provvigioni || 0);
+                
                     const decadeNum = giorno <= 10 ? 1 : (giorno <= 20 ? 2 : 3);
                     decadi[decadeNum].titoli += m.importo;
                     decadi[decadeNum].provvigioni += (m.provvigioni || 0);
@@ -1265,7 +1322,6 @@
     function impostaStatoGiornata(isFestivo) {
         document.getElementById('form-movimento-fieldset').disabled = !!isFestivo;
         document.getElementById('box-conteggio-cassa-fieldset').disabled = !!isFestivo;
-        
         const btn = document.getElementById('btn-festa');
         if (isFestivo) {
             btn.textContent = 'Riattiva Giorno';
@@ -1333,11 +1389,9 @@
             filterFn: mov => mov.metodologia === 'POS' && (mov.compagnia === 'HDI' || mov.compagnia === 'ARAG')
         }
     };
-
     async function mostraTabella(tipo) {
         configTabellaCorrente = configsTabelle[tipo];
         if (!configTabellaCorrente) return;
-
         if (Object.keys(stato.datiCompleti).length === 0) await caricaDatiDaFirebase();
 
         datiTabellaCorrente = [];
@@ -1385,7 +1439,6 @@
         const giorno = document.getElementById('generic-filtro-giorno').value;
         
         let datiFiltrati = datiTabellaCorrente;
-
         if (giorno) {
             datiFiltrati = datiFiltrati.filter(d => d.dataKey === giorno);
         } else {
@@ -1428,7 +1481,6 @@
         headerRow.appendChild(thAzioni);
 
         dati.sort((a, b) => new Date(b.dataKey) - new Date(a.dataKey));
-
         dati.forEach(d => {
             const isLocked = !d.isManuallyAdded;
             const riga = tbody.insertRow();
@@ -1493,10 +1545,8 @@
 
         if (confirm('Sei sicuro di voler eliminare definitivamente questo movimento?')) {
             const movimenti = stato.datiCompleti[compagnia]?.[key]?.movimenti;
-            
             if (movimenti && movimenti[index] !== undefined) {
                 movimenti.splice(index, 1);
-                
                 await salvaStatoCorrente(true); 
                 alert('Movimento eliminato.');
                 mostraTabella(configTabellaCorrente.type); 
@@ -1512,7 +1562,6 @@
         const riga = cell.closest('tr');
         const proprieta = cell.dataset.property;
         const { compagnia, key, index } = riga.dataset;
-
         if (stato.datiCompleti[compagnia]?.[key]?.movimenti?.[index]) {
             let valore;
             if (el.isContentEditable) {
@@ -1556,7 +1605,6 @@
         formContainer.innerHTML = '';
         const config = configTabellaCorrente;
         document.getElementById('add-movimento-title').textContent = `Aggiungi a ${config.title}`;
-        
         let formHtml = `
             <label>Data:</label><input type="date" id="add-data" required value="${formatDate(new Date())}">
             <label>Cliente:</label><input type="text" id="add-cliente" required>
@@ -1564,7 +1612,6 @@
             <label>Importo:</label><input type="number" id="add-importo" step="0.01" required>
             <label>Note:</label><input type="text" id="add-note">
         `;
-
         const addCompagniaSelect = () => `
             <label>Compagnia:</label>
             <select id="add-compagnia" onchange="toggleAltraCompagniaInput(this.value)">
@@ -1575,7 +1622,6 @@
                 <label>Nome Altra Compagnia:</label>
                 <input type="text" id="add-altra-compagnia">
             </div>`;
-
         switch(config.type) {
             case 'anticipi':
                 formHtml += addCompagniaSelect();
@@ -1608,7 +1654,6 @@
 
         const data = new Date(dataInput.valueAsDate);
         const dataKey = formatDate(data);
-        
         let compagnia = document.getElementById('add-compagnia').value;
         if (compagnia === 'Altra') {
             compagnia = document.getElementById('add-altra-compagnia').value.trim();
@@ -1626,7 +1671,6 @@
             note: document.getElementById('add-note').value,
             isManuallyAdded: true
         };
-
         switch(config.type) {
             case 'anticipi':
                 movimento.metodologia = 'Anticipo';
@@ -1650,7 +1694,6 @@
         if (!stato.datiCompleti[compagnia][dataKey].movimenti) stato.datiCompleti[compagnia][dataKey].movimenti = [];
         
         stato.datiCompleti[compagnia][dataKey].movimenti.push(movimento);
-        
         document.getElementById('add-movimento-modal').style.display = 'none';
         mostraTabella(config.type);
         salvaTutteLeModificheTabella();
@@ -1689,7 +1732,6 @@
         return dati;
     }
 
-
     // Rendi le funzioni visibili globalmente
     window.inizializzaApp = inizializzaApp;
     window.caricaGiornale = caricaGiornale;
@@ -1722,6 +1764,7 @@
     window.annullaChiusuraFestiva = annullaChiusuraFestiva;
     window.calcolaImportoMultiplo = calcolaImportoMultiplo;
     window.aggiornaCampiCondizionaliMultiplo = aggiornaCampiCondizionaliMultiplo;
+    window.toggleRiportoMode = toggleRiportoMode;
 </script>
 </body>
 </html>
