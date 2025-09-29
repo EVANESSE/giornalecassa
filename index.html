@@ -34,11 +34,13 @@
         .box { padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; }
         
         input, select, button {
-            width: 100%; padding: 10px; margin-bottom: 10px;
+            width: 100%;
+            padding: 10px; margin-bottom: 10px;
             border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1rem;
         }
         button {
-            background-color: var(--primary-color); color: white; border: none;
+            background-color: var(--primary-color);
+            color: white; border: none;
             cursor: pointer; font-weight: bold; transition: background-color 0.2s;
         }
         button.button-save { background-color: #28a745; font-size: 1.1rem; padding: 12px;}
@@ -56,7 +58,8 @@
         .provvigione-editabile:hover { background-color: #fff3cd; cursor: pointer; }
         
         .riepilogo-totali, .risultato-verifica {
-            font-size: 1.2rem; font-weight: bold; padding: 15px; margin-top: 15px;
+            font-size: 1.2rem;
+            font-weight: bold; padding: 15px; margin-top: 15px;
             border-radius: 5px; background-color: var(--primary-color-light); border-left: 5px solid var(--primary-color);
         }
         .risultato-verifica.ok { color: #155724; background-color: #d4edda; border-left-color: #28a745; }
@@ -67,32 +70,39 @@
         .decade-grid strong { color: var(--primary-color); }
 
         .modal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.7); display: flex; 
             justify-content: center; align-items: center; z-index: 1000;
         }
         
         #company-selector-modal .modal-overlay-background {
-            background: radial-gradient(circle, #6c757d 0%, #212529 100%); backdrop-filter: blur(3px);
+            background: radial-gradient(circle, #6c757d 0%, #212529 100%);
+            backdrop-filter: blur(3px);
         }
         #company-selector-modal .modal-wrapper {
-            display: flex; gap: 40px; align-items: flex-start;
+            display: flex;
+            gap: 40px; align-items: flex-start;
         }
         #company-selector-modal .modal-content {
-            background: linear-gradient(to bottom, #f8f9fa, #ffffff); border-radius: 12px;
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+            border-radius: 12px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.2); border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 30px 30px; display: flex; flex-direction: column;
+            padding: 30px 30px; display: flex;
+            flex-direction: column;
             justify-content: center; align-items: center;
         }
         #company-selector-modal .company-button {
-            width: 300px; margin: 15px 0; font-weight: bold; padding: 30px 10px;
+            width: 300px;
+            margin: 15px 0; font-weight: bold; padding: 30px 10px;
             border-bottom: 3px solid rgba(0,0,0,0.25); border-radius: 8px;
             background-image: linear-gradient(to top, rgba(0,0,0,0.2), transparent 40%);
             transition: all 0.2s ease-in-out; font-size: 1.4rem;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
         }
         #company-selector-modal .company-button:hover {
-            transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.35); filter: brightness(1.1);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.35); filter: brightness(1.1);
         }
         
         /* === NUOVI STILI PER LA SEZIONE "ALTRE FUNZIONI" === */
@@ -149,28 +159,33 @@
         /* === FINE NUOVI STILI === */
 
         .backup-container {
-            position: absolute; top: 30px; right: 40px;
+            position: absolute;
+            top: 30px; right: 40px;
             z-index: 1001; display: flex; gap: 10px;
         }
         .header-backup-button {
-            width: auto; padding: 8px 15px; font-size: 0.9rem;
+            width: auto;
+            padding: 8px 15px; font-size: 0.9rem;
             background-color: #17a2b8; border-radius: 5px; margin-bottom: 0;
         }
 
         .modal-full { padding: 20px; align-items: flex-start; overflow-y: auto; }
         .modal-full .modal-content-full {
-            width: 95%; max-width: 1800px; background: #fff;
+            width: 95%;
+            max-width: 1800px; background: #fff;
             padding: 20px; border-radius: 8px; text-align: left; margin-top: 2vh;
         }
         .modal-toolbar {
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex;
+            justify-content: space-between; align-items: center;
             padding-bottom: 15px; border-bottom: 2px solid #ccc; margin-bottom: 15px;
             flex-wrap: wrap; gap: 15px;
         }
         .modal-toolbar .filter-group { display: flex; align-items: center; gap: 10px; }
         .modal-toolbar .action-group { display: flex; align-items: center; gap: 10px; }
         .modal-toolbar .filter-group button, .modal-toolbar .filter-group select, .modal-toolbar .filter-group input, .modal-toolbar .action-group button { 
-            width: auto; margin-bottom: 0; padding: 8px;
+            width: auto;
+            margin-bottom: 0; padding: 8px;
         }
         .generic-table td[contenteditable="true"]:hover { background-color: #fff3cd; cursor: text; }
         .generic-table input, .generic-table select { padding: 4px; font-size: 0.9rem; border-radius: 3px; border: 1px solid #ccc;}
@@ -182,15 +197,18 @@
         .riga-critico { background-color: #f8d7da; }
 
         .save-notification {
-            display: none; padding: 10px 15px; border-radius: 5px; text-align: center;
+            display: none;
+            padding: 10px 15px; border-radius: 5px; text-align: center;
             font-weight: bold; margin: -10px auto 10px auto;
-            opacity: 0; transition: opacity 0.5s ease-in-out; color: white;
+            opacity: 0; transition: opacity 0.5s ease-in-out;
+            color: white;
         }
         .save-notification.success { background-color: #28a745; }
         .save-notification.error { background-color: #dc3545; }
         
         .app-header { 
-            display: flex; flex-wrap: wrap; justify-content: center; align-items: center; 
+            display: flex;
+            flex-wrap: wrap; justify-content: center; align-items: center; 
             padding: 10px 20px; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 20px; gap: 10px;
         }
         .app-header .header-group { display: flex; align-items: center; gap: 10px; }
@@ -205,7 +223,8 @@
         body.vista-mensile .col-impatto-cassa, body.vista-mensile .col-cassa-teorica { display: none; }
         
         #add-movimento-form label { 
-            font-weight: bold; margin-top: 15px; 
+            font-weight: bold;
+            margin-top: 15px; 
             font-size: 1.1rem; display: block; color: #333;
         }
         #add-movimento-title { font-size: 1.8rem; color: #333; }
@@ -280,12 +299,14 @@
             #print-layout { display: block !important; font-family: Arial, sans-serif; color: #000; }
             #print-page-1, #print-page-2 { width: 100%; padding: 20mm 15mm; box-sizing: border-box; }
             #print-page-2 {
-                page-break-before: always; display: flex; flex-direction: column;
+                page-break-before: always;
+                display: flex; flex-direction: column;
                 justify-content: space-between; height: 257mm;
             }
             .simplified-print #print-verifica-container { display: none !important; }
             #print-header {
-                text-align: center; border-bottom: 2px solid #333;
+                text-align: center;
+                border-bottom: 2px solid #333;
                 padding-bottom: 15px; margin-bottom: 20px; font-size: 1.5rem; color: #000;
             }
             #print-table-container table { width: 100%; font-size: 10pt; border-collapse: collapse; }
@@ -293,28 +314,34 @@
             #print-table-container th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; color-adjust: exact; }
             #print-conteggio-container, #print-verifica-container { margin-top: 20px; }
             #print-conteggio-container h2, #print-conteggio-container h3 {
-                color: #000; border-bottom: 1px solid #ccc; padding-bottom: 5px;
+                color: #000;
+                border-bottom: 1px solid #ccc; padding-bottom: 5px;
             }
             #print-conteggio-container .conteggio-grid {
-                display: grid; grid-template-columns: 1fr 2fr 2fr; 
+                display: grid;
+                grid-template-columns: 1fr 2fr 2fr; 
                 align-items: center; gap: 5px; padding: 5px 0; border-bottom: 1px dotted #eee;
             }
             #print-conteggio-container input { display: none; }
             #print-conteggio-container label { font-weight: bold; }
             #print-conteggio-container .riepilogo-totali {
-                font-size: 1.3rem; margin-top: 20px; background: #f0f0f0 !important;
+                font-size: 1.3rem;
+                margin-top: 20px; background: #f0f0f0 !important;
                 border: 1px solid #ccc; -webkit-print-color-adjust: exact; color-adjust: exact;
             }
             #print-verifica-container .risultato-verifica {
-                font-size: 1.4rem; padding: 20px; text-align: center;
+                font-size: 1.4rem;
+                padding: 20px; text-align: center;
                 border: 2px solid #333; border-radius: 5px;
             }
             #print-verifica-container .risultato-verifica.ok {
-                background-color: #d4edda !important; color: #155724 !important;
+                background-color: #d4edda !important;
+                color: #155724 !important;
                 -webkit-print-color-adjust: exact; color-adjust: exact;
             }
             #print-verifica-container .risultato-verifica.errore {
-                background-color: #f8d7da !important; color: #721c24 !important;
+                background-color: #f8d7da !important;
+                color: #721c24 !important;
                 -webkit-print-color-adjust: exact; color-adjust: exact;
             }
         }
@@ -330,7 +357,8 @@
         </div>
 
         <div class="modal-wrapper">
-            <div class="modal-content">
+     
+           <div class="modal-content">
                 <h2>Seleziona la Compagnia</h2>
                 <button class="company-button" onclick="inizializzaApp('Allianz')" style="background-color:#007bff">Allianz</button>
                 <button class="company-button" onclick="inizializzaApp('HDI')" style="background-color:#28a745">HDI</button>
@@ -342,10 +370,12 @@
             <div class="modal-content" id="utility-section">
                 <h2>Altre Funzioni</h2>
                 <div class="utility-grid-container">
+        
                     <button class="utility-button" onclick="mostraTabella('anticipi')">
                         <i class="fas fa-hand-holding-usd fa-2x"></i>
                         <span>ANTICIPO</span>
                     </button>
+               
                     <button class="utility-button" onclick="mostraTabella('bonifici_allianz')">
                         <i class="fas fa-university fa-2x"></i>
                         <span>BONIFICI ALLIANZ</span>
@@ -355,12 +385,14 @@
                         <span>BONIFICI HDI/ARAG</span>
                     </button>
                     <button class="utility-button" onclick="mostraTabella('pos_hdi_arag')">
+     
                         <i class="far fa-credit-card fa-2x"></i>
                         <span>POS HDI/ARAG</span>
                     </button>
                 </div>
             </div>
-        </div>
+     
+       </div>
   
     </div>
     
@@ -370,22 +402,26 @@
                 <h2 id="generic-modal-title"></h2>
                 <div class="filter-group">
                     <label>Filtra per:</label>
-                    <select id="generic-filtro-anno"></select>
+  
+                   <select id="generic-filtro-anno"></select>
                     <select id="generic-filtro-mese"></select>
                     <input type="date" id="generic-filtro-giorno">
                     <button onclick="applicaFiltriTabella()">Applica Filtri</button>
+                
                     <button class="button-secondary" onclick="resetFiltriTabella()">Resetta</button>
                 </div>
                 <div class="action-group">
                     <button class="button-save" onclick="apriFormAggiunta()"><i class="fa fa-plus"></i> Aggiungi Movimento</button>
                     <button class="button-save" onclick="salvaTutteLeModificheTabella()">Salva Modifiche</button>
+            
                     <button class="button-secondary" onclick="document.getElementById('generic-modal').style.display = 'none'">Chiudi</button>
                 </div>
             </div>
             <div id="generic-modal-notification" class="save-notification"></div>
             <div style="overflow-x: auto;">
                 <table id="generic-table" class="generic-table">
-                    <thead></thead>
+              
+                   <thead></thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -406,6 +442,7 @@
     <div class="container" id="main-container">
         <h1 id="main-title">Registro Cassa</h1>
         
+        
         <div class="app-header">
             <div class="header-group">
                 <label for="date-selector">Visualizza movimenti del:</label>
@@ -413,6 +450,7 @@
             </div>
             <div class="header-group">
                 <div id="status-indicator"></div>
+      
                 <button onclick="salvaStatoCorrente()" class="button-save">Salva Modifiche Online</button>
                 <button onclick="stampaPersonalizzata()" class="button-secondary">Stampa</button>
                 <button id="btn-festa" class="button-secondary" style="display: none;">Festa/Chiusura</button>
@@ -420,6 +458,7 @@
             </div>
         </div>
     
+       
         <div class="box" id="box-inizio-giornata">
             <h2>1. Inizio Giornata</h2>
             <div class="riporto-toggle-container">
@@ -427,6 +466,7 @@
                 <label class="switch">
                     <input type="checkbox" id="riporto-mode-toggle" onchange="toggleRiportoMode(this.checked)">
                     <span class="slider round"></span>
+    
                 </label>
             </div>
             <label for="riportoIniziale"><strong>Riporto da Cassa Teorica Giorno Precedente (€):</strong></label>
@@ -435,56 +475,71 @@
     
         <div class="grid-container">
             <fieldset id="form-movimento-fieldset">
+      
                 <div class="box">
                     <h2 id="form-title">2. Registrazione Movimento</h2>
                     <form id="formMovimento" onsubmit="event.preventDefault(); processaFormMovimento();">
                         <input type="hidden" id="editingIndex" value="">
                         <label for="metodologia">Metodologia Incasso:</label>
+                       
                         <select id="metodologia" onchange="aggiornaCampiCondizionali()"></select>
                         
                         <div id="campi-standard">
                             <div id="divTipoPosAllianz" style="display:none;">
+                  
                                 <label for="tipoPosAllianz">Tipo POS:</label>
                                 <select id="tipoPosAllianz">
                                     <option value="POS Direzione">POS Direzione</option>
+            
                                     <option value="POS Agenzia">POS Agenzia</option>
                                 </select>
                             </div>
+             
                             <div id="divTipoAnticipo" style="display:none;">
                                 <label for="tipoAnticipo">Tipo Anticipo:</label>
                                 <select id="tipoAnticipo" onchange="aggiornaCampiCondizionali()">
+               
                                     <option value="Anticipo Contanti">Anticipo Contanti</option>
                                     <option value="Anticipo Assegno">Anticipo Assegno</option>
                                     <option value="Anticipo POS">Anticipo POS</option>
                                     <option value="Anticipo Bonifico">Anticipo Bonifico</option>
                                     <option value="Plafond">Plafond</option>
+                      
                                     <option value="Sospeso Cassa">Sospeso Cassa</option>
                                 </select>
                             </div>
+                       
                             <div id="divRientroMetodo" style="display:none;">
                                 <label for="rientroMetodo">Metodo di Rientro:</label>
                                 <select id="rientroMetodo" onchange="aggiornaCampiCondizionali()">
+                        
                                     <option value="Contanti">Contanti</option><option value="Assegno">Assegno</option>
                                     <option value="POS">POS</option><option value="Bonifico">Bonifico</option>
                                 </select>
+                
                             </div>
                             <div id="divNumeroAssegno" style="display:none;">
                                 <label for="numeroAssegno">Numero Assegno:</label>
+                        
                                 <input type="text" id="numeroAssegno" placeholder="N° Assegno">
                             </div>
                         </div>
 
                         <label for="nomeCliente">Nome Cliente:</label><input type="text" id="nomeCliente" required>
+       
                         <label for="numeroPolizza">Numero Polizza:</label><input type="text" id="numeroPolizza">
                         <label for="importo" id="label-importo">Importo Titolo (€):</label><input type="number" id="importo" step="0.01" placeholder="0.00" required oninput="calcolaImportoMultiplo()">
                         
+                     
                         <div id="divIncassoMultiplo" style="display:none;">
                             <hr>
                             <h4>Parte 1</h4>
                             <label>Importo Parte 1 (€):</label>
+       
                             <input type="number" id="importoMultiplo1" step="0.01" oninput="calcolaImportoMultiplo()">
                             <label>Metodologia Parte 1:</label>
                             <select id="metodologiaMultiplo1" onchange="aggiornaCampiCondizionaliMultiplo(1)"></select>
+               
                             <div id="campiCondizionaliMultiplo1"></div>
                             <hr>
                             <h4>Parte 2</h4>
@@ -492,6 +547,7 @@
                             <input type="number" id="importoMultiplo2" step="0.01" readonly>
                             <label>Metodologia Parte 2:</label>
                             <select id="metodologiaMultiplo2" onchange="aggiornaCampiCondizionaliMultiplo(2)"></select>
+      
                             <div id="campiCondizionaliMultiplo2"></div>
                             <hr>
                         </div>
@@ -500,16 +556,19 @@
                             <label for="provvigioni">Provvigioni (€):</label>
                             <input type="number" id="provvigioni" step="0.01" placeholder="0.00">
                         </div>
+             
                         <label for="arrotondamenti">Arrotondamenti (€):</label><input type="number" id="arrotondamenti" step="0.01" placeholder="Es. -0.02">
                         <label for="uscite">Uscite Cassa (€):</label><input type="number" id="uscite" step="0.01" placeholder="0.00">
                         <div id="form-buttons">
                             <button type="submit">Aggiungi Movimento</button>
+              
                         </div>
                     </form>
                 </div>
             </fieldset>
             <fieldset id="box-conteggio-cassa-fieldset">
                 <div class="box" id="box-conteggio-cassa">
+           
                     <h2>3. Conteggio Fisico Cassa</h2>
                     <div id="conteggioBanconote"></div>
                     <div id="conteggioMonete"></div>
@@ -523,17 +582,20 @@
             </fieldset>
         </div>
     
+        
         <div class="box">
             <h2>Riepilogo Movimenti di Cassa</h2>
             <table id="tabellaMovimenti">
                 <thead><tr>
                     <th class="col-data-mensile">Data</th>
                     <th>Cliente</th><th>Polizza</th><th>Metodo</th><th>Importo (€)</th>
+             
                     <th class="col-provvigioni">Provv.(€)</th>
                     <th>Arroton. (€)</th><th>Uscite (€)</th>
                     <th class="col-impatto-cassa">Impatto (€)</th>
                     <th>Azioni</th>
                 </tr></thead>
+            
                 <tbody></tbody>
             </table>
             <div class="riepilogo-totali col-cassa-teorica">Cassa Teorica Finale (Riporto + Movimenti): € <span id="cassaTeorica">0.00</span></div>
@@ -542,11 +604,13 @@
         <div class="box" id="box-provvigioni" style="display:none;">
             <h2>Riepilogo Provvigioni e Decadi (Mese Corrente)</h2>
             <div class="riepilogo-totali">
+     
                 Totale Provvigioni del Mese: € <span id="provvigioni-mese-corrente">0.00</span>
             </div>
             <div class="decade-grid">
                 <div><strong>1ª Decade (1-10):</strong> € <span id="decade1-result">0.00</span></div>
                 <div><strong>2ª Decade (11-20):</strong> € <span id="decade2-result">0.00</span></div>
+                
                 <div><strong>3ª Decade (21+):</strong> € <span id="decade3-result">0.00</span></div>
             </div>
         </div>
@@ -562,6 +626,7 @@
         <div id="print-page-1">
             <h1 id="print-header"></h1>
             <div id="print-table-container"></div>
+            
             <div id="print-cassa-teorica-container"></div>
         </div>
         <div id="print-page-2">
@@ -577,6 +642,7 @@
       projectId: "giornalecassa",
       storageBucket: "giornalecassa.appspot.com",
       messagingSenderId: "655250052165",
+  
       appId: "1:655250052165:web:8cead9e63e7dd951773f2c"
     };
 
@@ -591,7 +657,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         caricaDatiDaFirebase();
     });
-
     async function caricaDatiDaFirebase() {
         if(statusIndicator) {
             statusIndicator.textContent = 'Caricamento...';
@@ -614,7 +679,8 @@
     }
 
     async function salvaStatoCorrente(silenzioso = false, notificationId = null) {
-        const indicator = notificationId ? document.getElementById(notificationId) : statusIndicator;
+        const indicator = notificationId ?
+            document.getElementById(notificationId) : statusIndicator;
         if (!silenzioso && indicator && statusIndicator) {
             indicator.textContent = 'Salvataggio in corso...';
             indicator.className = 'save-notification success';
@@ -636,6 +702,7 @@
                     setTimeout(() => { 
                         indicator.style.opacity = '0';
                         setTimeout(() => { indicator.style.display = 'none'; }, 500);
+                    
                     }, 2000);
                 }
             }
@@ -649,6 +716,7 @@
                     setTimeout(() => { 
                         indicator.style.opacity = '0';
                         setTimeout(() => { indicator.style.display = 'none'; }, 500);
+                    
                     }, 3000);
                 }
             }
@@ -684,7 +752,8 @@
         document.getElementById('box-conteggio-cassa').style.display = isSimplifiedView ? 'none' : 'block';
         document.getElementById('box-verifica-finale').style.display = isSimplifiedView ? 'none' : 'block';
         
-        document.getElementById('btn-festa').style.display = isSimplifiedView ? 'none' : 'inline-block';
+        document.getElementById('btn-festa').style.display = isSimplifiedView ?
+            'none' : 'inline-block';
 
         if (isSimplifiedView) {
             document.body.classList.add('vista-mensile');
@@ -704,7 +773,6 @@
         const label = document.getElementById('riporto-mode-label');
         const dataKey = formatDate(stato.dataSelezionata);
         const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
-
         if (isManual) {
             inputRiporto.readOnly = false;
             label.textContent = 'Riporto Manuale';
@@ -735,7 +803,8 @@
                 const movDate = new Date(year, month - 1, day);
                 
                 if (movDate.getMonth() === selectedMonth && movDate.getFullYear() === selectedYear) {
-                    const movimentiDelGiorno = datiCompagnia[dKey].movimenti || [];
+                    const movimentiDelGiorno = datiCompagnia[dKey].movimenti ||
+                        [];
                     movimentiDelGiorno.forEach(m => {
                         m.dataMovimento = dKey; 
                         movimentiDaMostrare.push(m);
@@ -804,7 +873,6 @@
         if (!stato.datiCompleti[stato.compagniaSelezionata][dataKey]) stato.datiCompleti[stato.compagniaSelezionata][dataKey] = creaNuovoGiorno(stato.dataSelezionata);
         
         const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
-        
         if (datiGiorno.riportoIsManual) {
             datiGiorno.riportoIniziale = parseFloat(document.getElementById('riportoIniziale').value) || 0;
         }
@@ -1023,6 +1091,7 @@
             } else if (m.metodologia === 'POS' && stato.compagniaSelezionata === 'Allianz') {
                 metodoDisplay = `POS (${m.tipoPosAllianz || ''})`;
             } else if (m.metodologia === 'Assegno') {
+  
                 metodoDisplay += ` ${m.numeroAssegno || ''}`;
             } else if (m.metodologia === 'Rientro da Anticipo') {
                 metodoDisplay += ` (${m.rientroMetodo || ''})`;
@@ -1044,6 +1113,7 @@
                 <td>${(m.arrotondamenti || 0).toFixed(2)}</td>
                 <td>${(m.uscite || 0).toFixed(2)}</td>
                 <td class="col-impatto-cassa"><strong>${impattoCassa.toFixed(2)}</strong></td>
+      
                 <td>
                     <button type="button" class="button-edit" onclick="modificaMovimento(${index}, '${dataKeyOriginale}')" ${m.isSplit ? 'disabled title="Gli incassi multipli non sono modificabili"' : ''}>Modifica</button>
                     <button type="button" class="button-delete" onclick="cancellaMovimento(${index}, '${dataKeyOriginale}')">Elimina</button>
@@ -1124,6 +1194,7 @@
                                 (m.metodologia === 'Rientro da Anticipo' && (m.rientroMetodo === 'Contanti' || m.rientroMetodo === 'Assegno'));
 
             let impatto = 0;
+     
             if (isCashBased) {
                 impatto = (m.importo || 0) + (m.arrotondamenti || 0);
             }
@@ -1164,8 +1235,7 @@
         const tipoAnticipo = document.getElementById('tipoAnticipo').value;
         const showProvvigioni = (compagnia === 'HDI' || compagnia === 'Vittoria') && metodologia !== 'Rientro da Anticipo';
         const showRientro = metodologia === 'Rientro da Anticipo';
-        const showAssegno = metodologia === 'Assegno' ||
-                            (showRientro && rientroMetodo === 'Assegno') || (metodologia === 'Anticipo' && tipoAnticipo === 'Anticipo Assegno');
+        const showAssegno = metodologia === 'Assegno' || (showRientro && rientroMetodo === 'Assegno') || (metodologia === 'Anticipo' && tipoAnticipo === 'Anticipo Assegno');
         const showTipoAnticipo = metodologia === 'Anticipo';
         const showTipoPosAllianz = metodologia === 'POS' && compagnia === 'Allianz';
         
@@ -1187,6 +1257,7 @@
 
         let totaleProvvigioniMese = 0;
         const decadi = { 1: { titoli: 0, provvigioni: 0 }, 2: { titoli: 0, provvigioni: 0 }, 3: { titoli: 0, provvigioni: 0 } };
+
         for (const dataKey in datiCompagnia) {
             const [year, month, day] = dataKey.split('-').map(Number);
             const dataGiornale = new Date(year, month - 1, day);
@@ -1196,9 +1267,15 @@
                     const giorno = dataGiornale.getDate();
                     totaleProvvigioniMese += (m.provvigioni || 0);
                 
-                    const decadeNum = giorno <= 10 ? 1 : (giorno <= 20 ? 2 : 3);
-                    decadi[decadeNum].titoli += m.importo;
-                    decadi[decadeNum].provvigioni += (m.provvigioni || 0);
+                    // --- INIZIO CODICE CORRETTO ---
+                    // Esegue il calcolo per la decade solo se il movimento
+                    // NON è un "Rientro da Anticipo".
+                    if (m.metodologia !== 'Rientro da Anticipo') {
+                        const decadeNum = giorno <= 10 ? 1 : (giorno <= 20 ? 2 : 3);
+                        decadi[decadeNum].titoli += m.importo;
+                        decadi[decadeNum].provvigioni += (m.provvigioni || 0);
+                    }
+                    // --- FINE CODICE CORRETTO ---
                 });
             }
         }
@@ -1369,12 +1446,14 @@
             title: 'Gestione Anticipi',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', tipoAnticipo: 'Tipo Anticipo', anticipoDi: 'Anticipo di', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
             filterFn: mov => mov.metodologia === 'Anticipo'
+  
         },
         'bonifici_allianz': {
             type: 'bonifici_allianz',
             title: 'Gestione Bonifici (Allianz)',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
             filterFn: mov => mov.metodologia === 'Bonifico' && mov.compagnia === 'Allianz'
+    
         },
         'bonifici_hdi_arag': {
             type: 'bonifici_hdi_arag',
@@ -1399,6 +1478,7 @@
             for (const dataKey in stato.datiCompleti[compagnia]) {
                 (stato.datiCompleti[compagnia][dataKey].movimenti || []).forEach((mov, index) => {
                     const movimentoCompleto = { ...mov, compagnia, dataKey, originalIndex: index };
+                   
                     if (configTabellaCorrente.filterFn(movimentoCompleto)) {
                         datiTabellaCorrente.push(movimentoCompleto);
                     }
@@ -1449,6 +1529,7 @@
                 datiFiltrati = datiFiltrati.filter(d => {
                     const [, month] = d.dataKey.split('-');
                     return parseInt(month) - 1 == mese;
+               
                 });
             }
         }
@@ -1495,13 +1576,16 @@
 
                 switch(key) {
                     case 'dataKey':
+ 
                         const [year, month, day] = content.split('-').map(Number);
                         cell.textContent = new Date(year, month-1, day).toLocaleDateString('it-IT');
                         break;
+                   
                     case 'importo':
                     case 'nomeCliente':
                     case 'numeroPolizza':
                         cell.textContent = (key === 'importo') ? (content || 0).toFixed(2) : content;
+                      
                         if (!isLocked) {
                            cell.contentEditable = true;
                            cell.onblur = (e) => salvaModificaGenerica(e.target);
@@ -1619,7 +1703,8 @@
                 <option value="Altra">Altra Compagnia</option>
             </select>
             <div id="altra-compagnia-div" style="display:none;">
-                <label>Nome Altra Compagnia:</label>
+         
+               <label>Nome Altra Compagnia:</label>
                 <input type="text" id="add-altra-compagnia">
             </div>`;
         switch(config.type) {
@@ -1630,6 +1715,7 @@
                     <select id="add-tipoAnticipo">
                         <option>Anticipo Contanti</option><option>Anticipo Assegno</option><option>Anticipo POS</option>
                         <option>Anticipo Bonifico</option><option>Plafond</option><option>Sospeso Cassa</option>
+   
                     </select>
                     <label>Anticipo di:</label><input type="text" id="add-anticipoDi">`;
                 break;
@@ -1650,7 +1736,8 @@
     function processaFormAggiunta() {
         const config = configTabellaCorrente;
         const dataInput = document.getElementById('add-data');
-        if (!dataInput.value) { alert('Per favore, inserisci una data.'); return; }
+        if (!dataInput.value) { alert('Per favore, inserisci una data.'); return;
+        }
 
         const data = new Date(dataInput.valueAsDate);
         const dataKey = formatDate(data);
