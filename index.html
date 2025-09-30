@@ -133,11 +133,10 @@
         .utility-button:hover i { color: #007bff; }
         .utility-button:active i { color: #28a745; }
         
-        /* Stile per il nuovo pulsante Abbuoni */
         .utility-button-full-width {
-            grid-column: 1 / -1; /* Occupa tutta la larghezza della griglia */
-            width: auto;         /* Larghezza automatica per adattarsi */
-            height: 80px;        /* Altezza ridotta come richiesto */
+            grid-column: 1 / -1; 
+            width: auto;         
+            height: 80px;        
         }
         /* === FINE NUOVI STILI === */
 
@@ -207,7 +206,6 @@
         #divIncassoMultiplo { border: 2px dashed var(--primary-color); padding: 15px; margin-top: 15px; border-radius: 5px; }
         #divIncassoMultiplo hr { margin: 20px 0; }
         
-        /* NUOVI STILI PER IL TOGGLE DEL RIPORTO */
         .riporto-toggle-container {
             display: flex; align-items: center;
             justify-content: flex-end;
@@ -237,20 +235,12 @@
             background-color: white;
             transition: .4s;
         }
-        input:checked + .slider {
-            background-color: #28a745; /* Verde per 'Manuale' */
-        }
-        input:not(:checked) + .slider {
-            background-color: #007bff; /* Blu per 'Automatico' */
-        }
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
+        input:checked + .slider { background-color: #28a745; }
+        input:not(:checked) + .slider { background-color: #007bff; }
+        input:checked + .slider:before { transform: translateX(26px); }
         .slider.round { border-radius: 34px; }
         .slider.round:before { border-radius: 50%; }
-        /* FINE NUOVI STILI */
 
-        /* STILI PER LA STAMPA PERSONALIZZATA */
         @media print {
             body { background-color: #fff; padding: 0; margin: 0; }
             body > *:not(#print-layout) { display: none !important; }
@@ -337,7 +327,7 @@
                         <i class="far fa-credit-card fa-2x"></i>
                         <span>POS HDI/ARAG</span>
                     </button>
-                     <button class="utility-button utility-button-full-width" onclick="mostraTabella('abbuoni')">
+                    <button class="utility-button utility-button-full-width" onclick="mostraTabella('abbuoni')">
                         <i class="fas fa-tags fa-2x"></i>
                         <span>ABBUONI</span>
                     </button>
@@ -527,7 +517,8 @@
                     <th>Cliente</th><th>Polizza</th><th>Metodo</th><th>Importo (€)</th>
                     <th class="col-provvigioni">Provv.(€)</th>
                     <th>Arroton. (€)</th>
-                    <th>Abbuoni (€)</th> <th>Uscite (€)</th>
+                    <th>Abbuoni (€)</th>
+                    <th>Uscite (€)</th>
                     <th class="col-impatto-cassa">Impatto (€)</th>
                     <th>Azioni</th>
                  </tr></thead>
@@ -692,7 +683,6 @@
         caricaGiornale(new Date());
     }
 
-    // NUOVA FUNZIONE: Gestisce il cambio tra modalità Automatica e Manuale
     function toggleRiportoMode(isManual) {
         const inputRiporto = document.getElementById('riportoIniziale');
         const label = document.getElementById('riporto-mode-label');
@@ -712,7 +702,6 @@
         salvaStatoCorrente(true);
     }
 
-    // FUNZIONE 'caricaGiornale' MODIFICATA
     function caricaGiornale(data) {
         if (!data) return;
         stato.dataSelezionata = data;
@@ -786,7 +775,6 @@
         return { riportoIniziale: riporto, movimenti: [], conteggioFisico: {}, cassaTeorica: riporto };
     }
 
-    // FUNZIONE 'salvaDatiLocali' MODIFICATA
     function salvaDatiLocali() {
         if(!stato.compagniaSelezionata || !stato.dataSelezionata) return;
         const isSimplifiedView = stato.compagniaSelezionata === 'ARAG' || stato.compagniaSelezionata === 'Helvetia';
@@ -813,8 +801,8 @@
             numeroPolizza: document.getElementById('numeroPolizza').value,
             provvigioni: parseFloat(document.getElementById('provvigioni').value) || 0,
             arrotondamenti: parseFloat(document.getElementById('arrotondamenti').value) || 0,
-            abbuoni: parseFloat(document.getElementById('abbuoni').value) || 0, // DATO AGGIUNTO
-            personaAbbuono: document.getElementById('personaAbbuono').value,     // DATO AGGIUNTO
+            abbuoni: parseFloat(document.getElementById('abbuoni').value) || 0,
+            personaAbbuono: document.getElementById('personaAbbuono').value,
             uscite: parseFloat(document.getElementById('uscite').value) || 0,
         };
 
@@ -889,8 +877,8 @@
         document.getElementById('importo').value = movimento.importo;
         document.getElementById('provvigioni').value = movimento.provvigioni || '';
         document.getElementById('arrotondamenti').value = movimento.arrotondamenti;
-        document.getElementById('abbuoni').value = movimento.abbuoni || ''; // CAMPO AGGIUNTO
-        document.getElementById('personaAbbuono').value = movimento.personaAbbuono || ''; // CAMPO AGGIUNTO
+        document.getElementById('abbuoni').value = movimento.abbuoni || '';
+        document.getElementById('personaAbbuono').value = movimento.personaAbbuono || '';
         document.getElementById('uscite').value = movimento.uscite;
         document.getElementById('date-selector').value = dataKey;
         
@@ -899,7 +887,7 @@
         document.getElementById('form-title').textContent = `Modifica Movimento del ${dateToSet.toLocaleDateString('it-IT')}`;
         document.getElementById('form-buttons').innerHTML = `<button type="submit">Salva Modifiche</button><button type="button" class="button-secondary" onclick="annullaModifica()">Annulla</button>`;
         aggiornaCampiCondizionali();
-        togglePersonaAbbuono(); // VISIBILITÀ AGGIORNATA
+        togglePersonaAbbuono();
         window.scrollTo(0, 0);
     }
 
@@ -909,7 +897,7 @@
         document.getElementById('form-title').textContent = "2. Registrazione Movimento";
         document.getElementById('form-buttons').innerHTML = `<button type="submit">Aggiungi Movimento</button>`;
         aggiornaCampiCondizionali();
-        togglePersonaAbbuono(); // ASSICURA CHE IL CAMPO SIA NASCOSTO
+        togglePersonaAbbuono();
     }
 
     function cancellaMovimento(index, dataMovimento) {
@@ -1010,7 +998,8 @@
 
             let impattoCassa = 0;
             if (isCashBased) {
-                impattoCassa = (m.importo || 0) + (m.arrotondamenti || 0);
+                // CALCOLO IMPATTO MODIFICATO
+                impattoCassa = (m.importo || 0) + (m.arrotondamenti || 0) - (m.abbuoni || 0);
             }
             impattoCassa -= (m.uscite || 0);
 
@@ -1032,7 +1021,6 @@
             const riga = tbody.insertRow();
             const [year, month, day] = dataKeyOriginale.split('-').map(Number);
             const dataLocale = new Date(year, month-1, day);
-            // AGGIORNAMENTO RIGA TABELLA
             riga.innerHTML = `
                 <td class="col-data-mensile">${dataLocale.toLocaleDateString('it-IT')}</td>
                 <td>${m.nomeCliente || ''}</td>
@@ -1041,7 +1029,8 @@
                 <td>${(m.importo || 0).toFixed(2)}</td>
                 <td class="col-provvigioni provvigione-editabile" onclick="rendiProvvigioneEditabile(this, ${index}, '${dataKeyOriginale}')">${(m.provvigioni || 0).toFixed(2)}</td>
                 <td>${(m.arrotondamenti || 0).toFixed(2)}</td>
-                <td>${(m.abbuoni || 0).toFixed(2)}</td> <td>${(m.uscite || 0).toFixed(2)}</td>
+                <td>${(m.abbuoni || 0).toFixed(2)}</td>
+                <td>${(m.uscite || 0).toFixed(2)}</td>
                 <td class="col-impatto-cassa"><strong>${impattoCassa.toFixed(2)}</strong></td>
                 <td>
                     <button type="button" class="button-edit" onclick="modificaMovimento(${index}, '${dataKeyOriginale}')" ${m.isSplit ? 'disabled title="Gli incassi multipli non sono modificabili"' : ''}>Modifica</button>
@@ -1124,7 +1113,8 @@
 
             let impatto = 0;
             if (isCashBased) {
-                impatto = (m.importo || 0) + (m.arrotondamenti || 0);
+                // CALCOLO IMPATTO MODIFICATO
+                impatto = (m.importo || 0) + (m.arrotondamenti || 0) - (m.abbuoni || 0);
             }
             impatto -= (m.uscite || 0);
 
@@ -1225,7 +1215,6 @@
         return dataPrec;
     }
     
-    // NUOVA FUNZIONE per mostrare/nascondere il campo "Persona Abbuono"
     function togglePersonaAbbuono() {
         const abbuoniVal = parseFloat(document.getElementById('abbuoni').value) || 0;
         const div = document.getElementById('divPersonaAbbuono');
@@ -1398,14 +1387,13 @@
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
             filterFn: mov => mov.metodologia === 'POS' && (mov.compagnia === 'HDI' || mov.compagnia === 'ARAG')
         },
-        // NUOVA CONFIGURAZIONE TABELLA ABBUONI
         'abbuoni': {
             type: 'abbuoni',
             title: 'Gestione Abbuoni',
-            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', abbuoni: 'Importo Abbuono (€)', personaAbbuono: 'Effettuato da', note: 'Note' },
+            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', abbuoni: 'Importo Abbuono (€)', personaAbbuono: 'Effettuato da', note: 'Note', abbuonoRegolato: 'Regolato' },
             filterFn: mov => mov.abbuoni && parseFloat(mov.abbuoni) > 0,
-            hasTextFilter: true, // Flag per mostrare il filtro testuale
-            textFilterKey: 'personaAbbuono' // Campo su cui filtrare
+            hasTextFilter: true, 
+            textFilterKey: 'personaAbbuono'
         }
     };
     
@@ -1430,7 +1418,6 @@
         popolaFiltri(datiTabellaCorrente);
         applicaFiltriTabella();
 
-        // MOSTRA/NASCONDI FILTRO TESTUALE IN BASE ALLA CONFIGURAZIONE
         const textFilter = document.getElementById('generic-filtro-testo');
         if (configTabellaCorrente.hasTextFilter) {
             textFilter.style.display = 'inline-block';
@@ -1468,7 +1455,7 @@
         const anno = document.getElementById('generic-filtro-anno').value;
         const mese = document.getElementById('generic-filtro-mese').value;
         const giorno = document.getElementById('generic-filtro-giorno').value;
-        const testo = document.getElementById('generic-filtro-testo').value.toLowerCase(); // Leggi filtro testuale
+        const testo = document.getElementById('generic-filtro-testo').value.toLowerCase();
         
         let datiFiltrati = datiTabellaCorrente;
         if (giorno) {
@@ -1485,7 +1472,6 @@
             }
         }
 
-        // APPLICA FILTRO TESTUALE SE NECESSARIO
         if (testo && configTabellaCorrente.hasTextFilter) {
             const filterKey = configTabellaCorrente.textFilterKey;
             datiFiltrati = datiFiltrati.filter(d =>
@@ -1500,7 +1486,7 @@
         document.getElementById('generic-filtro-anno').value = 'tutti';
         document.getElementById('generic-filtro-mese').value = 'tutti';
         document.getElementById('generic-filtro-giorno').value = '';
-        document.getElementById('generic-filtro-testo').value = ''; // Resetta filtro testuale
+        document.getElementById('generic-filtro-testo').value = '';
         applicaFiltriTabella();
     }
 
@@ -1541,9 +1527,9 @@
                         cell.textContent = new Date(year, month-1, day).toLocaleDateString('it-IT');
                         break;
                     case 'importo':
-                    case 'abbuoni': // Gestione visualizzazione per abbuoni
+                    case 'abbuoni':
                         cell.textContent = (content || 0).toFixed(2);
-                        if (!isLocked && key === 'importo') { // Solo importo è editabile
+                        if (!isLocked && key === 'importo') {
                            cell.contentEditable = true;
                            cell.onblur = (e) => salvaModificaGenerica(e.target);
                         }
@@ -1569,6 +1555,7 @@
                         cell.innerHTML = `<input type="date" value="${content}" onchange="salvaModificaGenerica(this)">`;
                         break;
                     case 'incassato':
+                    case 'abbuonoRegolato': // Gestione checkbox
                         cell.innerHTML = `<input type="checkbox" ${content ? 'checked' : ''} onchange="salvaModificaGenerica(this)">`;
                         break;
                     default:
@@ -1633,7 +1620,7 @@
         const movimento = stato.datiCompleti[compagnia][key].movimenti[index];
         riga.className = '';
 
-        if (movimento.incassato) {
+        if (movimento.incassato || movimento.abbuonoRegolato) { // CONDIZIONE MODIFICATA
             riga.classList.add('riga-incassato');
         } else {
             const [year, month, day] = key.split('-').map(Number);
@@ -1649,7 +1636,6 @@
         div.style.display = (selectedValue === 'Altra') ? 'block' : 'none';
     }
 
-    // FUNZIONE AGGIORNATA PER GESTIRE DIVERSI FORM DI AGGIUNTA
     function apriFormAggiunta() {
         const formContainer = document.getElementById('add-movimento-form');
         formContainer.innerHTML = '';
@@ -1691,7 +1677,7 @@
                     <select id="add-compagnia"><option>HDI</option><option>ARAG</option></select>`;
                 break;
             case 'abbuoni':
-                hasGenericImporto = false; // Questo form non ha il campo "Importo" generico
+                hasGenericImporto = false;
                 specificHtml += `<label>Importo Abbuono:</label><input type="number" id="add-abbuono" step="0.01" required>`;
                 specificHtml += `<label>Effettuato da:</label><input type="text" id="add-personaAbbuono" required>`;
                 specificHtml += addCompagniaSelect();
@@ -1711,7 +1697,6 @@
         document.getElementById('add-movimento-modal').style.display = 'flex';
     }
 
-    // FUNZIONE AGGIORNATA PER PROCESSARE DIVERSI FORM
     function processaFormAggiunta() {
         const config = configTabellaCorrente;
         const dataInput = document.getElementById('add-data');
@@ -1732,7 +1717,7 @@
             metodologia: '',
             nomeCliente: document.getElementById('add-cliente').value,
             numeroPolizza: document.getElementById('add-polizza').value,
-            importo: parseFloat(document.getElementById('add-importo')?.value) || 0, // Opzionale
+            importo: parseFloat(document.getElementById('add-importo')?.value) || 0,
             note: document.getElementById('add-note').value,
             isManuallyAdded: true
         };
@@ -1835,7 +1820,7 @@
     window.calcolaImportoMultiplo = calcolaImportoMultiplo;
     window.aggiornaCampiCondizionaliMultiplo = aggiornaCampiCondizionaliMultiplo;
     window.toggleRiportoMode = toggleRiportoMode;
-    window.togglePersonaAbbuono = togglePersonaAbbuono; // Funzione resa globale
+    window.togglePersonaAbbuono = togglePersonaAbbuono;
 </script>
 </body>
 </html>
