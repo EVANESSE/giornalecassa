@@ -96,7 +96,6 @@
             transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.35); filter: brightness(1.1);
         }
         
-        /* === NUOVI STILI PER LA SEZIONE "ALTRE FUNZIONI" === */
         #utility-section {
             background: linear-gradient(145deg, #e6e6e6, #ffffff);
         }
@@ -138,7 +137,6 @@
             width: auto;         
             height: 80px;        
         }
-        /* === FINE NUOVI STILI === */
 
         .backup-container {
             position: absolute; top: 30px; right: 40px;
@@ -598,6 +596,7 @@
         }
     }
 
+    // ##### FUNZIONE DI SALVATAGGIO MODIFICATA #####
     async function salvaStatoCorrente(silenzioso = false, notificationId = null) {
         const indicator = notificationId ? document.getElementById(notificationId) : statusIndicator;
         if (!silenzioso && indicator && statusIndicator) {
@@ -608,8 +607,22 @@
         }
 
         try {
-            if(stato.compagniaSelezionata && stato.dataSelezionata) salvaDatiLocali();
-            await dbRef.set(stato.datiCompleti);
+            if (stato.compagniaSelezionata && stato.dataSelezionata) salvaDatiLocali();
+
+            // Se è selezionata una compagnia, aggiorna solo i dati di quella compagnia
+            if (stato.compagniaSelezionata) {
+                const updateData = {};
+                // Prepara un oggetto con chiave dinamica [nomeCompagnia]: {dati...}
+                updateData[stato.compagniaSelezionata] = stato.datiCompleti[stato.compagniaSelezionata];
+                
+                // Usa .update() per modificare solo i campi specificati senza toccare le altre compagnie
+                await dbRef.update(updateData);
+            } else {
+                console.warn("Nessuna compagnia selezionata, salvataggio annullato.");
+                 if (indicator) indicator.style.display = 'none';
+                return;
+            }
+
              if (indicator) {
                 indicator.textContent = 'Salvato con successo!';
                 indicator.className = 'save-notification success';
@@ -998,7 +1011,6 @@
 
             let impattoCassa = 0;
             if (isCashBased) {
-                // CALCOLO IMPATTO MODIFICATO
                 impattoCassa = (m.importo || 0) + (m.arrotondamenti || 0) - (m.abbuoni || 0);
             }
             impattoCassa -= (m.uscite || 0);
@@ -1113,7 +1125,6 @@
 
             let impatto = 0;
             if (isCashBased) {
-                // CALCOLO IMPATTO MODIFICATO
                 impatto = (m.importo || 0) + (m.arrotondamenti || 0) - (m.abbuoni || 0);
             }
             impatto -= (m.uscite || 0);
@@ -1266,7 +1277,8 @@
                     if (typeof datiImportati === 'object' && datiImportati !== null && !Array.isArray(datiImportati)) {
                         if (confirm("Sei sicuro di voler importare questo backup? I dati attuali verranno sovrascritti.")) {
                             stato.datiCompleti = datiImportati;
-                            await salvaStatoCorrente();
+                            // L'importazione usa .set() volutamente per sovrascrivere tutto
+                            await dbRef.set(stato.datiCompleti);
                             alert("Backup importato e salvato online con successo! La pagina verrà ricaricata.");
                             location.reload();
                         }
@@ -1555,7 +1567,7 @@
                         cell.innerHTML = `<input type="date" value="${content}" onchange="salvaModificaGenerica(this)">`;
                         break;
                     case 'incassato':
-                    case 'abbuonoRegolato': // Gestione checkbox
+                    case 'abbuonoRegolato':
                         cell.innerHTML = `<input type="checkbox" ${content ? 'checked' : ''} onchange="salvaModificaGenerica(this)">`;
                         break;
                     default:
@@ -1620,7 +1632,7 @@
         const movimento = stato.datiCompleti[compagnia][key].movimenti[index];
         riga.className = '';
 
-        if (movimento.incassato || movimento.abbuonoRegolato) { // CONDIZIONE MODIFICATA
+        if (movimento.incassato || movimento.abbuonoRegolato) {
             riga.classList.add('riga-incassato');
         } else {
             const [year, month, day] = key.split('-').map(Number);
