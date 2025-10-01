@@ -596,7 +596,6 @@
         }
     }
 
-    // ##### FUNZIONE DI SALVATAGGIO MODIFICATA #####
     async function salvaStatoCorrente(silenzioso = false, notificationId = null) {
         const indicator = notificationId ? document.getElementById(notificationId) : statusIndicator;
         if (!silenzioso && indicator && statusIndicator) {
@@ -609,13 +608,9 @@
         try {
             if (stato.compagniaSelezionata && stato.dataSelezionata) salvaDatiLocali();
 
-            // Se è selezionata una compagnia, aggiorna solo i dati di quella compagnia
             if (stato.compagniaSelezionata) {
                 const updateData = {};
-                // Prepara un oggetto con chiave dinamica [nomeCompagnia]: {dati...}
                 updateData[stato.compagniaSelezionata] = stato.datiCompleti[stato.compagniaSelezionata];
-                
-                // Usa .update() per modificare solo i campi specificati senza toccare le altre compagnie
                 await dbRef.update(updateData);
             } else {
                 console.warn("Nessuna compagnia selezionata, salvataggio annullato.");
@@ -1277,7 +1272,6 @@
                     if (typeof datiImportati === 'object' && datiImportati !== null && !Array.isArray(datiImportati)) {
                         if (confirm("Sei sicuro di voler importare questo backup? I dati attuali verranno sovrascritti.")) {
                             stato.datiCompleti = datiImportati;
-                            // L'importazione usa .set() volutamente per sovrascrivere tutto
                             await dbRef.set(stato.datiCompleti);
                             alert("Backup importato e salvato online con successo! La pagina verrà ricaricata.");
                             location.reload();
@@ -1623,8 +1617,35 @@
         }
     }
     
-    function salvaTutteLeModificheTabella() {
-        salvaStatoCorrente(false, 'generic-modal-notification');
+    // ##### FUNZIONE DI SALVATAGGIO PER "ALTRE FUNZIONI" MODIFICATA #####
+    async function salvaTutteLeModificheTabella() {
+        const indicator = document.getElementById('generic-modal-notification');
+        indicator.textContent = 'Salvataggio in corso...';
+        indicator.className = 'save-notification success';
+        indicator.style.display = 'block';
+        indicator.style.opacity = '1';
+
+        try {
+            // Usa .set() per salvare l'intero stato, poiché le modifiche potrebbero
+            // riguardare più compagnie. Questo è il comportamento corretto per questa specifica sezione.
+            await dbRef.set(stato.datiCompleti);
+            
+            indicator.textContent = 'Salvato con successo!';
+            indicator.className = 'save-notification success';
+            setTimeout(() => { 
+                indicator.style.opacity = '0';
+                setTimeout(() => { indicator.style.display = 'none'; }, 500);
+            }, 2000);
+
+        } catch (error) {
+            console.error("Errore salvataggio da tabella generica:", error);
+            indicator.textContent = 'Errore Salvataggio';
+            indicator.className = 'save-notification error';
+             setTimeout(() => { 
+                indicator.style.opacity = '0';
+                setTimeout(() => { indicator.style.display = 'none'; }, 500);
+            }, 3000);
+        }
     }
 
     function aggiornaStileRiga(riga) {
