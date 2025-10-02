@@ -416,6 +416,14 @@
                         <label for="metodologia">Metodologia Incasso:</label>
                         <select id="metodologia" onchange="aggiornaCampiCondizionali()"></select>
                         
+                        <div id="divVersamento" style="display:none;">
+                            <label for="tipoVersamento">Tipo Versamento:</label>
+                            <select id="tipoVersamento">
+                                <option value="Versamento Contanti">Versamento Contanti</option>
+                                <option value="Versamento Assegno">Versamento Assegno</option>
+                            </select>
+                        </div>
+
                         <div id="campi-standard">
                              <div id="divTipoPosAllianz" style="display:none;">
                                 <label for="tipoPosAllianz">Tipo POS:</label>
@@ -663,6 +671,9 @@
         document.getElementById('box-provvigioni').style.display = showProvvigioni ? 'block' : 'none';
         const selectMetodo = document.getElementById('metodologia');
         selectMetodo.innerHTML = `<option value="Contanti">Contanti</option><option value="Assegno">Assegno</option><option value="POS">POS</option><option value="Bonifico">Bonifico</option>`;
+        
+        selectMetodo.add(new Option('VERSAMENTO', 'VERSAMENTO')); // Aggiunta opzione VERSAMENTO
+        
         if (compagnia === 'Allianz') {
              selectMetodo.add(new Option('Finanziamento Allianz Bank', 'Finanziamento Allianz Bank'));
         }
@@ -804,16 +815,6 @@
         const dataPerSalvataggio = new Date(document.getElementById('date-selector').valueAsDate || new Date());
         const dataKey = formatDate(dataPerSalvataggio);
 
-        const commonData = {
-            nomeCliente: document.getElementById('nomeCliente').value,
-            numeroPolizza: document.getElementById('numeroPolizza').value,
-            provvigioni: parseFloat(document.getElementById('provvigioni').value) || 0,
-            arrotondamenti: parseFloat(document.getElementById('arrotondamenti').value) || 0,
-            abbuoni: parseFloat(document.getElementById('abbuoni').value) || 0,
-            personaAbbuono: document.getElementById('personaAbbuono').value,
-            uscite: parseFloat(document.getElementById('uscite').value) || 0,
-        };
-
         if (!stato.datiCompleti[stato.compagniaSelezionata]) stato.datiCompleti[stato.compagniaSelezionata] = {};
         if (!stato.datiCompleti[stato.compagniaSelezionata][dataKey]) stato.datiCompleti[stato.compagniaSelezionata][dataKey] = creaNuovoGiorno(dataPerSalvataggio);
         const datiGiorno = stato.datiCompleti[stato.compagniaSelezionata][dataKey];
@@ -821,7 +822,29 @@
         
         const metodologia = document.getElementById('metodologia').value;
         const editingIndex = document.getElementById('editingIndex').value;
-        if (metodologia === 'Incasso Multiplo') {
+
+        if (metodologia === 'VERSAMENTO') {
+            const importoVersato = parseFloat(document.getElementById('importo').value) || 0;
+            const tipoVersamento = document.getElementById('tipoVersamento').value;
+            const movimento = {
+                metodologia: 'VERSAMENTO',
+                nomeCliente: tipoVersamento,
+                numeroPolizza: '',
+                importo: 0,
+                uscite: importoVersato,
+                provvigioni: 0,
+                arrotondamenti: 0,
+                abbuoni: 0,
+                personaAbbuono: '',
+            };
+            if (editingIndex !== "") {
+                datiGiorno.movimenti[editingIndex] = movimento;
+            } else {
+                datiGiorno.movimenti.push(movimento);
+            }
+        } else if (metodologia === 'Incasso Multiplo') {
+            // Logica Incasso Multiplo (invariata)
+            const commonData = { nomeCliente: document.getElementById('nomeCliente').value, numeroPolizza: document.getElementById('numeroPolizza').value, provvigioni: parseFloat(document.getElementById('provvigioni').value) || 0, arrotondamenti: parseFloat(document.getElementById('arrotondamenti').value) || 0, abbuoni: parseFloat(document.getElementById('abbuoni').value) || 0, personaAbbuono: document.getElementById('personaAbbuono').value, uscite: parseFloat(document.getElementById('uscite').value) || 0 };
             const importoTotale = parseFloat(document.getElementById('importo').value) || 0;
             const importo1 = parseFloat(document.getElementById('importoMultiplo1').value) || 0;
             const importo2 = parseFloat(document.getElementById('importoMultiplo2').value) || 0;
@@ -829,21 +852,19 @@
                 alert("La somma delle due parti non corrisponde all'importo totale del titolo.");
                 return;
             }
-
-            const movimento1 = { ...commonData, isSplit: true };
-            movimento1.importo = importo1;
-            movimento1.metodologia = document.getElementById('metodologiaMultiplo1').value;
-            Object.assign(movimento1, leggiCampiCondizionaliMultiplo(1));
-
-            const movimento2 = { ...commonData, isSplit: true };
-            movimento2.importo = importo2;
-            movimento2.metodologia = document.getElementById('metodologiaMultiplo2').value;
-            Object.assign(movimento2, leggiCampiCondizionaliMultiplo(2));
-            
+            const movimento1 = { ...commonData, isSplit: true, importo: importo1, metodologia: document.getElementById('metodologiaMultiplo1').value, ...leggiCampiCondizionaliMultiplo(1) };
+            const movimento2 = { ...commonData, isSplit: true, importo: importo2, metodologia: document.getElementById('metodologiaMultiplo2').value, ...leggiCampiCondizionaliMultiplo(2) };
             datiGiorno.movimenti.push(movimento1, movimento2);
         } else {
+            // Logica per tutti gli altri movimenti (invariata)
              const movimento = {
-                ...commonData,
+                nomeCliente: document.getElementById('nomeCliente').value,
+                numeroPolizza: document.getElementById('numeroPolizza').value,
+                provvigioni: parseFloat(document.getElementById('provvigioni').value) || 0,
+                arrotondamenti: parseFloat(document.getElementById('arrotondamenti').value) || 0,
+                abbuoni: parseFloat(document.getElementById('abbuoni').value) || 0,
+                personaAbbuono: document.getElementById('personaAbbuono').value,
+                uscite: parseFloat(document.getElementById('uscite').value) || 0,
                 importo: parseFloat(document.getElementById('importo').value) || 0,
                 metodologia: metodologia,
                 tipoPosAllianz: document.getElementById('tipoPosAllianz').value,
@@ -876,18 +897,24 @@
         
         document.getElementById('editingIndex').value = index;
         document.getElementById('metodologia').value = movimento.metodologia;
-        document.getElementById('tipoPosAllianz').value = movimento.tipoPosAllianz || 'POS Direzione';
-        document.getElementById('tipoAnticipo').value = movimento.tipoAnticipo || 'Anticipo Contanti';
-        document.getElementById('rientroMetodo').value = movimento.rientroMetodo || 'Contanti';
-        document.getElementById('numeroAssegno').value = movimento.numeroAssegno;
-        document.getElementById('nomeCliente').value = movimento.nomeCliente;
-        document.getElementById('numeroPolizza').value = movimento.numeroPolizza;
-        document.getElementById('importo').value = movimento.importo;
-        document.getElementById('provvigioni').value = movimento.provvigioni || '';
-        document.getElementById('arrotondamenti').value = movimento.arrotondamenti;
-        document.getElementById('abbuoni').value = movimento.abbuoni || '';
-        document.getElementById('personaAbbuono').value = movimento.personaAbbuono || '';
-        document.getElementById('uscite').value = movimento.uscite;
+
+        if (movimento.metodologia === 'VERSAMENTO') {
+            document.getElementById('importo').value = movimento.uscite;
+            document.getElementById('tipoVersamento').value = movimento.nomeCliente;
+        } else {
+            document.getElementById('tipoPosAllianz').value = movimento.tipoPosAllianz || 'POS Direzione';
+            document.getElementById('tipoAnticipo').value = movimento.tipoAnticipo || 'Anticipo Contanti';
+            document.getElementById('rientroMetodo').value = movimento.rientroMetodo || 'Contanti';
+            document.getElementById('numeroAssegno').value = movimento.numeroAssegno;
+            document.getElementById('nomeCliente').value = movimento.nomeCliente;
+            document.getElementById('numeroPolizza').value = movimento.numeroPolizza;
+            document.getElementById('importo').value = movimento.importo;
+            document.getElementById('provvigioni').value = movimento.provvigioni || '';
+            document.getElementById('arrotondamenti').value = movimento.arrotondamenti;
+            document.getElementById('abbuoni').value = movimento.abbuoni || '';
+            document.getElementById('personaAbbuono').value = movimento.personaAbbuono || '';
+            document.getElementById('uscite').value = movimento.uscite;
+        }
         document.getElementById('date-selector').value = dataKey;
         
         const [year, month, day] = dataKey.split('-').map(Number);
@@ -1137,40 +1164,69 @@
     function aggiornaCampiCondizionali() {
         if (!stato.compagniaSelezionata) return;
         const metodologia = document.getElementById('metodologia').value;
-        const isMultiplo = metodologia === 'Incasso Multiplo';
-        
-        document.getElementById('divIncassoMultiplo').style.display = isMultiplo ? 'block' : 'none';
-        document.getElementById('campi-standard').style.display = isMultiplo ? 'none' : 'block';
-        document.getElementById('label-importo').textContent = isMultiplo ? 'Importo Totale Titolo (€):' : 'Importo Titolo (€):';
-        if (isMultiplo) {
-            const opzioniBase = Array.from(document.getElementById('metodologia').options)
-                                    .filter(opt => !['Incasso Multiplo'].includes(opt.value))
-                                    .map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('');
-            document.getElementById('metodologiaMultiplo1').innerHTML = opzioniBase;
-            document.getElementById('metodologiaMultiplo2').innerHTML = opzioniBase;
-            aggiornaCampiCondizionaliMultiplo(1);
-            aggiornaCampiCondizionaliMultiplo(2);
-            calcolaImportoMultiplo();
-            return;
-        }
+        const isVersamento = metodologia === 'VERSAMENTO';
 
-        const compagnia = stato.compagniaSelezionata;
-        const rientroMetodo = document.getElementById('rientroMetodo').value;
-        const tipoAnticipo = document.getElementById('tipoAnticipo').value;
-        const showProvvigioni = (compagnia === 'HDI' || compagnia === 'Vittoria') && metodologia !== 'Rientro da Anticipo';
-        const showRientro = metodologia === 'Rientro da Anticipo';
-        const showAssegno = metodologia === 'Assegno' || (showRientro && rientroMetodo === 'Assegno') || (metodologia === 'Anticipo' && tipoAnticipo === 'Anticipo Assegno');
-        const showTipoAnticipo = metodologia === 'Anticipo';
-        const showTipoPosAllianz = metodologia === 'POS' && compagnia === 'Allianz';
-        
-        document.getElementById('divProvvigioni').style.display = showProvvigioni ? 'block' : 'none';
-        document.getElementById('divRientroMetodo').style.display = showRientro ? 'block' : 'none';
-        document.getElementById('divNumeroAssegno').style.display = showAssegno ? 'block' : 'none';
-        document.getElementById('divTipoAnticipo').style.display = showTipoAnticipo ? 'block' : 'none';
-        document.getElementById('divTipoPosAllianz').style.display = showTipoPosAllianz ? 'block' : 'none';
-        
-        if (!showProvvigioni) document.getElementById('provvigioni').value = '';
-        if (!showAssegno) document.getElementById('numeroAssegno').value = '';
+        // Nascondi o mostra campi in base alla selezione di VERSAMENTO
+        const displayStandard = isVersamento ? 'none' : 'block';
+        document.querySelector('label[for="nomeCliente"]').style.display = displayStandard;
+        document.getElementById('nomeCliente').style.display = displayStandard;
+        document.querySelector('label[for="numeroPolizza"]').style.display = displayStandard;
+        document.getElementById('numeroPolizza').style.display = displayStandard;
+        document.getElementById('nomeCliente').required = !isVersamento;
+
+        document.getElementById('divVersamento').style.display = isVersamento ? 'block' : 'none';
+
+        if (isVersamento) {
+            document.getElementById('label-importo').textContent = 'Importo Versato (€):';
+            // Nascondi tutti gli altri div condizionali
+            document.getElementById('divIncassoMultiplo').style.display = 'none';
+            document.getElementById('divTipoPosAllianz').style.display = 'none';
+            document.getElementById('divTipoAnticipo').style.display = 'none';
+            document.getElementById('divRientroMetodo').style.display = 'none';
+            document.getElementById('divNumeroAssegno').style.display = 'none';
+            document.getElementById('divProvvigioni').style.display = 'none';
+            // Pulisci valori non pertinenti
+            document.getElementById('provvigioni').value = '';
+            document.getElementById('uscite').value = '';
+            document.getElementById('arrotondamenti').value = '';
+            document.getElementById('abbuoni').value = '';
+            togglePersonaAbbuono();
+        } else {
+            // Logica originale per tutte le altre metodologie
+            const isMultiplo = metodologia === 'Incasso Multiplo';
+            document.getElementById('divIncassoMultiplo').style.display = isMultiplo ? 'block' : 'none';
+            document.getElementById('campi-standard').style.display = isMultiplo ? 'none' : 'block';
+            document.getElementById('label-importo').textContent = isMultiplo ? 'Importo Totale Titolo (€):' : 'Importo Titolo (€):';
+            if (isMultiplo) {
+                const opzioniBase = Array.from(document.getElementById('metodologia').options)
+                                        .filter(opt => !['Incasso Multiplo', 'VERSAMENTO'].includes(opt.value))
+                                        .map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('');
+                document.getElementById('metodologiaMultiplo1').innerHTML = opzioniBase;
+                document.getElementById('metodologiaMultiplo2').innerHTML = opzioniBase;
+                aggiornaCampiCondizionaliMultiplo(1);
+                aggiornaCampiCondizionaliMultiplo(2);
+                calcolaImportoMultiplo();
+                return;
+            }
+
+            const compagnia = stato.compagniaSelezionata;
+            const rientroMetodo = document.getElementById('rientroMetodo').value;
+            const tipoAnticipo = document.getElementById('tipoAnticipo').value;
+            const showProvvigioni = (compagnia === 'HDI' || compagnia === 'Vittoria') && metodologia !== 'Rientro da Anticipo';
+            const showRientro = metodologia === 'Rientro da Anticipo';
+            const showAssegno = metodologia === 'Assegno' || (showRientro && rientroMetodo === 'Assegno') || (metodologia === 'Anticipo' && tipoAnticipo === 'Anticipo Assegno');
+            const showTipoAnticipo = metodologia === 'Anticipo';
+            const showTipoPosAllianz = metodologia === 'POS' && compagnia === 'Allianz';
+            
+            document.getElementById('divProvvigioni').style.display = showProvvigioni ? 'block' : 'none';
+            document.getElementById('divRientroMetodo').style.display = showRientro ? 'block' : 'none';
+            document.getElementById('divNumeroAssegno').style.display = showAssegno ? 'block' : 'none';
+            document.getElementById('divTipoAnticipo').style.display = showTipoAnticipo ? 'block' : 'none';
+            document.getElementById('divTipoPosAllianz').style.display = showTipoPosAllianz ? 'block' : 'none';
+            
+            if (!showProvvigioni) document.getElementById('provvigioni').value = '';
+            if (!showAssegno) document.getElementById('numeroAssegno').value = '';
+        }
     }
 
     function aggiornaRiepilogoProvvigioni() {
@@ -1589,7 +1645,7 @@
             const movimenti = stato.datiCompleti[compagnia]?.[key]?.movimenti;
             if (movimenti && movimenti[index] !== undefined) {
                 movimenti.splice(index, 1);
-                await salvaStatoCorrente(true); 
+                await salvaTutteLeModificheTabella();
                 alert('Movimento eliminato.');
                 mostraTabella(configTabellaCorrente.type); 
             } else {
@@ -1617,7 +1673,6 @@
         }
     }
     
-    // ##### FUNZIONE DI SALVATAGGIO PER "ALTRE FUNZIONI" MODIFICATA #####
     async function salvaTutteLeModificheTabella() {
         const indicator = document.getElementById('generic-modal-notification');
         indicator.textContent = 'Salvataggio in corso...';
@@ -1626,15 +1681,13 @@
         indicator.style.opacity = '1';
 
         try {
-            // Usa .set() per salvare l'intero stato, poiché le modifiche potrebbero
-            // riguardare più compagnie. Questo è il comportamento corretto per questa specifica sezione.
             await dbRef.set(stato.datiCompleti);
             
             indicator.textContent = 'Salvato con successo!';
             indicator.className = 'save-notification success';
             setTimeout(() => { 
                 indicator.style.opacity = '0';
-                setTimeout(() => { indicator.style.display = 'none'; }, 500);
+                setTimeout(() => { indicator.style.display = 'none'; }, 2000);
             }, 2000);
 
         } catch (error) {
@@ -1643,7 +1696,7 @@
             indicator.className = 'save-notification error';
              setTimeout(() => { 
                 indicator.style.opacity = '0';
-                setTimeout(() => { indicator.style.display = 'none'; }, 500);
+                setTimeout(() => { indicator.style.display = 'none'; }, 3000);
             }, 3000);
         }
     }
