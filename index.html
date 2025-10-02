@@ -417,11 +417,10 @@
                         <select id="metodologia" onchange="aggiornaCampiCondizionali()"></select>
                         
                         <div id="divVersamento" style="display:none;">
-                            <label for="tipoVersamento">Tipo Versamento:</label>
-                            <select id="tipoVersamento">
-                                <option value="Versamento Contanti">Versamento Contanti</option>
-                                <option value="Versamento Assegno">Versamento Assegno</option>
-                            </select>
+                            <label for="versamentoContanti">Versamento Contanti (€):</label>
+                            <input type="number" id="versamentoContanti" step="0.01" placeholder="0.00">
+                            <label for="versamentoAssegni">Versamento Assegni (€):</label>
+                            <input type="number" id="versamentoAssegni" step="0.01" placeholder="0.00">
                         </div>
 
                         <div id="campi-standard">
@@ -636,7 +635,7 @@
                 if(notificationId){
                     setTimeout(() => { 
                         indicator.style.opacity = '0';
-                        setTimeout(() => { indicator.style.display = 'none'; }, 500);
+                        setTimeout(() => { indicator.style.display = 'none'; }, 2000);
                     }, 2000);
                 }
             }
@@ -672,7 +671,7 @@
         const selectMetodo = document.getElementById('metodologia');
         selectMetodo.innerHTML = `<option value="Contanti">Contanti</option><option value="Assegno">Assegno</option><option value="POS">POS</option><option value="Bonifico">Bonifico</option>`;
         
-        selectMetodo.add(new Option('VERSAMENTO', 'VERSAMENTO')); // Aggiunta opzione VERSAMENTO
+        selectMetodo.add(new Option('Versamento', 'Versamento'));
         
         if (compagnia === 'Allianz') {
              selectMetodo.add(new Option('Finanziamento Allianz Bank', 'Finanziamento Allianz Bank'));
@@ -823,27 +822,18 @@
         const metodologia = document.getElementById('metodologia').value;
         const editingIndex = document.getElementById('editingIndex').value;
 
-        if (metodologia === 'VERSAMENTO') {
-            const importoVersato = parseFloat(document.getElementById('importo').value) || 0;
-            const tipoVersamento = document.getElementById('tipoVersamento').value;
-            const movimento = {
-                metodologia: 'VERSAMENTO',
-                nomeCliente: tipoVersamento,
-                numeroPolizza: '',
-                importo: 0,
-                uscite: importoVersato,
-                provvigioni: 0,
-                arrotondamenti: 0,
-                abbuoni: 0,
-                personaAbbuono: '',
-            };
-            if (editingIndex !== "") {
-                datiGiorno.movimenti[editingIndex] = movimento;
-            } else {
-                datiGiorno.movimenti.push(movimento);
+        if (metodologia === 'Versamento') {
+            const versamentoContanti = parseFloat(document.getElementById('versamentoContanti').value) || 0;
+            const versamentoAssegni = parseFloat(document.getElementById('versamentoAssegni').value) || 0;
+            
+            if (versamentoContanti > 0) {
+                datiGiorno.movimenti.push({ metodologia: 'Versamento', nomeCliente: 'Versamento Contanti', uscite: versamentoContanti, importo: 0, numeroPolizza: '', provvigioni: 0, arrotondamenti: 0, abbuoni: 0, personaAbbuono: '' });
             }
+            if (versamentoAssegni > 0) {
+                datiGiorno.movimenti.push({ metodologia: 'Versamento', nomeCliente: 'Versamento Assegni', uscite: versamentoAssegni, importo: 0, numeroPolizza: '', provvigioni: 0, arrotondamenti: 0, abbuoni: 0, personaAbbuono: '' });
+            }
+
         } else if (metodologia === 'Incasso Multiplo') {
-            // Logica Incasso Multiplo (invariata)
             const commonData = { nomeCliente: document.getElementById('nomeCliente').value, numeroPolizza: document.getElementById('numeroPolizza').value, provvigioni: parseFloat(document.getElementById('provvigioni').value) || 0, arrotondamenti: parseFloat(document.getElementById('arrotondamenti').value) || 0, abbuoni: parseFloat(document.getElementById('abbuoni').value) || 0, personaAbbuono: document.getElementById('personaAbbuono').value, uscite: parseFloat(document.getElementById('uscite').value) || 0 };
             const importoTotale = parseFloat(document.getElementById('importo').value) || 0;
             const importo1 = parseFloat(document.getElementById('importoMultiplo1').value) || 0;
@@ -856,7 +846,6 @@
             const movimento2 = { ...commonData, isSplit: true, importo: importo2, metodologia: document.getElementById('metodologiaMultiplo2').value, ...leggiCampiCondizionaliMultiplo(2) };
             datiGiorno.movimenti.push(movimento1, movimento2);
         } else {
-            // Logica per tutti gli altri movimenti (invariata)
              const movimento = {
                 nomeCliente: document.getElementById('nomeCliente').value,
                 numeroPolizza: document.getElementById('numeroPolizza').value,
@@ -898,23 +887,20 @@
         document.getElementById('editingIndex').value = index;
         document.getElementById('metodologia').value = movimento.metodologia;
 
-        if (movimento.metodologia === 'VERSAMENTO') {
-            document.getElementById('importo').value = movimento.uscite;
-            document.getElementById('tipoVersamento').value = movimento.nomeCliente;
-        } else {
-            document.getElementById('tipoPosAllianz').value = movimento.tipoPosAllianz || 'POS Direzione';
-            document.getElementById('tipoAnticipo').value = movimento.tipoAnticipo || 'Anticipo Contanti';
-            document.getElementById('rientroMetodo').value = movimento.rientroMetodo || 'Contanti';
-            document.getElementById('numeroAssegno').value = movimento.numeroAssegno;
-            document.getElementById('nomeCliente').value = movimento.nomeCliente;
-            document.getElementById('numeroPolizza').value = movimento.numeroPolizza;
-            document.getElementById('importo').value = movimento.importo;
-            document.getElementById('provvigioni').value = movimento.provvigioni || '';
-            document.getElementById('arrotondamenti').value = movimento.arrotondamenti;
-            document.getElementById('abbuoni').value = movimento.abbuoni || '';
-            document.getElementById('personaAbbuono').value = movimento.personaAbbuono || '';
-            document.getElementById('uscite').value = movimento.uscite;
-        }
+        // La modalità versamento non è modificabile, quindi non serve gestirla qui.
+        document.getElementById('tipoPosAllianz').value = movimento.tipoPosAllianz || 'POS Direzione';
+        document.getElementById('tipoAnticipo').value = movimento.tipoAnticipo || 'Anticipo Contanti';
+        document.getElementById('rientroMetodo').value = movimento.rientroMetodo || 'Contanti';
+        document.getElementById('numeroAssegno').value = movimento.numeroAssegno;
+        document.getElementById('nomeCliente').value = movimento.nomeCliente;
+        document.getElementById('numeroPolizza').value = movimento.numeroPolizza;
+        document.getElementById('importo').value = movimento.importo;
+        document.getElementById('provvigioni').value = movimento.provvigioni || '';
+        document.getElementById('arrotondamenti').value = movimento.arrotondamenti;
+        document.getElementById('abbuoni').value = movimento.abbuoni || '';
+        document.getElementById('personaAbbuono').value = movimento.personaAbbuono || '';
+        document.getElementById('uscite').value = movimento.uscite;
+        
         document.getElementById('date-selector').value = dataKey;
         
         const [year, month, day] = dataKey.split('-').map(Number);
@@ -1067,7 +1053,7 @@
                 <td>${(m.uscite || 0).toFixed(2)}</td>
                 <td class="col-impatto-cassa"><strong>${impattoCassa.toFixed(2)}</strong></td>
                 <td>
-                    <button type="button" class="button-edit" onclick="modificaMovimento(${index}, '${dataKeyOriginale}')" ${m.isSplit ? 'disabled title="Gli incassi multipli non sono modificabili"' : ''}>Modifica</button>
+                    <button type="button" class="button-edit" onclick="modificaMovimento(${index}, '${dataKeyOriginale}')" ${m.isSplit || m.metodologia === 'Versamento' ? 'disabled title="Questo tipo di movimento non è modificabile"' : ''}>Modifica</button>
                     <button type="button" class="button-delete" onclick="cancellaMovimento(${index}, '${dataKeyOriginale}')">Elimina</button>
                 </td>`;
         });
@@ -1164,42 +1150,37 @@
     function aggiornaCampiCondizionali() {
         if (!stato.compagniaSelezionata) return;
         const metodologia = document.getElementById('metodologia').value;
-        const isVersamento = metodologia === 'VERSAMENTO';
+        const isVersamento = metodologia === 'Versamento';
 
-        // Nascondi o mostra campi in base alla selezione di VERSAMENTO
-        const displayStandard = isVersamento ? 'none' : 'block';
-        document.querySelector('label[for="nomeCliente"]').style.display = displayStandard;
-        document.getElementById('nomeCliente').style.display = displayStandard;
-        document.querySelector('label[for="numeroPolizza"]').style.display = displayStandard;
-        document.getElementById('numeroPolizza').style.display = displayStandard;
-        document.getElementById('nomeCliente').required = !isVersamento;
+        const fields = ['nomeCliente', 'numeroPolizza', 'importo', 'arrotondamenti', 'abbuoni', 'uscite'];
+        fields.forEach(id => {
+            const el = document.getElementById(id);
+            const label = document.querySelector(`label[for="${id}"]`);
+            const display = isVersamento ? 'none' : 'block';
+            if (el) el.style.display = display;
+            if (label) label.style.display = display;
+        });
 
         document.getElementById('divVersamento').style.display = isVersamento ? 'block' : 'none';
+        document.getElementById('nomeCliente').required = !isVersamento;
+        document.getElementById('importo').required = !isVersamento;
 
         if (isVersamento) {
-            document.getElementById('label-importo').textContent = 'Importo Versato (€):';
-            // Nascondi tutti gli altri div condizionali
             document.getElementById('divIncassoMultiplo').style.display = 'none';
             document.getElementById('divTipoPosAllianz').style.display = 'none';
             document.getElementById('divTipoAnticipo').style.display = 'none';
             document.getElementById('divRientroMetodo').style.display = 'none';
             document.getElementById('divNumeroAssegno').style.display = 'none';
             document.getElementById('divProvvigioni').style.display = 'none';
-            // Pulisci valori non pertinenti
-            document.getElementById('provvigioni').value = '';
-            document.getElementById('uscite').value = '';
-            document.getElementById('arrotondamenti').value = '';
-            document.getElementById('abbuoni').value = '';
-            togglePersonaAbbuono();
+            document.getElementById('divPersonaAbbuono').style.display = 'none';
         } else {
-            // Logica originale per tutte le altre metodologie
             const isMultiplo = metodologia === 'Incasso Multiplo';
             document.getElementById('divIncassoMultiplo').style.display = isMultiplo ? 'block' : 'none';
             document.getElementById('campi-standard').style.display = isMultiplo ? 'none' : 'block';
-            document.getElementById('label-importo').textContent = isMultiplo ? 'Importo Totale Titolo (€):' : 'Importo Titolo (€):';
+            
             if (isMultiplo) {
                 const opzioniBase = Array.from(document.getElementById('metodologia').options)
-                                        .filter(opt => !['Incasso Multiplo', 'VERSAMENTO'].includes(opt.value))
+                                        .filter(opt => !['Incasso Multiplo', 'Versamento'].includes(opt.value))
                                         .map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('');
                 document.getElementById('metodologiaMultiplo1').innerHTML = opzioniBase;
                 document.getElementById('metodologiaMultiplo2').innerHTML = opzioniBase;
