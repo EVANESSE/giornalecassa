@@ -825,12 +825,13 @@
         if (metodologia === 'Versamento') {
             const versamentoContanti = parseFloat(document.getElementById('versamentoContanti').value) || 0;
             const versamentoAssegni = parseFloat(document.getElementById('versamentoAssegni').value) || 0;
-            
+            const commonVersamento = { metodologia: 'Versamento', importo: 0, numeroPolizza: '', provvigioni: 0, arrotondamenti: 0, abbuoni: 0, personaAbbuono: '' };
+
             if (versamentoContanti > 0) {
-                datiGiorno.movimenti.push({ metodologia: 'Versamento', nomeCliente: 'Versamento Contanti', uscite: versamentoContanti, importo: 0, numeroPolizza: '', provvigioni: 0, arrotondamenti: 0, abbuoni: 0, personaAbbuono: '' });
+                datiGiorno.movimenti.push({ ...commonVersamento, nomeCliente: 'Versamento Contanti', uscite: versamentoContanti });
             }
             if (versamentoAssegni > 0) {
-                datiGiorno.movimenti.push({ metodologia: 'Versamento', nomeCliente: 'Versamento Assegni', uscite: versamentoAssegni, importo: 0, numeroPolizza: '', provvigioni: 0, arrotondamenti: 0, abbuoni: 0, personaAbbuono: '' });
+                datiGiorno.movimenti.push({ ...commonVersamento, nomeCliente: 'Versamento Assegni', uscite: versamentoAssegni });
             }
 
         } else if (metodologia === 'Incasso Multiplo') {
@@ -887,7 +888,6 @@
         document.getElementById('editingIndex').value = index;
         document.getElementById('metodologia').value = movimento.metodologia;
 
-        // La modalità versamento non è modificabile, quindi non serve gestirla qui.
         document.getElementById('tipoPosAllianz').value = movimento.tipoPosAllianz || 'POS Direzione';
         document.getElementById('tipoAnticipo').value = movimento.tipoAnticipo || 'Anticipo Contanti';
         document.getElementById('rientroMetodo').value = movimento.rientroMetodo || 'Contanti';
@@ -1152,8 +1152,8 @@
         const metodologia = document.getElementById('metodologia').value;
         const isVersamento = metodologia === 'Versamento';
 
-        const fields = ['nomeCliente', 'numeroPolizza', 'importo', 'arrotondamenti', 'abbuoni', 'uscite'];
-        fields.forEach(id => {
+        const fieldsToToggle = ['nomeCliente', 'numeroPolizza', 'importo', 'arrotondamenti', 'abbuoni', 'uscite'];
+        fieldsToToggle.forEach(id => {
             const el = document.getElementById(id);
             const label = document.querySelector(`label[for="${id}"]`);
             const display = isVersamento ? 'none' : 'block';
@@ -1166,13 +1166,9 @@
         document.getElementById('importo').required = !isVersamento;
 
         if (isVersamento) {
-            document.getElementById('divIncassoMultiplo').style.display = 'none';
-            document.getElementById('divTipoPosAllianz').style.display = 'none';
-            document.getElementById('divTipoAnticipo').style.display = 'none';
-            document.getElementById('divRientroMetodo').style.display = 'none';
-            document.getElementById('divNumeroAssegno').style.display = 'none';
-            document.getElementById('divProvvigioni').style.display = 'none';
-            document.getElementById('divPersonaAbbuono').style.display = 'none';
+            ['divIncassoMultiplo', 'divTipoPosAllianz', 'divTipoAnticipo', 'divRientroMetodo', 'divNumeroAssegno', 'divProvvigioni', 'divPersonaAbbuono'].forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
         } else {
             const isMultiplo = metodologia === 'Incasso Multiplo';
             document.getElementById('divIncassoMultiplo').style.display = isMultiplo ? 'block' : 'none';
@@ -1349,6 +1345,19 @@
         const conteggioContainerPrint = document.getElementById('print-conteggio-container');
         conteggioContainerPrint.innerHTML = '';
         const conteggioClonato = conteggioOrig.cloneNode(true)
+        
+        conteggioClonato.querySelectorAll('.conteggio-assegno').forEach(input => {
+            const importo = parseFloat(input.value);
+            if (!isNaN(importo) && importo > 0) {
+                const newDiv = document.createElement('div');
+                newDiv.className = 'conteggio-grid';
+                newDiv.innerHTML = `<label>Assegno:</label><span>€ ${importo.toFixed(2)}</span><span></span>`;
+                input.parentElement.replaceWith(newDiv);
+            } else {
+                input.parentElement.remove();
+            }
+        });
+
         const addCheckButton = conteggioClonato.querySelector('button');
         if(addCheckButton) addCheckButton.remove();
         conteggioContainerPrint.appendChild(conteggioClonato);
