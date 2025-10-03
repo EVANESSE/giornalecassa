@@ -239,38 +239,61 @@
         .slider.round { border-radius: 34px; }
         .slider.round:before { border-radius: 50%; }
 
+        /* NUOVI STILI PER LA STAMPA */
         @media print {
-            body { background-color: #fff; padding: 0; margin: 0; }
+            @page {
+                size: A4 landscape;
+                margin: 15mm;
+            }
+            body { background-color: #fff; padding: 0; margin: 0; font-size: 9pt; }
             body > *:not(#print-layout) { display: none !important; }
             #print-layout { display: block !important; font-family: Arial, sans-serif; color: #000; }
-            #print-page-1, #print-page-2 { width: 100%; padding: 20mm 15mm; box-sizing: border-box; }
+            #print-page-1, #print-page-2 { width: 100%; box-sizing: border-box; }
             #print-page-2 {
                 page-break-before: always;
                 display: flex; flex-direction: column;
-                justify-content: space-between; height: 257mm;
+                justify-content: space-between; height: 170mm; /* Altezza ridotta per A4 landscape */
             }
             .simplified-print #print-verifica-container { display: none !important; }
             #print-header {
                 text-align: center; border-bottom: 2px solid #333;
-                padding-bottom: 15px; margin-bottom: 20px; font-size: 1.5rem; color: #000;
+                padding-bottom: 10px; margin-bottom: 15px; font-size: 1.4rem; color: #000;
             }
-            #print-table-container table { width: 100%; font-size: 10pt; border-collapse: collapse; }
-            #print-table-container th, #print-table-container td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+            #print-table-container table { width: 100%; font-size: 9pt; }
+            #print-table-container th, #print-table-container td { 
+                border: 1px solid #ccc; 
+                padding: 3px 6px; /* Padding ridotto */
+                text-align: left; 
+            }
+            #print-table-container th:last-child, 
+            #print-table-container td:last-child {
+                display: none; /* Nasconde la colonna Azioni */
+            }
             #print-table-container th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; color-adjust: exact; }
-            #print-conteggio-container, #print-verifica-container { margin-top: 20px; }
-            #print-conteggio-container h2, #print-conteggio-container h3 {
-                color: #000; border-bottom: 1px solid #ccc; padding-bottom: 5px;
+            
+            #print-conteggio-wrapper { margin-top: 20px; }
+            #print-conteggio-wrapper h2 { color: #000; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+
+            #print-conteggio-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr; /* Layout a due colonne */
+                gap: 30px;
+                align-items: start;
             }
-            #print-conteggio-container .conteggio-grid {
-                display: grid; grid-template-columns: 1fr 2fr 2fr; 
-                align-items: center; gap: 5px; padding: 5px 0; border-bottom: 1px dotted #eee;
+            #print-conteggio-container h3 { margin-top: 0; }
+            #print-conteggio-container .conteggio-grid, 
+            #print-conteggio-container .print-assegno-row {
+                display: grid;
+                grid-template-columns: 1.5fr 2fr 2fr; 
+                align-items: center; gap: 5px; padding: 3px 0; border-bottom: 1px dotted #eee;
             }
             #print-conteggio-container input { display: none; }
             #print-conteggio-container label { font-weight: bold; }
-            #print-conteggio-container .riepilogo-totali {
+            #print-conteggio-wrapper .riepilogo-totali {
                 font-size: 1.3rem; margin-top: 20px; background: #f0f0f0 !important;
                 border: 1px solid #ccc; -webkit-print-color-adjust: exact; color-adjust: exact;
             }
+            #print-verifica-container { margin-top: 20px; }
             #print-verifica-container .risultato-verifica {
                 font-size: 1.4rem; padding: 20px; text-align: center;
                 border: 2px solid #333; border-radius: 5px;
@@ -558,7 +581,12 @@
             <div id="print-cassa-teorica-container"></div>
         </div>
         <div id="print-page-2">
-            <div id="print-conteggio-container"></div>
+            <div id="print-conteggio-wrapper">
+                <div id="print-conteggio-container">
+                    <div id="print-conteggio-soldi"></div>
+                    <div id="print-conteggio-assegni"></div>
+                </div>
+            </div>
             <div id="print-verifica-container"></div>
         </div>
     </div>
@@ -1342,25 +1370,39 @@
         if (cassaTeoricaOrig) cassaTeoricaContainerPrint.appendChild(cassaTeoricaOrig.cloneNode(true));
 
         const conteggioOrig = document.getElementById('box-conteggio-cassa');
-        const conteggioContainerPrint = document.getElementById('print-conteggio-container');
-        conteggioContainerPrint.innerHTML = '';
-        const conteggioClonato = conteggioOrig.cloneNode(true)
+        const conteggioWrapperPrint = document.getElementById('print-conteggio-wrapper');
+        const soldiContainerPrint = document.getElementById('print-conteggio-soldi');
+        const assegniContainerPrint = document.getElementById('print-conteggio-assegni');
+
+        soldiContainerPrint.innerHTML = '';
+        assegniContainerPrint.innerHTML = '';
         
-        conteggioClonato.querySelectorAll('.conteggio-assegno').forEach(input => {
+        const oldTotal = conteggioWrapperPrint.querySelector('.riepilogo-totali');
+        if (oldTotal) oldTotal.remove();
+
+        const conteggioClonato = conteggioOrig.cloneNode(true);
+
+        soldiContainerPrint.appendChild(conteggioClonato.querySelector('#conteggioBanconote'));
+        soldiContainerPrint.appendChild(conteggioClonato.querySelector('#conteggioMonete'));
+
+        const assegniNode = conteggioClonato.querySelector('#box-conteggio-assegni');
+        assegniNode.querySelectorAll('.conteggio-assegno').forEach(input => {
             const importo = parseFloat(input.value);
+            const newDiv = document.createElement('div');
+            newDiv.className = 'print-assegno-row';
             if (!isNaN(importo) && importo > 0) {
-                const newDiv = document.createElement('div');
-                newDiv.className = 'conteggio-grid';
-                newDiv.innerHTML = `<label>Assegno:</label><span>€ ${importo.toFixed(2)}</span><span></span>`;
+                newDiv.innerHTML = `<label>Assegno:</label><span>€ ${importo.toFixed(2)}</span>`;
                 input.parentElement.replaceWith(newDiv);
             } else {
                 input.parentElement.remove();
             }
         });
-
-        const addCheckButton = conteggioClonato.querySelector('button');
-        if(addCheckButton) addCheckButton.remove();
-        conteggioContainerPrint.appendChild(conteggioClonato);
+        const addCheckButton = assegniNode.querySelector('button');
+        if (addCheckButton) addCheckButton.remove();
+        assegniContainerPrint.appendChild(assegniNode);
+        
+        const totaliNode = conteggioClonato.querySelector('.riepilogo-totali');
+        if (totaliNode) conteggioWrapperPrint.appendChild(totaliNode);
 
         const verificaOrig = document.getElementById('risultatoVerifica');
         const verificaContainerPrint = document.getElementById('print-verifica-container');
