@@ -239,7 +239,6 @@
         .slider.round { border-radius: 34px; }
         .slider.round:before { border-radius: 50%; }
 
-        /* NUOVI STILI PER LA STAMPA */
         @media print {
             @page {
                 size: A4 landscape;
@@ -252,7 +251,7 @@
             #print-page-2 {
                 page-break-before: always;
                 display: flex; flex-direction: column;
-                justify-content: space-between; height: 170mm; /* Altezza ridotta per A4 landscape */
+                justify-content: space-between; height: 170mm;
             }
             .simplified-print #print-verifica-container { display: none !important; }
             #print-header {
@@ -262,12 +261,12 @@
             #print-table-container table { width: 100%; font-size: 9pt; }
             #print-table-container th, #print-table-container td { 
                 border: 1px solid #ccc; 
-                padding: 3px 6px; /* Padding ridotto */
+                padding: 3px 6px; 
                 text-align: left; 
             }
             #print-table-container th:last-child, 
             #print-table-container td:last-child {
-                display: none; /* Nasconde la colonna Azioni */
+                display: none;
             }
             #print-table-container th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; color-adjust: exact; }
             
@@ -276,7 +275,7 @@
 
             #print-conteggio-container {
                 display: grid;
-                grid-template-columns: 1fr 1fr; /* Layout a due colonne */
+                grid-template-columns: 1fr 1fr;
                 gap: 30px;
                 align-items: start;
             }
@@ -364,10 +363,12 @@
             <div class="modal-toolbar">
                 <h2 id="generic-modal-title"></h2>
                 <div class="filter-group">
-                    <label>Filtra per:</label>
+                    <label>Filtra per data:</label>
                     <select id="generic-filtro-anno"></select>
                     <select id="generic-filtro-mese"></select>
                     <input type="date" id="generic-filtro-giorno">
+                    <label>Filtra per cliente:</label>
+                    <input type="text" id="generic-filtro-cliente" placeholder="Nome cliente...">
                     <input type="text" id="generic-filtro-testo" placeholder="Cerca..." style="display: none;">
                     <button onclick="applicaFiltriTabella()">Applica Filtri</button>
                     <button class="button-secondary" onclick="resetFiltriTabella()">Resetta</button>
@@ -1183,7 +1184,7 @@
         const fieldsToToggle = ['nomeCliente', 'numeroPolizza', 'importo', 'arrotondamenti', 'abbuoni', 'uscite'];
         fieldsToToggle.forEach(id => {
             const el = document.getElementById(id);
-            const label = document.querySelector(`label[for="${id}"]`);
+            const label = el.labels ? el.labels[0] : document.querySelector(`label[for="${id}"]`);
             const display = isVersamento ? 'none' : 'block';
             if (el) el.style.display = display;
             if (label) label.style.display = display;
@@ -1376,27 +1377,27 @@
 
         soldiContainerPrint.innerHTML = '';
         assegniContainerPrint.innerHTML = '';
-        
         const oldTotal = conteggioWrapperPrint.querySelector('.riepilogo-totali');
-        if (oldTotal) oldTotal.remove();
+        if(oldTotal) oldTotal.remove();
 
         const conteggioClonato = conteggioOrig.cloneNode(true);
-
+        
         soldiContainerPrint.appendChild(conteggioClonato.querySelector('#conteggioBanconote'));
         soldiContainerPrint.appendChild(conteggioClonato.querySelector('#conteggioMonete'));
-
+        
         const assegniNode = conteggioClonato.querySelector('#box-conteggio-assegni');
         assegniNode.querySelectorAll('.conteggio-assegno').forEach(input => {
             const importo = parseFloat(input.value);
-            const newDiv = document.createElement('div');
-            newDiv.className = 'print-assegno-row';
             if (!isNaN(importo) && importo > 0) {
-                newDiv.innerHTML = `<label>Assegno:</label><span>€ ${importo.toFixed(2)}</span>`;
+                const newDiv = document.createElement('div');
+                newDiv.className = 'print-assegno-row';
+                newDiv.innerHTML = `<label>Assegno:</label><span>€ ${importo.toFixed(2)}</span><span></span>`;
                 input.parentElement.replaceWith(newDiv);
             } else {
                 input.parentElement.remove();
             }
         });
+
         const addCheckButton = assegniNode.querySelector('button');
         if (addCheckButton) addCheckButton.remove();
         assegniContainerPrint.appendChild(assegniNode);
@@ -1550,6 +1551,7 @@
         const mese = document.getElementById('generic-filtro-mese').value;
         const giorno = document.getElementById('generic-filtro-giorno').value;
         const testo = document.getElementById('generic-filtro-testo').value.toLowerCase();
+        const cliente = document.getElementById('generic-filtro-cliente').value.toLowerCase();
         
         let datiFiltrati = datiTabellaCorrente;
         if (giorno) {
@@ -1564,6 +1566,10 @@
                     return parseInt(month) - 1 == mese;
                 });
             }
+        }
+
+        if (cliente) {
+            datiFiltrati = datiFiltrati.filter(d => d.nomeCliente && d.nomeCliente.toLowerCase().includes(cliente));
         }
 
         if (testo && configTabellaCorrente.hasTextFilter) {
@@ -1581,6 +1587,7 @@
         document.getElementById('generic-filtro-mese').value = 'tutti';
         document.getElementById('generic-filtro-giorno').value = '';
         document.getElementById('generic-filtro-testo').value = '';
+        document.getElementById('generic-filtro-cliente').value = '';
         applicaFiltriTabella();
     }
 
