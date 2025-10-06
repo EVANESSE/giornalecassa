@@ -132,10 +132,8 @@
         .utility-button:hover i { color: #007bff; }
         .utility-button:active i { color: #28a745; }
         
-        .utility-button-full-width {
-            grid-column: 1 / -1; 
-            width: auto;         
-            height: 80px;        
+        .utility-button-small-height {
+            height: 80px;
         }
 
         .backup-container {
@@ -157,7 +155,7 @@
             padding-bottom: 15px; border-bottom: 2px solid #ccc; margin-bottom: 15px;
             flex-wrap: wrap; gap: 15px;
         }
-        .modal-toolbar .filter-group { display: flex; align-items: center; gap: 10px; }
+        .modal-toolbar .filter-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .modal-toolbar .action-group { display: flex; align-items: center; gap: 10px; }
         .modal-toolbar .filter-group button, .modal-toolbar .filter-group select, .modal-toolbar .filter-group input, .modal-toolbar .action-group button { 
             width: auto; margin-bottom: 0; padding: 8px;
@@ -331,25 +329,29 @@
             <div class="modal-content" id="utility-section">
                 <h2>Altre Funzioni</h2>
                 <div class="utility-grid-container">
+                    <button class="utility-button utility-button-small-height" onclick="mostraTabella('bonifici_hdi_arag')">
+                        <i class="fas fa-university fa-2x"></i>
+                        <span>BONIFICI HDI/ARAG</span>
+                    </button>
+                    <button class="utility-button utility-button-small-height" onclick="mostraTabella('pos_hdi_arag')">
+                        <i class="far fa-credit-card fa-2x"></i>
+                        <span>POS HDI/ARAG</span>
+                    </button>
                     <button class="utility-button" onclick="mostraTabella('anticipi')">
                         <i class="fas fa-hand-holding-usd fa-2x"></i>
                         <span>ANTICIPO</span>
                     </button>
-                    <button class="utility-button" onclick="mostraTabella('bonifici_allianz')">
+                    <button class="utility-button" onclick="mostraTabella('abbuoni')">
+                         <i class="fas fa-tags fa-2x"></i>
+                         <span>ABBUONI</span>
+                    </button>
+                    <button class="utility-button utility-button-small-height" onclick="mostraTabella('bonifici_allianz')">
                         <i class="fas fa-university fa-2x"></i>
                         <span>BONIFICI ALLIANZ</span>
                     </button>
-                    <button class="utility-button" onclick="mostraTabella('bonifici_hdi_arag')">
-                        <i class="fas fa-exchange-alt fa-2x"></i>
-                        <span>BONIFICI HDI/ARAG</span>
-                    </button>
-                    <button class="utility-button" onclick="mostraTabella('pos_hdi_arag')">
-                        <i class="far fa-credit-card fa-2x"></i>
-                        <span>POS HDI/ARAG</span>
-                    </button>
-                    <button class="utility-button utility-button-full-width" onclick="mostraTabella('abbuoni')">
-                        <i class="fas fa-tags fa-2x"></i>
-                        <span>ABBUONI</span>
+                    <button class="utility-button utility-button-small-height" onclick="mostraTabella('bonifici_vittoria')">
+                        <i class="fas fa-university fa-2x"></i>
+                        <span>BONIFICI VITTORIA</span>
                     </button>
                 </div>
             </div>
@@ -1474,7 +1476,17 @@
             type: 'bonifici_hdi_arag',
             title: 'Gestione Bonifici (HDI/ARAG)',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note' },
-            filterFn: mov => mov.metodologia === 'Bonifico' && (mov.compagnia === 'HDI' || mov.compagnia === 'ARAG')
+            filterFn: mov => mov.metodologia === 'Bonifico' && (mov.compagnia === 'HDI' || mov.compagnia === 'ARAG'),
+            disableRowColoring: true,
+            defaultToCurrentMonth: true
+        },
+        'bonifici_vittoria': {
+            type: 'bonifici_vittoria',
+            title: 'Gestione Bonifici (Vittoria)',
+            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note' },
+            filterFn: mov => mov.metodologia === 'Bonifico' && mov.compagnia === 'Vittoria',
+            disableRowColoring: true,
+            defaultToCurrentMonth: true
         },
         'pos_hdi_arag': {
             type: 'pos_hdi_arag',
@@ -1582,12 +1594,10 @@
     }
 
     function resetFiltriTabella() {
-        if (configTabellaCorrente.type === 'bonifici_hdi_arag') {
+        if (configTabellaCorrente.defaultToCurrentMonth) {
             const oggi = new Date();
-            const currentYear = oggi.getFullYear();
-            const currentMonth = oggi.getMonth();
-            document.getElementById('generic-filtro-anno').value = currentYear;
-            document.getElementById('generic-filtro-mese').value = currentMonth;
+            document.getElementById('generic-filtro-anno').value = oggi.getFullYear();
+            document.getElementById('generic-filtro-mese').value = oggi.getMonth();
         } else {
             document.getElementById('generic-filtro-anno').value = 'tutti';
             document.getElementById('generic-filtro-mese').value = 'tutti';
@@ -1679,7 +1689,7 @@
                 cellaAzioni.innerHTML = `<button class="button-delete" onclick="cancellaMovimentoGenerico(this)">Elimina</button>`;
             }
             
-            if (configTabellaCorrente.type !== 'bonifici_hdi_arag') {
+            if (!configTabellaCorrente.disableRowColoring) {
                 aggiornaStileRiga(riga);
             }
         });
@@ -1717,7 +1727,7 @@
             }
             
             stato.datiCompleti[compagnia][key].movimenti[index][proprieta] = valore;
-            if (configTabellaCorrente.type !== 'bonifici_hdi_arag') {
+            if (!configTabellaCorrente.disableRowColoring) {
                 aggiornaStileRiga(riga);
             }
         }
