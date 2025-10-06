@@ -1511,7 +1511,6 @@
         
         document.getElementById('generic-modal-title').textContent = configTabellaCorrente.title;
         popolaFiltri(datiTabellaCorrente);
-        applicaFiltriTabella();
 
         const textFilter = document.getElementById('generic-filtro-testo');
         if (configTabellaCorrente.hasTextFilter) {
@@ -1583,8 +1582,16 @@
     }
 
     function resetFiltriTabella() {
-        document.getElementById('generic-filtro-anno').value = 'tutti';
-        document.getElementById('generic-filtro-mese').value = 'tutti';
+        if (configTabellaCorrente.type === 'bonifici_hdi_arag') {
+            const oggi = new Date();
+            const currentYear = oggi.getFullYear();
+            const currentMonth = oggi.getMonth();
+            document.getElementById('generic-filtro-anno').value = currentYear;
+            document.getElementById('generic-filtro-mese').value = currentMonth;
+        } else {
+            document.getElementById('generic-filtro-anno').value = 'tutti';
+            document.getElementById('generic-filtro-mese').value = 'tutti';
+        }
         document.getElementById('generic-filtro-giorno').value = '';
         document.getElementById('generic-filtro-testo').value = '';
         document.getElementById('generic-filtro-cliente').value = '';
@@ -1672,7 +1679,9 @@
                 cellaAzioni.innerHTML = `<button class="button-delete" onclick="cancellaMovimentoGenerico(this)">Elimina</button>`;
             }
             
-            aggiornaStileRiga(riga);
+            if (configTabellaCorrente.type !== 'bonifici_hdi_arag') {
+                aggiornaStileRiga(riga);
+            }
         });
     }
 
@@ -1708,7 +1717,9 @@
             }
             
             stato.datiCompleti[compagnia][key].movimenti[index][proprieta] = valore;
-            aggiornaStileRiga(riga);
+            if (configTabellaCorrente.type !== 'bonifici_hdi_arag') {
+                aggiornaStileRiga(riga);
+            }
         }
     }
     
