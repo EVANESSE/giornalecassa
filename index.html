@@ -1473,7 +1473,7 @@
         'bonifici_hdi_arag': {
             type: 'bonifici_hdi_arag',
             title: 'Gestione Bonifici (HDI/ARAG)',
-            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
+            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note' },
             filterFn: mov => mov.metodologia === 'Bonifico' && (mov.compagnia === 'HDI' || mov.compagnia === 'ARAG')
         },
         'pos_hdi_arag': {
@@ -1567,7 +1567,7 @@
                 });
             }
         }
-
+        
         if (cliente) {
             datiFiltrati = datiFiltrati.filter(d => d.nomeCliente && d.nomeCliente.toLowerCase().includes(cliente));
         }
