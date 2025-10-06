@@ -11,12 +11,13 @@
         :root {
             --primary-color: #6c757d;
             --primary-color-light: #f8f9fa;
+            --primary-rgb: 108, 117, 125;
         }
-        body.theme-allianz { --primary-color: #007bff; --primary-color-light: #cce5ff; }
-        body.theme-hdi { --primary-color: #28a745; --primary-color-light: #d4edda; }
-        body.theme-vittoria { --primary-color: #6f42c1; --primary-color-light: #e2d9f3; }
-        body.theme-arag { --primary-color: #ffc107; --primary-color-light: #fff3cd; }
-        body.theme-helvetia { --primary-color: #dc3545; --primary-color-light: #f8d7da; }
+        body.theme-allianz { --primary-color: #007bff; --primary-color-light: #cce5ff; --primary-rgb: 0, 123, 255; }
+        body.theme-hdi { --primary-color: #28a745; --primary-color-light: #d4edda; --primary-rgb: 40, 167, 69; }
+        body.theme-vittoria { --primary-color: #6f42c1; --primary-color-light: #e2d9f3; --primary-rgb: 111, 66, 193; }
+        body.theme-arag { --primary-color: #ffc107; --primary-color-light: #fff3cd; --primary-rgb: 255, 193, 7; }
+        body.theme-helvetia { --primary-color: #dc3545; --primary-color-light: #f8d7da; --primary-rgb: 220, 53, 69; }
 
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -32,6 +33,27 @@
         
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         .box { padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; }
+
+        /* === NUOVI STILI PER SFONDI SEZIONI === */
+        #box-inizio-giornata {
+            background-image: linear-gradient(to top right, rgba(var(--primary-rgb), 0.02), rgba(var(--primary-rgb), 0.08));
+        }
+        #form-movimento-fieldset .box {
+            background-image: linear-gradient(to top right, #ffffff, rgba(var(--primary-rgb), 0.06));
+        }
+        #box-conteggio-cassa {
+            background-image: linear-gradient(to top right, #ffffff, rgba(var(--primary-rgb), 0.06));
+        }
+        #box-riepilogo-movimenti {
+            background-image: linear-gradient(to top right, #ffffff, rgba(var(--primary-rgb), 0.09));
+        }
+        #box-provvigioni {
+             background-image: linear-gradient(to top right, #ffffff, rgba(var(--primary-rgb), 0.07));
+        }
+        #box-verifica-finale {
+            background-image: linear-gradient(to top right, rgba(var(--primary-rgb), 0.05), rgba(var(--primary-rgb), 0.15));
+        }
+        /* === FINE NUOVI STILI === */
         
         input, select, button {
             width: 100%; padding: 10px; margin-bottom: 10px;
@@ -540,7 +562,7 @@
             </fieldset>
         </div>
     
-        <div class="box">
+        <div class="box" id="box-riepilogo-movimenti">
             <h2>Riepilogo Movimenti di Cassa</h2>
             <table id="tabellaMovimenti">
                 <thead><tr>
