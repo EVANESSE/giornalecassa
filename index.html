@@ -34,7 +34,6 @@
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         .box { padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; }
 
-        /* === NUOVI STILI PER SFONDI SEZIONI === */
         #box-inizio-giornata {
             background-image: linear-gradient(to top right, rgba(var(--primary-rgb), 0.02), rgba(var(--primary-rgb), 0.08));
         }
@@ -53,7 +52,6 @@
         #box-verifica-finale {
             background-image: linear-gradient(to top right, rgba(var(--primary-rgb), 0.05), rgba(var(--primary-rgb), 0.15));
         }
-        /* === FINE NUOVI STILI === */
         
         input, select, button {
             width: 100%; padding: 10px; margin-bottom: 10px;
@@ -122,11 +120,11 @@
             background: linear-gradient(145deg, #e6e6e6, #ffffff);
         }
         .utility-grid-container {
-            display: grid; grid-template-columns: repeat(2, 1fr); /* Changed to 2 columns */
+            display: grid; grid-template-columns: repeat(2, 1fr);
             gap: 20px; padding: 20px;
         }
         .utility-button {
-            width: 150px; height: 105px; /* Standardized height */
+            width: 150px; height: 105px;
             margin: 0; padding: 10px;
             border-radius: 15px; border: 1px solid #b0b0b0;
             background: linear-gradient(145deg, #f0f0f0, #cacaca);
@@ -163,9 +161,8 @@
             background-color: #17a2b8; border-radius: 5px; margin-bottom: 0;
         }
 
-        /* Stili per Alert Riattivazioni */
         #riattivazioni-alert-container {
-            display: none; /* Nascosto di default */
+            display: none;
             background-color: #fff3cd;
             color: #856404;
             border: 2px solid #ffeeba;
@@ -198,7 +195,7 @@
             border-bottom: none;
         }
         #riattivazioni-alert-container strong {
-            color: #6f42c1; /* Colore Vittoria */
+            color: #6f42c1;
         }
 
         .modal-full { padding: 20px; align-items: flex-start; overflow-y: auto; }
@@ -690,7 +687,6 @@
                 statusIndicator.textContent = 'Pronto';
                 statusIndicator.className = 'synced';
             }
-            // *** NUOVO: Controlla le riattivazioni all'avvio ***
             controllaRiattivazioni();
         } catch (error) {
             console.error("Errore caricamento da Firebase: ", error);
@@ -713,7 +709,6 @@
         try {
             if (stato.compagniaSelezionata && stato.dataSelezionata) salvaDatiLocali();
 
-            // *** MODIFICATO: Salva l'intero oggetto datiCompleti ***
             await dbRef.set(stato.datiCompleti);
 
              if (indicator) {
@@ -1356,10 +1351,6 @@
         }
     }
 
-    // ===============================================
-    // FUNZIONI DI BACKUP, STAMPA E FESTIVITA'
-    // ===============================================
-    
     function esportaBackup() {
         if (Object.keys(stato.datiCompleti).length === 0) {
             alert("Nessun dato da esportare. Prova a caricare prima una compagnia.");
@@ -1513,7 +1504,6 @@
         }
     }
 
-
     // ===============================================
     // SISTEMA DI GESTIONE TABELLE GENERICHE
     // ===============================================
@@ -1525,20 +1515,17 @@
         'anticipi': {
             type: 'anticipi',
             title: 'Gestione Anticipi',
-            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', tipoAnticipo: 'Tipo Anticipo', anticipoDi: 'Anticipo di', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
-            filterSource: 'movimenti'
+            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', tipoAnticipo: 'Tipo Anticipo', anticipoDi: 'Anticipo di', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' }
         },
         'bonifici_allianz': {
             type: 'bonifici_allianz',
             title: 'Gestione Bonifici (Allianz)',
-            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
-            filterSource: 'movimenti'
+            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' }
         },
         'bonifici_hdi_arag': {
             type: 'bonifici_hdi_arag',
             title: 'Gestione Bonifici (HDI/ARAG)',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note' },
-            filterSource: 'movimenti',
             disableRowColoring: true,
             defaultToCurrentMonth: true
         },
@@ -1546,32 +1533,28 @@
             type: 'bonifici_vittoria',
             title: 'Gestione Bonifici (Vittoria)',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note' },
-            filterSource: 'movimenti',
             disableRowColoring: true,
             defaultToCurrentMonth: true
         },
         'pos_hdi_arag': {
             type: 'pos_hdi_arag',
             title: 'Gestione POS (HDI/ARAG)',
-            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
-            filterSource: 'movimenti'
+            columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' }
         },
         'abbuoni': {
             type: 'abbuoni',
             title: 'Gestione Abbuoni',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', abbuoni: 'Importo Abbuono (€)', personaAbbuono: 'Effettuato da', note: 'Note', abbuonoRegolato: 'Regolato' },
-            filterSource: 'movimenti',
             hasTextFilter: true, 
             textFilterKey: 'personaAbbuono'
         },
-        // *** NUOVA CONFIGURAZIONE TABELLA ***
         'riattivazioni_vittoria': {
             type: 'riattivazioni_vittoria',
             title: 'Gestione Riattivazioni Vittoria',
             columns: { contraente: 'CONTRAENTE', nPolizza: 'N° POLIZZA', targa: 'TARGA', dataSospensione: 'DATA SOSPENSIONE', dataRiattivazione: 'DATA RIATTIVAZIONE', note: 'NOTE', riattivata: 'RIATTIVATA' },
-            dataSource: 'riattivazioni_vittoria', // Usa questa fonte dati
-            filterByDateOn: 'dataSospensione', // Filtra per mese/anno su questa colonna
-            searchClientOn: 'contraente', // Cerca il cliente su questa colonna
+            dataSource: 'riattivazioni_vittoria',
+            filterByDateOn: 'dataSospensione',
+            searchClientOn: 'contraente',
             disableRowColoring: true
         }
     };
@@ -1582,10 +1565,8 @@
         if (Object.keys(stato.datiCompleti).length === 0) await caricaDatiDaFirebase();
 
         if (configTabellaCorrente.dataSource) {
-            // Logica per fonti dati non basate sui movimenti (es. riattivazioni)
             datiTabellaCorrente = stato.datiCompleti[configTabellaCorrente.dataSource] || [];
         } else {
-            // Logica esistente per tabelle basate sui movimenti di cassa
             datiTabellaCorrente = [];
             for (const compagnia in stato.datiCompleti) {
                 if (typeof stato.datiCompleti[compagnia] === 'object' && stato.datiCompleti[compagnia] !== null) {
@@ -1602,7 +1583,6 @@
         }
         
         document.getElementById('generic-modal-title').textContent = configTabellaCorrente.title;
-        // Aggiorna etichetta del filtro cliente
         const clientFilterLabel = document.getElementById('generic-filtro-cliente-label');
         const clientFilterInput = document.getElementById('generic-filtro-cliente');
         if (configTabellaCorrente.searchClientOn === 'contraente') {
@@ -1617,7 +1597,6 @@
         document.getElementById('generic-modal').style.display = 'flex';
     }
     
-    // Funzione helper per la logica di filtro complessa
     function filtraMovimentoPerTabella(mov, tipo) {
         switch(tipo) {
             case 'anticipi': return mov.metodologia === 'Anticipo';
@@ -1629,7 +1608,6 @@
             default: return false;
         }
     }
-
 
     function popolaFiltri(dati) {
         const annoSelect = document.getElementById('generic-filtro-anno');
@@ -1708,20 +1686,18 @@
         }
         headerRow.appendChild(document.createElement('th')).textContent = 'Azioni';
 
-        // Ordinamento per data decrescente
         const dateKey = configTabellaCorrente.dataSource ? configTabellaCorrente.filterByDateOn : 'dataKey';
         dati.sort((a, b) => new Date(b[dateKey]) - new Date(a[dateKey]));
 
-        dati.forEach((d, index) => {
+        dati.forEach((d) => {
             const riga = tbody.insertRow();
-            riga.dataset.index = datiTabellaCorrente.indexOf(d); // Usa l'indice dell'array originale non filtrato
+            riga.dataset.index = datiTabellaCorrente.indexOf(d);
             
             for (const key in configTabellaCorrente.columns) {
                 const cell = riga.insertCell();
                 cell.dataset.property = key;
                 let content = d[key] || '';
                 
-                // Logica di rendering delle celle
                  switch(key) {
                     case 'dataKey':
                          cell.textContent = content ? new Date(content.split('-').join('/')).toLocaleDateString('it-IT') : '';
@@ -1768,11 +1744,31 @@
         const riga = buttonEl.closest('tr');
         const { index } = riga.dataset;
 
+        const dataItem = datiTabellaCorrente[index];
+        if (!dataItem) return;
+
         if (confirm('Sei sicuro di voler eliminare definitivamente questo elemento?')) {
-            datiTabellaCorrente.splice(index, 1);
-            await salvaTutteLeModificheTabella();
-            alert('Elemento eliminato.');
-            mostraTabella(configTabellaCorrente.type); 
+            let deleted = false;
+            
+            if (!configTabellaCorrente.dataSource) {
+                const { compagnia, dataKey, originalIndex } = dataItem;
+                const movimentiOriginali = stato.datiCompleti[compagnia]?.[dataKey]?.movimenti;
+                if (movimentiOriginali && movimentiOriginali[originalIndex] !== undefined) {
+                    movimentiOriginali.splice(originalIndex, 1);
+                    deleted = true;
+                }
+            } else {
+                datiTabellaCorrente.splice(index, 1);
+                deleted = true;
+            }
+
+            if (deleted) {
+                await salvaTutteLeModificheTabella();
+                alert('Elemento eliminato.');
+                mostraTabella(configTabellaCorrente.type);
+            } else {
+                alert("Errore: Impossibile trovare l'elemento originale da eliminare.");
+            }
         }
     }
     
@@ -1782,18 +1778,29 @@
         const proprieta = cell.dataset.property;
         const { index } = riga.dataset;
 
-        if (datiTabellaCorrente[index]) {
-            let valore;
-            if (el.isContentEditable) {
-                 valore = el.textContent;
-            } else {
-                valore = el.type === 'checkbox' ? el.checked : el.value;
-            }
-            datiTabellaCorrente[index][proprieta] = valore;
+        const dataItem = datiTabellaCorrente[index];
+        if (!dataItem) return;
 
-             if (!configTabellaCorrente.disableRowColoring) {
-                aggiornaStileRiga(riga);
+        let valore;
+        if (el.isContentEditable) {
+            valore = el.textContent;
+        } else {
+            valore = el.type === 'checkbox' ? el.checked : el.value;
+        }
+        
+        dataItem[proprieta] = valore;
+
+        if (!configTabellaCorrente.dataSource) {
+            const { compagnia, dataKey, originalIndex } = dataItem;
+            if (stato.datiCompleti[compagnia]?.[dataKey]?.movimenti?.[originalIndex]) {
+                stato.datiCompleti[compagnia][dataKey].movimenti[originalIndex][proprieta] = valore;
+            } else {
+                console.error("ERRORE: Impossibile trovare il movimento originale da aggiornare.", dataItem);
             }
+        }
+        
+        if (!configTabellaCorrente.disableRowColoring) {
+            aggiornaStileRiga(riga);
         }
     }
     
@@ -1805,7 +1812,6 @@
         indicator.style.opacity = '1';
 
         try {
-            // *** MODIFICATO: Salva l'intero oggetto datiCompleti ***
             await dbRef.set(stato.datiCompleti);
             
             indicator.textContent = 'Salvato con successo!';
@@ -1829,6 +1835,7 @@
     function aggiornaStileRiga(riga) {
         const { index } = riga.dataset;
         const movimento = datiTabellaCorrente[index];
+        if (!movimento || !movimento.dataKey) return;
         riga.className = '';
 
         if (movimento.incassato || movimento.abbuonoRegolato) {
@@ -1858,7 +1865,6 @@
                 <label>Note:</label><input type="text" id="add-note">
             `;
         } else {
-             // Logica esistente per gli altri form
              formHtml = `
                 <label>Data:</label><input type="date" id="add-data" required value="${formatDate(new Date())}">
                 <label>Cliente:</label><input type="text" id="add-cliente" required>
@@ -1874,10 +1880,9 @@
 
     function processaFormAggiunta() {
         const config = configTabellaCorrente;
-        let nuovoElemento = {};
-
+        
         if (config.dataSource === 'riattivazioni_vittoria') {
-            nuovoElemento = {
+            const nuovoElemento = {
                 contraente: document.getElementById('add-contraente').value,
                 nPolizza: document.getElementById('add-nPolizza').value,
                 targa: document.getElementById('add-targa').value,
@@ -1885,14 +1890,14 @@
                 dataRiattivazione: document.getElementById('add-dataRiattivazione').value,
                 note: document.getElementById('add-note').value,
                 riattivata: false,
-                id: `riatt-${new Date().getTime()}` // ID unico
+                id: `riatt-${new Date().getTime()}`
             };
             if (!stato.datiCompleti[config.dataSource]) {
                 stato.datiCompleti[config.dataSource] = [];
             }
             stato.datiCompleti[config.dataSource].push(nuovoElemento);
         } else {
-            // Logica esistente per movimenti di cassa manuali
+            // Logica per aggiungere movimenti manuali
         }
         
         document.getElementById('add-movimento-modal').style.display = 'none';
@@ -1900,10 +1905,6 @@
         salvaTutteLeModificheTabella();
     }
 
-
-    // ===============================================
-    // *** NUOVE FUNZIONI PER ALERT RIATTIVAZIONI ***
-    // ===============================================
     function controllaRiattivazioni() {
         const riattivazioni = stato.datiCompleti.riattivazioni_vittoria || [];
         const alertList = document.getElementById('riattivazioni-alert-list');
@@ -1912,24 +1913,22 @@
         let alertsDaMostrare = [];
         
         const oggi = new Date();
-        oggi.setHours(0, 0, 0, 0); // Normalizza la data di oggi
+        oggi.setHours(0, 0, 0, 0);
 
         riattivazioni.forEach(r => {
             if (r.riattivata || !r.dataRiattivazione) return;
 
             const dataRiattivazione = new Date(r.dataRiattivazione);
-            dataRiattivazione.setMinutes(dataRiattivazione.getMinutes() + dataRiattivazione.getTimezoneOffset()); // Corregge fuso orario
+            dataRiattivazione.setMinutes(dataRiattivazione.getMinutes() + dataRiattivazione.getTimezoneOffset());
             dataRiattivazione.setHours(0,0,0,0);
             
             let dataAlert = new Date(dataRiattivazione);
             const giornoSettimana = dataRiattivazione.getDay();
 
-            // Se è Sabato (6), anticipa a Venerdì (-1 giorno)
-            if (giornoSettimana === 6) {
+            if (giornoSettimana === 6) { // Sabato
                 dataAlert.setDate(dataAlert.getDate() - 1);
             } 
-            // Se è Domenica (0), anticipa a Venerdì (-2 giorni)
-            else if (giornoSettimana === 0) {
+            else if (giornoSettimana === 0) { // Domenica
                 dataAlert.setDate(dataAlert.getDate() - 2);
             }
             
@@ -1952,10 +1951,6 @@
         }
     }
 
-
-    // ===============================================
-    // FUNZIONI PER INCASSO MULTIPLO
-    // ===============================================
     function calcolaImportoMultiplo() {
         const importoTot = parseFloat(document.getElementById('importo').value) || 0;
         const importo1 = parseFloat(document.getElementById('importoMultiplo1').value) || 0;
@@ -1986,7 +1981,6 @@
         return dati;
     }
 
-    // Rendi le funzioni visibili globalmente
     window.inizializzaApp = inizializzaApp;
     window.caricaGiornale = caricaGiornale;
     window.processaFormMovimento = processaFormMovimento;
