@@ -687,7 +687,7 @@
                 statusIndicator.className = 'synced';
             }
             controllaRiattivazioni();
-            controllaPromemoria(); // <-- CONTROLLA I NUOVI PROMEMORIA
+            controllaPromemoria();
         } catch (error) {
             console.error("Errore caricamento da Firebase: ", error);
             if(statusIndicator) {
@@ -708,7 +708,6 @@
 
         try {
             if (stato.compagniaSelezionata && stato.dataSelezionata) salvaDatiLocali();
-
             await dbRef.set(stato.datiCompleti);
 
              if (indicator) {
@@ -1703,50 +1702,56 @@
             const riga = tbody.insertRow();
             riga.dataset.index = datiTabellaCorrente.indexOf(d);
             
+            // ** LOGICA DI BLOCCO/SBLOCCO CORRETTA **
+            const isLocked = !d.isManuallyAdded;
+
             for (const key in configTabellaCorrente.columns) {
                 const cell = riga.insertCell();
                 cell.dataset.property = key;
                 let content = d[key] || '';
                 
-                 switch(key) {
+                // I campi sempre modificabili (note, date, checkbox, etc.)
+                const alwaysEditable = ['note', 'nota', 'anticipoDi', 'dataEstinzione', 'dataSospensione', 'dataRiattivazione', 'data', 'incassato', 'riattivata', 'abbuonoRegolato', 'fatto'].includes(key);
+
+                switch(key) {
                     case 'dataKey':
-                         cell.textContent = content ? new Date(content.split('-').join('/')).toLocaleDateString('it-IT') : '';
+                        cell.textContent = content ? new Date(content.split('-').join('/')).toLocaleDateString('it-IT') : '';
                         break;
                     case 'dataSospensione':
                     case 'dataRiattivazione':
                     case 'dataEstinzione':
-                    case 'data': // per promemoria
+                    case 'data':
                         cell.innerHTML = `<input type="date" value="${content}" onchange="salvaModificaGenerica(this)">`;
+                        break;
+                    case 'incassato':
+                    case 'riattivata':
+                    case 'abbuonoRegolato':
+                    case 'fatto':
+                        cell.innerHTML = `<input type="checkbox" ${content ? 'checked' : ''} onchange="salvaModificaGenerica(this)">`;
+                        cell.style.textAlign = 'center';
                         break;
                     case 'importo':
                     case 'abbuoni':
                         cell.textContent = (content || 0).toFixed(2);
                         break;
-                    case 'contraente':
-                    case 'nPolizza':
-                    case 'targa':
-                    case 'note':
-                    case 'utente': // per promemoria
-                    case 'nota':   // per promemoria
+                    default: // Tutti gli altri campi di testo
                         cell.textContent = content;
-                        cell.contentEditable = true;
-                        cell.onblur = (e) => salvaModificaGenerica(e.target);
+                        if(alwaysEditable || !isLocked){
+                            cell.contentEditable = true;
+                            cell.onblur = (e) => salvaModificaGenerica(e.target);
+                        }
                         if (key === 'note' || key === 'nota') cell.classList.add('col-note');
                         break;
-                     case 'riattivata':
-                     case 'incassato':
-                     case 'abbuonoRegolato':
-                     case 'fatto': // per promemoria
-                         cell.innerHTML = `<input type="checkbox" ${content ? 'checked' : ''} onchange="salvaModificaGenerica(this)">`;
-                         cell.style.textAlign = 'center';
-                         break;
-                    default:
-                        cell.textContent = content;
                 }
             }
             
             const cellaAzioni = riga.insertCell();
-            cellaAzioni.innerHTML = `<button class="button-delete" onclick="cancellaMovimentoGenerico(this)">Elimina</button>`;
+            cellaAzioni.style.textAlign = 'center';
+            if (isLocked && !configTabellaCorrente.dataSource) {
+                 cellaAzioni.innerHTML = `<i class="fa fa-lock" title="Modificabile/Eliminabile solo dal giornale di cassa di riferimento"></i>`;
+            } else {
+                 cellaAzioni.innerHTML = `<button class="button-delete" onclick="cancellaMovimentoGenerico(this)">Elimina</button>`;
+            }
             
             if (!configTabellaCorrente.disableRowColoring) {
                  aggiornaStileRiga(riga);
@@ -2004,7 +2009,6 @@
             alertContainer.style.display = 'none';
         }
     }
-
 
     function calcolaImportoMultiplo() {
         const importoTot = parseFloat(document.getElementById('importo').value) || 0;
