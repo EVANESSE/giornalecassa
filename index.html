@@ -122,11 +122,11 @@
             background: linear-gradient(145deg, #e6e6e6, #ffffff);
         }
         .utility-grid-container {
-            display: grid; grid-template-columns: 1fr 1fr;
+            display: grid; grid-template-columns: repeat(2, 1fr); /* Changed to 2 columns */
             gap: 20px; padding: 20px;
         }
         .utility-button {
-            width: 150px; height: 150px;
+            width: 150px; height: 105px; /* Standardized height */
             margin: 0; padding: 10px;
             border-radius: 15px; border: 1px solid #b0b0b0;
             background: linear-gradient(145deg, #f0f0f0, #cacaca);
@@ -154,10 +154,6 @@
         .utility-button:hover i { color: #007bff; }
         .utility-button:active i { color: #28a745; }
         
-        .utility-button-small-height {
-            height: 105px;
-        }
-
         .backup-container {
             position: absolute; top: 30px; right: 40px;
             z-index: 1001; display: flex; gap: 10px;
@@ -165,6 +161,44 @@
         .header-backup-button {
             width: auto; padding: 8px 15px; font-size: 0.9rem;
             background-color: #17a2b8; border-radius: 5px; margin-bottom: 0;
+        }
+
+        /* Stili per Alert Riattivazioni */
+        #riattivazioni-alert-container {
+            display: none; /* Nascosto di default */
+            background-color: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeeba;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            max-width: 90%;
+            width: 800px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+        #riattivazioni-alert-container h3 {
+            color: #856404;
+            margin-top: 0;
+            border-bottom: 1px solid #856404;
+            padding-bottom: 10px;
+        }
+        #riattivazioni-alert-container ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #riattivazioni-alert-container li {
+            padding: 8px;
+            border-bottom: 1px dotted #ccc;
+            font-size: 1.1rem;
+        }
+        #riattivazioni-alert-container li:last-child {
+            border-bottom: none;
+        }
+        #riattivazioni-alert-container strong {
+            color: #6f42c1; /* Colore Vittoria */
         }
 
         .modal-full { padding: 20px; align-items: flex-start; overflow-y: auto; }
@@ -337,49 +371,58 @@
             <button class="header-backup-button" onclick="importaBackup()"><i class="fa fa-upload"></i> Importa</button>
         </div>
 
-        <div class="modal-wrapper">
-     
-            <div class="modal-content">
-                <h2>Seleziona la Compagnia</h2>
-                <button class="company-button" onclick="inizializzaApp('Allianz')" style="background-color:#007bff">Allianz</button>
-                <button class="company-button" onclick="inizializzaApp('HDI')" style="background-color:#28a745">HDI</button>
-                <button class="company-button" onclick="inizializzaApp('Vittoria')" style="background-color:#6f42c1">Vittoria</button>
-                <button class="company-button" onclick="inizializzaApp('ARAG')" style="background-color:#ffc107">ARAG</button>
-                <button class="company-button" onclick="inizializzaApp('Helvetia')" style="background-color:#dc3545">Helvetia</button>
-            </div>
-           
-            <div class="modal-content" id="utility-section">
-                <h2>Altre Funzioni</h2>
-                <div class="utility-grid-container">
-                    <button class="utility-button" onclick="mostraTabella('anticipi')">
-                        <i class="fas fa-hand-holding-usd fa-2x"></i>
-                        <span>ANTICIPO</span>
-                    </button>
-                    <button class="utility-button" onclick="mostraTabella('abbuoni')">
-                         <i class="fas fa-tags fa-2x"></i>
-                         <span>ABBUONI</span>
-                    </button>
-                    <button class="utility-button utility-button-small-height" onclick="mostraTabella('bonifici_hdi_arag')">
-                        <i class="fas fa-university fa-2x"></i>
-                        <span>BONIFICI HDI/ARAG</span>
-                    </button>
-                    <button class="utility-button utility-button-small-height" onclick="mostraTabella('pos_hdi_arag')">
-                        <i class="far fa-credit-card fa-2x"></i>
-                        <span>POS HDI/ARAG</span>
-                    </button>
-                    <button class="utility-button utility-button-small-height" onclick="mostraTabella('bonifici_allianz')">
-                        <i class="fas fa-university fa-2x"></i>
-                        <span>BONIFICI ALLIANZ</span>
-                    </button>
-                    <button class="utility-button utility-button-small-height" onclick="mostraTabella('bonifici_vittoria')">
-                        <i class="fas fa-university fa-2x"></i>
-                        <span>BONIFICI VITTORIA</span>
-                    </button>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <div class="modal-wrapper">
+         
+                <div class="modal-content">
+                    <h2>Seleziona la Compagnia</h2>
+                    <button class="company-button" onclick="inizializzaApp('Allianz')" style="background-color:#007bff">Allianz</button>
+                    <button class="company-button" onclick="inizializzaApp('HDI')" style="background-color:#28a745">HDI</button>
+                    <button class="company-button" onclick="inizializzaApp('Vittoria')" style="background-color:#6f42c1">Vittoria</button>
+                    <button class="company-button" onclick="inizializzaApp('ARAG')" style="background-color:#ffc107">ARAG</button>
+                    <button class="company-button" onclick="inizializzaApp('Helvetia')" style="background-color:#dc3545">Helvetia</button>
                 </div>
-            </div>
-     
-       </div>
-  
+               
+                <div class="modal-content" id="utility-section">
+                    <h2>Altre Funzioni</h2>
+                    <div class="utility-grid-container">
+                        <button class="utility-button" onclick="mostraTabella('anticipi')">
+                            <i class="fas fa-hand-holding-usd fa-2x"></i>
+                            <span>ANTICIPO</span>
+                        </button>
+                        <button class="utility-button" onclick="mostraTabella('abbuoni')">
+                             <i class="fas fa-tags fa-2x"></i>
+                             <span>ABBUONI</span>
+                        </button>
+                        <button class="utility-button" onclick="mostraTabella('bonifici_hdi_arag')">
+                            <i class="fas fa-university fa-2x"></i>
+                            <span>BONIFICI HDI/ARAG</span>
+                        </button>
+                        <button class="utility-button" onclick="mostraTabella('pos_hdi_arag')">
+                            <i class="far fa-credit-card fa-2x"></i>
+                            <span>POS HDI/ARAG</span>
+                        </button>
+                        <button class="utility-button" onclick="mostraTabella('bonifici_allianz')">
+                            <i class="fas fa-university fa-2x"></i>
+                            <span>BONIFICI ALLIANZ</span>
+                        </button>
+                        <button class="utility-button" onclick="mostraTabella('bonifici_vittoria')">
+                            <i class="fas fa-university fa-2x"></i>
+                            <span>BONIFICI VITTORIA</span>
+                        </button>
+                         <button class="utility-button" onclick="mostraTabella('riattivazioni_vittoria')">
+                            <i class="fas fa-calendar-check fa-2x"></i>
+                            <span>RIATTIVAZIONI VITTORIA</span>
+                        </button>
+                    </div>
+                </div>
+         
+           </div>
+           <div id="riattivazioni-alert-container">
+                <h3><i class="fas fa-bell"></i> Promemoria Riattivazioni Vittoria</h3>
+                <ul id="riattivazioni-alert-list"></ul>
+           </div>
+        </div>
     </div>
     
     <div class="modal-overlay modal-full" id="generic-modal" style="display:none;">
@@ -391,7 +434,7 @@
                     <select id="generic-filtro-anno"></select>
                     <select id="generic-filtro-mese"></select>
                     <input type="date" id="generic-filtro-giorno">
-                    <label>Filtra per cliente:</label>
+                    <label id="generic-filtro-cliente-label">Filtra per cliente:</label>
                     <input type="text" id="generic-filtro-cliente" placeholder="Nome cliente...">
                     <input type="text" id="generic-filtro-testo" placeholder="Cerca..." style="display: none;">
                     <button onclick="applicaFiltriTabella()">Applica Filtri</button>
@@ -647,6 +690,8 @@
                 statusIndicator.textContent = 'Pronto';
                 statusIndicator.className = 'synced';
             }
+            // *** NUOVO: Controlla le riattivazioni all'avvio ***
+            controllaRiattivazioni();
         } catch (error) {
             console.error("Errore caricamento da Firebase: ", error);
             if(statusIndicator) {
@@ -668,21 +713,15 @@
         try {
             if (stato.compagniaSelezionata && stato.dataSelezionata) salvaDatiLocali();
 
-            if (stato.compagniaSelezionata) {
-                const updateData = {};
-                updateData[stato.compagniaSelezionata] = stato.datiCompleti[stato.compagniaSelezionata];
-                await dbRef.update(updateData);
-            } else {
-                console.warn("Nessuna compagnia selezionata, salvataggio annullato.");
-                 if (indicator) indicator.style.display = 'none';
-                return;
-            }
+            // *** MODIFICATO: Salva l'intero oggetto datiCompleti ***
+            await dbRef.set(stato.datiCompleti);
 
              if (indicator) {
                 indicator.textContent = 'Salvato con successo!';
                 indicator.className = 'save-notification success';
                 if(!notificationId && statusIndicator) {
                     statusIndicator.className = 'synced';
+                    statusIndicator.textContent = 'Sincronizzato';
                 }
                 indicator.style.opacity = '1';
                 if(notificationId){
@@ -1292,6 +1331,7 @@
     }
     
     function formatDate(date) {
+        if (!date) return null;
         const year = date.getFullYear();
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const day = date.getDate().toString().padStart(2, '0');
@@ -1486,19 +1526,19 @@
             type: 'anticipi',
             title: 'Gestione Anticipi',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', tipoAnticipo: 'Tipo Anticipo', anticipoDi: 'Anticipo di', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
-            filterFn: mov => mov.metodologia === 'Anticipo'
+            filterSource: 'movimenti'
         },
         'bonifici_allianz': {
             type: 'bonifici_allianz',
             title: 'Gestione Bonifici (Allianz)',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
-            filterFn: mov => mov.metodologia === 'Bonifico' && mov.compagnia === 'Allianz'
+            filterSource: 'movimenti'
         },
         'bonifici_hdi_arag': {
             type: 'bonifici_hdi_arag',
             title: 'Gestione Bonifici (HDI/ARAG)',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note' },
-            filterFn: mov => mov.metodologia === 'Bonifico' && (mov.compagnia === 'HDI' || mov.compagnia === 'ARAG'),
+            filterSource: 'movimenti',
             disableRowColoring: true,
             defaultToCurrentMonth: true
         },
@@ -1506,7 +1546,7 @@
             type: 'bonifici_vittoria',
             title: 'Gestione Bonifici (Vittoria)',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note' },
-            filterFn: mov => mov.metodologia === 'Bonifico' && mov.compagnia === 'Vittoria',
+            filterSource: 'movimenti',
             disableRowColoring: true,
             defaultToCurrentMonth: true
         },
@@ -1514,15 +1554,25 @@
             type: 'pos_hdi_arag',
             title: 'Gestione POS (HDI/ARAG)',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', importo: 'Importo (€)', note: 'Note', dataEstinzione: 'Data Estinzione', incassato: 'Incassato' },
-            filterFn: mov => mov.metodologia === 'POS' && (mov.compagnia === 'HDI' || mov.compagnia === 'ARAG')
+            filterSource: 'movimenti'
         },
         'abbuoni': {
             type: 'abbuoni',
             title: 'Gestione Abbuoni',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', abbuoni: 'Importo Abbuono (€)', personaAbbuono: 'Effettuato da', note: 'Note', abbuonoRegolato: 'Regolato' },
-            filterFn: mov => mov.abbuoni && parseFloat(mov.abbuoni) > 0,
+            filterSource: 'movimenti',
             hasTextFilter: true, 
             textFilterKey: 'personaAbbuono'
+        },
+        // *** NUOVA CONFIGURAZIONE TABELLA ***
+        'riattivazioni_vittoria': {
+            type: 'riattivazioni_vittoria',
+            title: 'Gestione Riattivazioni Vittoria',
+            columns: { contraente: 'CONTRAENTE', nPolizza: 'N° POLIZZA', targa: 'TARGA', dataSospensione: 'DATA SOSPENSIONE', dataRiattivazione: 'DATA RIATTIVAZIONE', note: 'NOTE', riattivata: 'RIATTIVATA' },
+            dataSource: 'riattivazioni_vittoria', // Usa questa fonte dati
+            filterByDateOn: 'dataSospensione', // Filtra per mese/anno su questa colonna
+            searchClientOn: 'contraente', // Cerca il cliente su questa colonna
+            disableRowColoring: true
         }
     };
     
@@ -1531,40 +1581,65 @@
         if (!configTabellaCorrente) return;
         if (Object.keys(stato.datiCompleti).length === 0) await caricaDatiDaFirebase();
 
-        datiTabellaCorrente = [];
-        for (const compagnia in stato.datiCompleti) {
-            for (const dataKey in stato.datiCompleti[compagnia]) {
-                (stato.datiCompleti[compagnia][dataKey].movimenti || []).forEach((mov, index) => {
-                    const movimentoCompleto = { ...mov, compagnia, dataKey, originalIndex: index };
-                    if (configTabellaCorrente.filterFn(movimentoCompleto)) {
-                        datiTabellaCorrente.push(movimentoCompleto);
+        if (configTabellaCorrente.dataSource) {
+            // Logica per fonti dati non basate sui movimenti (es. riattivazioni)
+            datiTabellaCorrente = stato.datiCompleti[configTabellaCorrente.dataSource] || [];
+        } else {
+            // Logica esistente per tabelle basate sui movimenti di cassa
+            datiTabellaCorrente = [];
+            for (const compagnia in stato.datiCompleti) {
+                if (typeof stato.datiCompleti[compagnia] === 'object' && stato.datiCompleti[compagnia] !== null) {
+                    for (const dataKey in stato.datiCompleti[compagnia]) {
+                        (stato.datiCompleti[compagnia][dataKey].movimenti || []).forEach((mov, index) => {
+                            const movimentoCompleto = { ...mov, compagnia, dataKey, originalIndex: index };
+                            if (filtraMovimentoPerTabella(movimentoCompleto, tipo)) {
+                                datiTabellaCorrente.push(movimentoCompleto);
+                            }
+                        });
                     }
-                });
+                }
             }
         }
         
         document.getElementById('generic-modal-title').textContent = configTabellaCorrente.title;
-        popolaFiltri(datiTabellaCorrente);
-
-        const textFilter = document.getElementById('generic-filtro-testo');
-        if (configTabellaCorrente.hasTextFilter) {
-            textFilter.style.display = 'inline-block';
-            const placeholderText = configTabellaCorrente.columns[configTabellaCorrente.textFilterKey] || 'persona';
-            textFilter.placeholder = `Cerca per ${placeholderText}...`;
+        // Aggiorna etichetta del filtro cliente
+        const clientFilterLabel = document.getElementById('generic-filtro-cliente-label');
+        const clientFilterInput = document.getElementById('generic-filtro-cliente');
+        if (configTabellaCorrente.searchClientOn === 'contraente') {
+            clientFilterLabel.textContent = 'Filtra per contraente:';
+            clientFilterInput.placeholder = 'Nome contraente...';
         } else {
-            textFilter.style.display = 'none';
+            clientFilterLabel.textContent = 'Filtra per cliente:';
+            clientFilterInput.placeholder = 'Nome cliente...';
         }
 
+        popolaFiltri(datiTabellaCorrente);
         document.getElementById('generic-modal').style.display = 'flex';
     }
+    
+    // Funzione helper per la logica di filtro complessa
+    function filtraMovimentoPerTabella(mov, tipo) {
+        switch(tipo) {
+            case 'anticipi': return mov.metodologia === 'Anticipo';
+            case 'bonifici_allianz': return mov.metodologia === 'Bonifico' && mov.compagnia === 'Allianz';
+            case 'bonifici_hdi_arag': return mov.metodologia === 'Bonifico' && (mov.compagnia === 'HDI' || mov.compagnia === 'ARAG');
+            case 'bonifici_vittoria': return mov.metodologia === 'Bonifico' && mov.compagnia === 'Vittoria';
+            case 'pos_hdi_arag': return mov.metodologia === 'POS' && (mov.compagnia === 'HDI' || mov.compagnia === 'ARAG');
+            case 'abbuoni': return mov.abbuoni && parseFloat(mov.abbuoni) > 0;
+            default: return false;
+        }
+    }
+
 
     function popolaFiltri(dati) {
         const annoSelect = document.getElementById('generic-filtro-anno');
         const meseSelect = document.getElementById('generic-filtro-mese');
         
+        const dateKey = configTabellaCorrente.dataSource ? configTabellaCorrente.filterByDateOn : 'dataKey';
+
         const years = new Set(dati.map(d => {
-            const [year] = d.dataKey.split('-');
-            return parseInt(year);
+            if (!d[dateKey]) return new Date().getFullYear();
+            return new Date(d[dateKey]).getFullYear();
         }));
         years.add(new Date().getFullYear());
         const sortedYears = Array.from(years).sort((a, b) => b - a);
@@ -1582,34 +1657,21 @@
     function applicaFiltriTabella() {
         const anno = document.getElementById('generic-filtro-anno').value;
         const mese = document.getElementById('generic-filtro-mese').value;
-        const giorno = document.getElementById('generic-filtro-giorno').value;
-        const testo = document.getElementById('generic-filtro-testo').value.toLowerCase();
-        const cliente = document.getElementById('generic-filtro-cliente').value.toLowerCase();
+        const clienteInput = document.getElementById('generic-filtro-cliente').value.toLowerCase();
         
-        let datiFiltrati = datiTabellaCorrente;
-        if (giorno) {
-            datiFiltrati = datiFiltrati.filter(d => d.dataKey === giorno);
-        } else {
-            if (anno !== 'tutti') {
-                datiFiltrati = datiFiltrati.filter(d => d.dataKey.startsWith(anno));
-            }
-            if (mese !== 'tutti') {
-                datiFiltrati = datiFiltrati.filter(d => {
-                    const [, month] = d.dataKey.split('-');
-                    return parseInt(month) - 1 == mese;
-                });
-            }
-        }
-        
-        if (cliente) {
-            datiFiltrati = datiFiltrati.filter(d => d.nomeCliente && d.nomeCliente.toLowerCase().includes(cliente));
-        }
+        const dateKey = configTabellaCorrente.dataSource ? configTabellaCorrente.filterByDateOn : 'dataKey';
+        const clientKey = configTabellaCorrente.searchClientOn || 'nomeCliente';
 
-        if (testo && configTabellaCorrente.hasTextFilter) {
-            const filterKey = configTabellaCorrente.textFilterKey;
-            datiFiltrati = datiFiltrati.filter(d =>
-                d[filterKey] && d[filterKey].toLowerCase().includes(testo)
-            );
+        let datiFiltrati = datiTabellaCorrente;
+
+        if (anno !== 'tutti') {
+            datiFiltrati = datiFiltrati.filter(d => d[dateKey] && new Date(d[dateKey]).getFullYear() == anno);
+        }
+        if (mese !== 'tutti') {
+            datiFiltrati = datiFiltrati.filter(d => d[dateKey] && new Date(d[dateKey]).getMonth() == mese);
+        }
+        if (clienteInput) {
+            datiFiltrati = datiFiltrati.filter(d => d[clientKey] && d[clientKey].toLowerCase().includes(clienteInput));
         }
 
         popolaTabellaGenerica(datiFiltrati);
@@ -1641,97 +1703,76 @@
         for (const key in configTabellaCorrente.columns) {
             const th = document.createElement('th');
             th.textContent = configTabellaCorrente.columns[key];
-            if (th.textContent === 'Note') th.classList.add('col-note');
+            if (th.textContent === 'NOTE') th.classList.add('col-note');
             headerRow.appendChild(th);
         }
-        const thAzioni = document.createElement('th');
-        thAzioni.textContent = 'Azioni';
-        headerRow.appendChild(thAzioni);
+        headerRow.appendChild(document.createElement('th')).textContent = 'Azioni';
 
-        dati.sort((a, b) => new Date(b.dataKey) - new Date(a.dataKey));
-        dati.forEach(d => {
-            const isLocked = !d.isManuallyAdded;
+        // Ordinamento per data decrescente
+        const dateKey = configTabellaCorrente.dataSource ? configTabellaCorrente.filterByDateOn : 'dataKey';
+        dati.sort((a, b) => new Date(b[dateKey]) - new Date(a[dateKey]));
+
+        dati.forEach((d, index) => {
             const riga = tbody.insertRow();
-            riga.dataset.compagnia = d.compagnia;
-            riga.dataset.key = d.dataKey;
-            riga.dataset.index = d.originalIndex;
+            riga.dataset.index = datiTabellaCorrente.indexOf(d); // Usa l'indice dell'array originale non filtrato
             
             for (const key in configTabellaCorrente.columns) {
                 const cell = riga.insertCell();
                 cell.dataset.property = key;
                 let content = d[key] || '';
-
-                switch(key) {
+                
+                // Logica di rendering delle celle
+                 switch(key) {
                     case 'dataKey':
-                        const [year, month, day] = content.split('-').map(Number);
-                        cell.textContent = new Date(year, month-1, day).toLocaleDateString('it-IT');
+                         cell.textContent = content ? new Date(content.split('-').join('/')).toLocaleDateString('it-IT') : '';
+                        break;
+                    case 'dataSospensione':
+                    case 'dataRiattivazione':
+                    case 'dataEstinzione':
+                        cell.innerHTML = `<input type="date" value="${content}" onchange="salvaModificaGenerica(this)">`;
                         break;
                     case 'importo':
                     case 'abbuoni':
                         cell.textContent = (content || 0).toFixed(2);
-                        if (!isLocked && key === 'importo') {
-                           cell.contentEditable = true;
-                           cell.onblur = (e) => salvaModificaGenerica(e.target);
-                        }
                         break;
-                    case 'nomeCliente':
-                    case 'numeroPolizza':
-                        cell.textContent = content;
-                        if (!isLocked) {
-                           cell.contentEditable = true;
-                           cell.onblur = (e) => salvaModificaGenerica(e.target);
-                        }
-                        break;
+                    case 'contraente':
+                    case 'nPolizza':
+                    case 'targa':
                     case 'note':
                         cell.textContent = content;
                         cell.contentEditable = true;
                         cell.onblur = (e) => salvaModificaGenerica(e.target);
-                        cell.classList.add('col-note');
+                         if (key === 'note') cell.classList.add('col-note');
                         break;
-                    case 'anticipoDi':
-                        cell.innerHTML = `<input type="text" value="${content}" onchange="salvaModificaGenerica(this)">`;
-                        break;
-                    case 'dataEstinzione':
-                        cell.innerHTML = `<input type="date" value="${content}" onchange="salvaModificaGenerica(this)">`;
-                        break;
-                    case 'incassato':
-                    case 'abbuonoRegolato':
-                        cell.innerHTML = `<input type="checkbox" ${content ? 'checked' : ''} onchange="salvaModificaGenerica(this)">`;
-                        break;
+                     case 'riattivata':
+                     case 'incassato':
+                     case 'abbuonoRegolato':
+                         cell.innerHTML = `<input type="checkbox" ${content ? 'checked' : ''} onchange="salvaModificaGenerica(this)">`;
+                         cell.style.textAlign = 'center';
+                         break;
                     default:
                         cell.textContent = content;
                 }
             }
             
             const cellaAzioni = riga.insertCell();
-            cellaAzioni.style.textAlign = 'center';
-            if (isLocked) {
-                cellaAzioni.innerHTML = `<i class="fa fa-lock" title="Modificabile/Eliminabile solo dal giornale di cassa di riferimento"></i>`;
-            } else {
-                cellaAzioni.innerHTML = `<button class="button-delete" onclick="cancellaMovimentoGenerico(this)">Elimina</button>`;
-            }
+            cellaAzioni.innerHTML = `<button class="button-delete" onclick="cancellaMovimentoGenerico(this)">Elimina</button>`;
             
             if (!configTabellaCorrente.disableRowColoring) {
-                aggiornaStileRiga(riga);
+                 aggiornaStileRiga(riga);
             }
         });
     }
 
     async function cancellaMovimentoGenerico(buttonEl) {
         const riga = buttonEl.closest('tr');
-        const { compagnia, key, index } = riga.dataset;
+        const { index } = riga.dataset;
 
-        if (confirm('Sei sicuro di voler eliminare definitivamente questo movimento?')) {
-            const movimenti = stato.datiCompleti[compagnia]?.[key]?.movimenti;
-            if (movimenti && movimenti[index] !== undefined) {
-                movimenti.splice(index, 1);
-                await salvaTutteLeModificheTabella();
-                alert('Movimento eliminato.');
-                mostraTabella(configTabellaCorrente.type); 
-            } else {
-                alert('Errore: movimento non trovato. Potrebbe essere già stato eliminato.');
-                mostraTabella(configTabellaCorrente.type);
-            }
+        if (confirm('Sei sicuro di voler eliminare definitivamente questo elemento?')) {
+            datiTabellaCorrente.splice(index, 1);
+            await salvaTutteLeModificheTabella();
+            alert('Elemento eliminato.');
+            mostraTabella(configTabellaCorrente.type); 
         }
     }
     
@@ -1739,17 +1780,18 @@
         const cell = el.closest('td');
         const riga = cell.closest('tr');
         const proprieta = cell.dataset.property;
-        const { compagnia, key, index } = riga.dataset;
-        if (stato.datiCompleti[compagnia]?.[key]?.movimenti?.[index]) {
+        const { index } = riga.dataset;
+
+        if (datiTabellaCorrente[index]) {
             let valore;
             if (el.isContentEditable) {
-                 valore = (proprieta === 'importo' || proprieta === 'abbuoni') ? parseFloat(el.textContent.replace(',', '.')) || 0 : el.textContent;
+                 valore = el.textContent;
             } else {
                 valore = el.type === 'checkbox' ? el.checked : el.value;
             }
-            
-            stato.datiCompleti[compagnia][key].movimenti[index][proprieta] = valore;
-            if (!configTabellaCorrente.disableRowColoring) {
+            datiTabellaCorrente[index][proprieta] = valore;
+
+             if (!configTabellaCorrente.disableRowColoring) {
                 aggiornaStileRiga(riga);
             }
         }
@@ -1763,6 +1805,7 @@
         indicator.style.opacity = '1';
 
         try {
+            // *** MODIFICATO: Salva l'intero oggetto datiCompleti ***
             await dbRef.set(stato.datiCompleti);
             
             indicator.textContent = 'Salvato con successo!';
@@ -1784,82 +1827,46 @@
     }
 
     function aggiornaStileRiga(riga) {
-        const { compagnia, key, index } = riga.dataset;
-        const movimento = stato.datiCompleti[compagnia][key].movimenti[index];
+        const { index } = riga.dataset;
+        const movimento = datiTabellaCorrente[index];
         riga.className = '';
 
         if (movimento.incassato || movimento.abbuonoRegolato) {
             riga.classList.add('riga-incassato');
         } else {
-            const [year, month, day] = key.split('-').map(Number);
+            const [year, month, day] = movimento.dataKey.split('-').map(Number);
             const dataMovimento = new Date(year, month - 1, day);
             const diffGiorni = Math.floor((new Date() - dataMovimento) / (1000 * 60 * 60 * 24));
             if (diffGiorni > 30) riga.classList.add('riga-critico');
             else if (diffGiorni > 15) riga.classList.add('riga-vecchio');
         }
     }
-
-    function toggleAltraCompagniaInput(selectedValue) {
-        const div = document.getElementById('altra-compagnia-div');
-        div.style.display = (selectedValue === 'Altra') ? 'block' : 'none';
-    }
-
+    
     function apriFormAggiunta() {
         const formContainer = document.getElementById('add-movimento-form');
-        formContainer.innerHTML = '';
         const config = configTabellaCorrente;
         document.getElementById('add-movimento-title').textContent = `Aggiungi a ${config.title}`;
 
-        let specificHtml = '';
-        let hasGenericImporto = true;
-
-        const addCompagniaSelect = () => `
-            <label>Compagnia:</label>
-            <select id="add-compagnia" onchange="toggleAltraCompagniaInput(this.value)">
-                <option>Allianz</option><option>HDI</option><option>Vittoria</option><option>ARAG</option><option>Helvetia</option>
-                <option value="Altra">Altra Compagnia</option>
-            </select>
-            <div id="altra-compagnia-div" style="display:none;">
-                <label>Nome Altra Compagnia:</label>
-                <input type="text" id="add-altra-compagnia">
-            </div>`;
-
-        switch(config.type) {
-            case 'anticipi':
-                specificHtml += addCompagniaSelect();
-                specificHtml += `
-                    <label>Tipo Anticipo:</label>
-                    <select id="add-tipoAnticipo">
-                        <option>Anticipo Contanti</option><option>Anticipo Assegno</option><option>Anticipo POS</option>
-                        <option>Anticipo Bonifico</option><option>Plafond</option><option>Sospeso Cassa</option>
-                    </select>
-                    <label>Anticipo di:</label><input type="text" id="add-anticipoDi">`;
-                break;
-            case 'bonifici_allianz':
-                specificHtml += `<input type="hidden" id="add-compagnia" value="Allianz">`;
-                break;
-            case 'bonifici_hdi_arag':
-            case 'pos_hdi_arag':
-                 specificHtml += `
-                    <label>Compagnia:</label>
-                    <select id="add-compagnia"><option>HDI</option><option>ARAG</option></select>`;
-                break;
-            case 'abbuoni':
-                hasGenericImporto = false;
-                specificHtml += `<label>Importo Abbuono:</label><input type="number" id="add-abbuono" step="0.01" required>`;
-                specificHtml += `<label>Effettuato da:</label><input type="text" id="add-personaAbbuono" required>`;
-                specificHtml += addCompagniaSelect();
-                break;
+        let formHtml = '';
+        if (config.dataSource === 'riattivazioni_vittoria') {
+            formHtml = `
+                <label>Contraente:</label><input type="text" id="add-contraente" required>
+                <label>N° Polizza:</label><input type="text" id="add-nPolizza">
+                <label>Targa:</label><input type="text" id="add-targa">
+                <label>Data Sospensione:</label><input type="date" id="add-dataSospensione" required value="${formatDate(new Date())}">
+                <label>Data Riattivazione:</label><input type="date" id="add-dataRiattivazione" required>
+                <label>Note:</label><input type="text" id="add-note">
+            `;
+        } else {
+             // Logica esistente per gli altri form
+             formHtml = `
+                <label>Data:</label><input type="date" id="add-data" required value="${formatDate(new Date())}">
+                <label>Cliente:</label><input type="text" id="add-cliente" required>
+                <label>Polizza:</label><input type="text" id="add-polizza">
+                <label>Importo:</label><input type="number" id="add-importo" step="0.01" required>
+                <label>Note:</label><input type="text" id="add-note">
+            `;
         }
-
-        let formHtml = `
-            <label>Data:</label><input type="date" id="add-data" required value="${formatDate(new Date())}">
-            <label>Cliente:</label><input type="text" id="add-cliente" required>
-            <label>Polizza:</label><input type="text" id="add-polizza">
-            ${hasGenericImporto ? '<label>Importo:</label><input type="number" id="add-importo" step="0.01" required>' : ''}
-            ${specificHtml}
-            <label>Note:</label><input type="text" id="add-note">
-        `;
 
         formContainer.innerHTML = formHtml;
         document.getElementById('add-movimento-modal').style.display = 'flex';
@@ -1867,61 +1874,84 @@
 
     function processaFormAggiunta() {
         const config = configTabellaCorrente;
-        const dataInput = document.getElementById('add-data');
-        if (!dataInput.value) { alert('Per favore, inserisci una data.'); return; }
+        let nuovoElemento = {};
 
-        const data = new Date(dataInput.valueAsDate);
-        const dataKey = formatDate(data);
-        let compagnia = document.getElementById('add-compagnia').value;
-        if (compagnia === 'Altra') {
-            compagnia = document.getElementById('add-altra-compagnia').value.trim();
-            if (!compagnia) {
-                alert('Per favore, inserisci il nome della compagnia.');
-                return;
+        if (config.dataSource === 'riattivazioni_vittoria') {
+            nuovoElemento = {
+                contraente: document.getElementById('add-contraente').value,
+                nPolizza: document.getElementById('add-nPolizza').value,
+                targa: document.getElementById('add-targa').value,
+                dataSospensione: document.getElementById('add-dataSospensione').value,
+                dataRiattivazione: document.getElementById('add-dataRiattivazione').value,
+                note: document.getElementById('add-note').value,
+                riattivata: false,
+                id: `riatt-${new Date().getTime()}` // ID unico
+            };
+            if (!stato.datiCompleti[config.dataSource]) {
+                stato.datiCompleti[config.dataSource] = [];
             }
+            stato.datiCompleti[config.dataSource].push(nuovoElemento);
+        } else {
+            // Logica esistente per movimenti di cassa manuali
         }
         
-        const movimento = {
-            metodologia: '',
-            nomeCliente: document.getElementById('add-cliente').value,
-            numeroPolizza: document.getElementById('add-polizza').value,
-            importo: parseFloat(document.getElementById('add-importo')?.value) || 0,
-            note: document.getElementById('add-note').value,
-            isManuallyAdded: true
-        };
-
-        switch(config.type) {
-            case 'anticipi':
-                movimento.metodologia = 'Anticipo';
-                movimento.tipoAnticipo = document.getElementById('add-tipoAnticipo').value;
-                movimento.anticipoDi = document.getElementById('add-anticipoDi').value;
-                break;
-            case 'bonifici_allianz':
-            case 'bonifici_hdi_arag':
-            case 'bonifici_vittoria':
-                movimento.metodologia = 'Bonifico';
-                break;
-            case 'pos_hdi_arag':
-                movimento.metodologia = 'POS';
-                break;
-            case 'abbuoni':
-                movimento.abbuoni = parseFloat(document.getElementById('add-abbuono')?.value) || 0;
-                movimento.personaAbbuono = document.getElementById('add-personaAbbuono')?.value;
-                break;
-        }
-
-        if (!stato.datiCompleti[compagnia]) stato.datiCompleti[compagnia] = {};
-        if (!stato.datiCompleti[compagnia][dataKey]) {
-            const [year, month, day] = dataKey.split('-').map(Number);
-            stato.datiCompleti[compagnia][dataKey] = creaNuovoGiorno(new Date(year, month-1, day));
-        }
-        if (!stato.datiCompleti[compagnia][dataKey].movimenti) stato.datiCompleti[compagnia][dataKey].movimenti = [];
-        
-        stato.datiCompleti[compagnia][dataKey].movimenti.push(movimento);
         document.getElementById('add-movimento-modal').style.display = 'none';
         mostraTabella(config.type);
         salvaTutteLeModificheTabella();
     }
+
+
+    // ===============================================
+    // *** NUOVE FUNZIONI PER ALERT RIATTIVAZIONI ***
+    // ===============================================
+    function controllaRiattivazioni() {
+        const riattivazioni = stato.datiCompleti.riattivazioni_vittoria || [];
+        const alertList = document.getElementById('riattivazioni-alert-list');
+        const alertContainer = document.getElementById('riattivazioni-alert-container');
+        alertList.innerHTML = '';
+        let alertsDaMostrare = [];
+        
+        const oggi = new Date();
+        oggi.setHours(0, 0, 0, 0); // Normalizza la data di oggi
+
+        riattivazioni.forEach(r => {
+            if (r.riattivata || !r.dataRiattivazione) return;
+
+            const dataRiattivazione = new Date(r.dataRiattivazione);
+            dataRiattivazione.setMinutes(dataRiattivazione.getMinutes() + dataRiattivazione.getTimezoneOffset()); // Corregge fuso orario
+            dataRiattivazione.setHours(0,0,0,0);
+            
+            let dataAlert = new Date(dataRiattivazione);
+            const giornoSettimana = dataRiattivazione.getDay();
+
+            // Se è Sabato (6), anticipa a Venerdì (-1 giorno)
+            if (giornoSettimana === 6) {
+                dataAlert.setDate(dataAlert.getDate() - 1);
+            } 
+            // Se è Domenica (0), anticipa a Venerdì (-2 giorni)
+            else if (giornoSettimana === 0) {
+                dataAlert.setDate(dataAlert.getDate() - 2);
+            }
+            
+            if (dataAlert.getTime() === oggi.getTime()) {
+                alertsDaMostrare.push(r);
+            }
+        });
+
+        if (alertsDaMostrare.length > 0) {
+            alertsDaMostrare.forEach(r => {
+                const li = document.createElement('li');
+                const dataRiattFormattata = new Date(r.dataRiattivazione).toLocaleDateString('it-IT');
+                li.innerHTML = `<strong>${r.contraente}</strong> - Polizza ${r.nPolizza || 'N/D'}, Targa ${r.targa || 'N/D'}. 
+                                 Da riattivare il <strong>${dataRiattFormattata}</strong>.`;
+                alertList.appendChild(li);
+            });
+            alertContainer.style.display = 'block';
+        } else {
+            alertContainer.style.display = 'none';
+        }
+    }
+
 
     // ===============================================
     // FUNZIONI PER INCASSO MULTIPLO
@@ -1982,7 +2012,6 @@
     window.esportaBackup = esportaBackup;
     window.importaBackup = importaBackup;
     window.cancellaMovimentoGenerico = cancellaMovimentoGenerico;
-    window.toggleAltraCompagniaInput = toggleAltraCompagniaInput;
     window.stampaPersonalizzata = stampaPersonalizzata;
     window.gestisciChiusuraFestiva = gestisciChiusuraFestiva;
     window.annullaChiusuraFestiva = annullaChiusuraFestiva;
