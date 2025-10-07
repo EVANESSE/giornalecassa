@@ -161,11 +161,8 @@
             background-color: #17a2b8; border-radius: 5px; margin-bottom: 0;
         }
 
-        #riattivazioni-alert-container {
+        .alert-box {
             display: none;
-            background-color: #fff3cd;
-            color: #856404;
-            border: 2px solid #ffeeba;
             border-radius: 10px;
             padding: 20px;
             margin-top: 20px;
@@ -175,28 +172,23 @@
             max-height: 40vh;
             overflow-y: auto;
         }
-        #riattivazioni-alert-container h3 {
-            color: #856404;
-            margin-top: 0;
-            border-bottom: 1px solid #856404;
-            padding-bottom: 10px;
+        .alert-box h3 { margin-top: 0; padding-bottom: 10px; }
+        .alert-box ul { list-style: none; padding: 0; margin: 0; }
+        .alert-box li { padding: 8px; border-bottom: 1px dotted #ccc; font-size: 1.1rem; }
+        .alert-box li:last-child { border-bottom: none; }
+
+        #riattivazioni-alert-container {
+            background-color: #fff3cd; color: #856404; border: 2px solid #ffeeba;
         }
-        #riattivazioni-alert-container ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
+        #riattivazioni-alert-container h3 { color: #856404; border-bottom: 1px solid #856404; }
+        #riattivazioni-alert-container strong { color: #6f42c1; }
+
+        #promemoria-alert-container {
+             background-color: #d1ecf1; color: #0c5460; border: 2px solid #bee5eb;
         }
-        #riattivazioni-alert-container li {
-            padding: 8px;
-            border-bottom: 1px dotted #ccc;
-            font-size: 1.1rem;
-        }
-        #riattivazioni-alert-container li:last-child {
-            border-bottom: none;
-        }
-        #riattivazioni-alert-container strong {
-            color: #6f42c1;
-        }
+        #promemoria-alert-container h3 { color: #0c5460; border-bottom: 1px solid #0c5460; }
+        #promemoria-alert-container strong { color: #007bff; }
+
 
         .modal-full { padding: 20px; align-items: flex-start; overflow-y: auto; }
         .modal-full .modal-content-full {
@@ -216,7 +208,7 @@
         .generic-table td[contenteditable="true"]:hover { background-color: #fff3cd; cursor: text; }
         .generic-table input, .generic-table select { padding: 4px; font-size: 0.9rem; border-radius: 3px; border: 1px solid #ccc;}
         .generic-table input[type="checkbox"] { width: auto; transform: scale(1.2); }
-        .generic-table th.col-note, .generic-table td.col-note { width: 25%; }
+        .generic-table th.col-note, .generic-table td.col-note { width: 35%; }
         
         .riga-incassato { background-color: #d4edda !important; text-decoration: line-through; color: #555;}
         .riga-vecchio { background-color: #fff3cd; }
@@ -411,13 +403,22 @@
                             <i class="fas fa-calendar-check fa-2x"></i>
                             <span>RIATTIVAZIONI VITTORIA</span>
                         </button>
+                        <button class="utility-button" onclick="mostraTabella('promemoria')">
+                            <i class="fas fa-bell fa-2x"></i>
+                            <span>PROMEMORIA</span>
+                        </button>
                     </div>
                 </div>
          
            </div>
-           <div id="riattivazioni-alert-container">
-                <h3><i class="fas fa-bell"></i> Promemoria Riattivazioni Vittoria</h3>
+           
+           <div id="riattivazioni-alert-container" class="alert-box">
+                <h3><i class="fas fa-calendar-check"></i> Promemoria Riattivazioni Vittoria</h3>
                 <ul id="riattivazioni-alert-list"></ul>
+           </div>
+            <div id="promemoria-alert-container" class="alert-box">
+                <h3><i class="fas fa-bell"></i> Promemoria di Oggi</h3>
+                <ul id="promemoria-alert-list"></ul>
            </div>
         </div>
     </div>
@@ -430,15 +431,13 @@
                     <label>Filtra per data:</label>
                     <select id="generic-filtro-anno"></select>
                     <select id="generic-filtro-mese"></select>
-                    <input type="date" id="generic-filtro-giorno">
-                    <label id="generic-filtro-cliente-label">Filtra per cliente:</label>
-                    <input type="text" id="generic-filtro-cliente" placeholder="Nome cliente...">
-                    <input type="text" id="generic-filtro-testo" placeholder="Cerca..." style="display: none;">
+                    <label id="generic-filtro-cliente-label">Filtra per:</label>
+                    <input type="text" id="generic-filtro-cliente" placeholder="Nome...">
                     <button onclick="applicaFiltriTabella()">Applica Filtri</button>
                     <button class="button-secondary" onclick="resetFiltriTabella()">Resetta</button>
                 </div>
                 <div class="action-group">
-                    <button class="button-save" onclick="apriFormAggiunta()"><i class="fa fa-plus"></i> Aggiungi Movimento</button>
+                    <button class="button-save" onclick="apriFormAggiunta()"><i class="fa fa-plus"></i> Aggiungi Nuovo</button>
                     <button class="button-save" onclick="salvaTutteLeModificheTabella()">Salva Modifiche</button>
                     <button class="button-secondary" onclick="document.getElementById('generic-modal').style.display = 'none'">Chiudi</button>
                 </div>
@@ -455,7 +454,7 @@
 
     <div class="modal-overlay" id="add-movimento-modal" style="display:none; z-index: 1001;">
         <div class="modal-content" style="text-align: left; width: 450px; padding: 30px;">
-            <h2 id="add-movimento-title" style="text-align: center;">Aggiungi Nuovo Movimento</h2>
+            <h2 id="add-movimento-title" style="text-align: center;">Aggiungi Nuovo</h2>
             <form id="add-movimento-form" onsubmit="event.preventDefault(); processaFormAggiunta();"></form>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button onclick="processaFormAggiunta()" class="button-save" style="width: 50%;">Salva</button>
@@ -688,6 +687,7 @@
                 statusIndicator.className = 'synced';
             }
             controllaRiattivazioni();
+            controllaPromemoria(); // <-- CONTROLLA I NUOVI PROMEMORIA
         } catch (error) {
             console.error("Errore caricamento da Firebase: ", error);
             if(statusIndicator) {
@@ -1545,8 +1545,6 @@
             type: 'abbuoni',
             title: 'Gestione Abbuoni',
             columns: { dataKey: 'Data', compagnia: 'Compagnia', nomeCliente: 'Cliente', numeroPolizza: 'Polizza', abbuoni: 'Importo Abbuono (€)', personaAbbuono: 'Effettuato da', note: 'Note', abbuonoRegolato: 'Regolato' },
-            hasTextFilter: true, 
-            textFilterKey: 'personaAbbuono'
         },
         'riattivazioni_vittoria': {
             type: 'riattivazioni_vittoria',
@@ -1555,6 +1553,15 @@
             dataSource: 'riattivazioni_vittoria',
             filterByDateOn: 'dataSospensione',
             searchClientOn: 'contraente',
+            disableRowColoring: true
+        },
+        'promemoria': {
+            type: 'promemoria',
+            title: 'Gestione Promemoria',
+            columns: { nota: 'NOTA PROMEMORIA', utente: 'UTENTE', data: 'DATA', fatto: 'FATTO' },
+            dataSource: 'promemoria',
+            filterByDateOn: 'data',
+            searchClientOn: 'utente',
             disableRowColoring: true
         }
     };
@@ -1585,10 +1592,15 @@
         document.getElementById('generic-modal-title').textContent = configTabellaCorrente.title;
         const clientFilterLabel = document.getElementById('generic-filtro-cliente-label');
         const clientFilterInput = document.getElementById('generic-filtro-cliente');
+        
         if (configTabellaCorrente.searchClientOn === 'contraente') {
             clientFilterLabel.textContent = 'Filtra per contraente:';
             clientFilterInput.placeholder = 'Nome contraente...';
-        } else {
+        } else if (configTabellaCorrente.searchClientOn === 'utente') {
+            clientFilterLabel.textContent = 'Filtra per utente:';
+            clientFilterInput.placeholder = 'Nome utente...';
+        }
+        else {
             clientFilterLabel.textContent = 'Filtra per cliente:';
             clientFilterInput.placeholder = 'Nome cliente...';
         }
@@ -1664,8 +1676,6 @@
             document.getElementById('generic-filtro-anno').value = 'tutti';
             document.getElementById('generic-filtro-mese').value = 'tutti';
         }
-        document.getElementById('generic-filtro-giorno').value = '';
-        document.getElementById('generic-filtro-testo').value = '';
         document.getElementById('generic-filtro-cliente').value = '';
         applicaFiltriTabella();
     }
@@ -1681,7 +1691,7 @@
         for (const key in configTabellaCorrente.columns) {
             const th = document.createElement('th');
             th.textContent = configTabellaCorrente.columns[key];
-            if (th.textContent === 'NOTE') th.classList.add('col-note');
+            if (key === 'note' || key === 'nota') th.classList.add('col-note');
             headerRow.appendChild(th);
         }
         headerRow.appendChild(document.createElement('th')).textContent = 'Azioni';
@@ -1705,6 +1715,7 @@
                     case 'dataSospensione':
                     case 'dataRiattivazione':
                     case 'dataEstinzione':
+                    case 'data': // per promemoria
                         cell.innerHTML = `<input type="date" value="${content}" onchange="salvaModificaGenerica(this)">`;
                         break;
                     case 'importo':
@@ -1715,14 +1726,17 @@
                     case 'nPolizza':
                     case 'targa':
                     case 'note':
+                    case 'utente': // per promemoria
+                    case 'nota':   // per promemoria
                         cell.textContent = content;
                         cell.contentEditable = true;
                         cell.onblur = (e) => salvaModificaGenerica(e.target);
-                         if (key === 'note') cell.classList.add('col-note');
+                        if (key === 'note' || key === 'nota') cell.classList.add('col-note');
                         break;
                      case 'riattivata':
                      case 'incassato':
                      case 'abbuonoRegolato':
+                     case 'fatto': // per promemoria
                          cell.innerHTML = `<input type="checkbox" ${content ? 'checked' : ''} onchange="salvaModificaGenerica(this)">`;
                          cell.style.textAlign = 'center';
                          break;
@@ -1864,16 +1878,14 @@
                 <label>Data Riattivazione:</label><input type="date" id="add-dataRiattivazione" required>
                 <label>Note:</label><input type="text" id="add-note">
             `;
-        } else {
-             formHtml = `
-                <label>Data:</label><input type="date" id="add-data" required value="${formatDate(new Date())}">
-                <label>Cliente:</label><input type="text" id="add-cliente" required>
-                <label>Polizza:</label><input type="text" id="add-polizza">
-                <label>Importo:</label><input type="number" id="add-importo" step="0.01" required>
-                <label>Note:</label><input type="text" id="add-note">
+        } else if (config.dataSource === 'promemoria') {
+            formHtml = `
+                <label>Data Promemoria:</label><input type="date" id="add-data" required value="${formatDate(new Date())}">
+                <label>Utente:</label><input type="text" id="add-utente" required>
+                <label>Nota Promemoria:</label><textarea id="add-nota" rows="4" style="width: 100%; padding: 10px;"></textarea>
             `;
         }
-
+        
         formContainer.innerHTML = formHtml;
         document.getElementById('add-movimento-modal').style.display = 'flex';
     }
@@ -1892,12 +1904,18 @@
                 riattivata: false,
                 id: `riatt-${new Date().getTime()}`
             };
-            if (!stato.datiCompleti[config.dataSource]) {
-                stato.datiCompleti[config.dataSource] = [];
-            }
+            if (!stato.datiCompleti[config.dataSource]) stato.datiCompleti[config.dataSource] = [];
             stato.datiCompleti[config.dataSource].push(nuovoElemento);
-        } else {
-            // Logica per aggiungere movimenti manuali
+        } else if (config.dataSource === 'promemoria') {
+             const nuovoElemento = {
+                data: document.getElementById('add-data').value,
+                utente: document.getElementById('add-utente').value,
+                nota: document.getElementById('add-nota').value,
+                fatto: false,
+                id: `prom-${new Date().getTime()}`
+            };
+            if (!stato.datiCompleti[config.dataSource]) stato.datiCompleti[config.dataSource] = [];
+            stato.datiCompleti[config.dataSource].push(nuovoElemento);
         }
         
         document.getElementById('add-movimento-modal').style.display = 'none';
@@ -1925,12 +1943,8 @@
             let dataAlert = new Date(dataRiattivazione);
             const giornoSettimana = dataRiattivazione.getDay();
 
-            if (giornoSettimana === 6) { // Sabato
-                dataAlert.setDate(dataAlert.getDate() - 1);
-            } 
-            else if (giornoSettimana === 0) { // Domenica
-                dataAlert.setDate(dataAlert.getDate() - 2);
-            }
+            if (giornoSettimana === 6) { dataAlert.setDate(dataAlert.getDate() - 1); } 
+            else if (giornoSettimana === 0) { dataAlert.setDate(dataAlert.getDate() - 2); }
             
             if (dataAlert.getTime() === oggi.getTime()) {
                 alertsDaMostrare.push(r);
@@ -1950,6 +1964,47 @@
             alertContainer.style.display = 'none';
         }
     }
+
+    function controllaPromemoria() {
+        const promemoria = stato.datiCompleti.promemoria || [];
+        const alertList = document.getElementById('promemoria-alert-list');
+        const alertContainer = document.getElementById('promemoria-alert-container');
+        alertList.innerHTML = '';
+        let alertsDaMostrare = [];
+
+        const oggi = new Date();
+        oggi.setHours(0, 0, 0, 0);
+
+        promemoria.forEach(p => {
+            if (p.fatto || !p.data) return;
+
+            const dataPromemoria = new Date(p.data);
+            dataPromemoria.setMinutes(dataPromemoria.getMinutes() + dataPromemoria.getTimezoneOffset());
+            dataPromemoria.setHours(0, 0, 0, 0);
+
+            let dataAlert = new Date(dataPromemoria);
+            const giornoSettimana = dataPromemoria.getDay();
+
+            if (giornoSettimana === 6) { dataAlert.setDate(dataAlert.getDate() - 1); } 
+            else if (giornoSettimana === 0) { dataAlert.setDate(dataAlert.getDate() - 2); }
+
+            if (dataAlert.getTime() === oggi.getTime()) {
+                alertsDaMostrare.push(p);
+            }
+        });
+
+        if (alertsDaMostrare.length > 0) {
+            alertsDaMostrare.forEach(p => {
+                const li = document.createElement('li');
+                li.innerHTML = `Per <strong>${p.utente}</strong>: ${p.nota}`;
+                alertList.appendChild(li);
+            });
+            alertContainer.style.display = 'block';
+        } else {
+            alertContainer.style.display = 'none';
+        }
+    }
+
 
     function calcolaImportoMultiplo() {
         const importoTot = parseFloat(document.getElementById('importo').value) || 0;
