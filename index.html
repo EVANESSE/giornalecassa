@@ -209,6 +209,8 @@
         .generic-table input, .generic-table select { padding: 4px; font-size: 0.9rem; border-radius: 3px; border: 1px solid #ccc;}
         .generic-table input[type="checkbox"] { width: auto; transform: scale(1.2); }
         .generic-table th.col-note, .generic-table td.col-note { width: 35%; }
+        /* NUOVA REGOLA PER LEGGIBILITA' CAMPI DATA */
+        .generic-table th.col-date, .generic-table td.col-date { min-width: 140px; }
         
         .riga-incassato { background-color: #d4edda !important; text-decoration: line-through; color: #555;}
         .riga-vecchio { background-color: #fff3cd; }
@@ -697,18 +699,31 @@
         }
     }
 
+    // *** FUNZIONE MODIFICATA PER SALVATAGGIO GRANULARE ***
     async function salvaStatoCorrente(silenzioso = false, notificationId = null) {
         const indicator = notificationId ? document.getElementById(notificationId) : statusIndicator;
         if (!silenzioso && indicator && statusIndicator) {
             indicator.textContent = 'Salvataggio in corso...';
             indicator.className = 'save-notification success';
-            indicator.style.display = 'block';
-            indicator.style.opacity = '1';
+            if(notificationId) {
+                indicator.style.display = 'block';
+                indicator.style.opacity = '1';
+            }
         }
 
         try {
             if (stato.compagniaSelezionata && stato.dataSelezionata) salvaDatiLocali();
-            await dbRef.set(stato.datiCompleti);
+
+            const updatePayload = {};
+            const compagnia = stato.compagniaSelezionata;
+
+            if (compagnia && stato.datiCompleti.hasOwnProperty(compagnia)) {
+                updatePayload[compagnia] = stato.datiCompleti[compagnia];
+                await dbRef.update(updatePayload); // Usa UPDATE invece di SET
+            } else {
+                 if (indicator) indicator.style.display = 'none';
+                return;
+            }
 
              if (indicator) {
                 indicator.textContent = 'Salvato con successo!';
@@ -734,7 +749,7 @@
                 if(notificationId){
                     setTimeout(() => { 
                         indicator.style.opacity = '0';
-                        setTimeout(() => { indicator.style.display = 'none'; }, 500);
+                        setTimeout(() => { indicator.style.display = 'none'; }, 3000);
                     }, 3000);
                 }
             }
@@ -1679,6 +1694,7 @@
         applicaFiltriTabella();
     }
 
+    // *** FUNZIONE CORRETTA E MIGLIORATA ***
     function popolaTabellaGenerica(dati) {
         const table = document.getElementById('generic-table');
         const thead = table.querySelector('thead');
@@ -1687,10 +1703,12 @@
         tbody.innerHTML = '';
 
         const headerRow = thead.insertRow();
+        const dateColumns = ['dataEstinzione', 'dataSospensione', 'dataRiattivazione', 'data'];
         for (const key in configTabellaCorrente.columns) {
             const th = document.createElement('th');
             th.textContent = configTabellaCorrente.columns[key];
             if (key === 'note' || key === 'nota') th.classList.add('col-note');
+            if (dateColumns.includes(key)) th.classList.add('col-date');
             headerRow.appendChild(th);
         }
         headerRow.appendChild(document.createElement('th')).textContent = 'Azioni';
@@ -1702,7 +1720,6 @@
             const riga = tbody.insertRow();
             riga.dataset.index = datiTabellaCorrente.indexOf(d);
             
-            // ** LOGICA DI BLOCCO/SBLOCCO CORRETTA **
             const isLocked = !d.isManuallyAdded;
 
             for (const key in configTabellaCorrente.columns) {
@@ -1710,33 +1727,27 @@
                 cell.dataset.property = key;
                 let content = d[key] || '';
                 
-                // I campi sempre modificabili (note, date, checkbox, etc.)
-                const alwaysEditable = ['note', 'nota', 'anticipoDi', 'dataEstinzione', 'dataSospensione', 'dataRiattivazione', 'data', 'incassato', 'riattivata', 'abbuonoRegolato', 'fatto'].includes(key);
+                if (dateColumns.includes(key)) cell.classList.add('col-date');
+
+                const alwaysEditableText = ['note', 'nota', 'anticipoDi'].includes(key);
 
                 switch(key) {
                     case 'dataKey':
                         cell.textContent = content ? new Date(content.split('-').join('/')).toLocaleDateString('it-IT') : '';
                         break;
-                    case 'dataSospensione':
-                    case 'dataRiattivazione':
-                    case 'dataEstinzione':
-                    case 'data':
+                    case 'dataSospensione': case 'dataRiattivazione': case 'dataEstinzione': case 'data':
                         cell.innerHTML = `<input type="date" value="${content}" onchange="salvaModificaGenerica(this)">`;
                         break;
-                    case 'incassato':
-                    case 'riattivata':
-                    case 'abbuonoRegolato':
-                    case 'fatto':
+                    case 'incassato': case 'riattivata': case 'abbuonoRegolato': case 'fatto':
                         cell.innerHTML = `<input type="checkbox" ${content ? 'checked' : ''} onchange="salvaModificaGenerica(this)">`;
                         cell.style.textAlign = 'center';
                         break;
-                    case 'importo':
-                    case 'abbuoni':
+                    case 'importo': case 'abbuoni':
                         cell.textContent = (content || 0).toFixed(2);
                         break;
                     default: // Tutti gli altri campi di testo
                         cell.textContent = content;
-                        if(alwaysEditable || !isLocked){
+                        if (alwaysEditableText || !isLocked) {
                             cell.contentEditable = true;
                             cell.onblur = (e) => salvaModificaGenerica(e.target);
                         }
@@ -1823,6 +1834,7 @@
         }
     }
     
+    // *** FUNZIONE MODIFICATA PER SALVATAGGIO GRANULARE ***
     async function salvaTutteLeModificheTabella() {
         const indicator = document.getElementById('generic-modal-notification');
         indicator.textContent = 'Salvataggio in corso...';
@@ -1831,7 +1843,24 @@
         indicator.style.opacity = '1';
 
         try {
-            await dbRef.set(stato.datiCompleti);
+            const updatePayload = {};
+
+            if (configTabellaCorrente.dataSource) {
+                // Caso 1: La tabella ha una fonte dati diretta (es. 'promemoria')
+                const dataSource = configTabellaCorrente.dataSource;
+                updatePayload[dataSource] = stato.datiCompleti[dataSource];
+            } else {
+                // Caso 2: Tabella derivata che può modificare più compagnie (es. 'anticipi')
+                // Per sicurezza, aggiorniamo tutte le possibili fonti di dati dei movimenti
+                const companyKeys = ['Allianz', 'HDI', 'Vittoria', 'ARAG', 'Helvetia'];
+                companyKeys.forEach(key => {
+                    if (stato.datiCompleti.hasOwnProperty(key)) {
+                        updatePayload[key] = stato.datiCompleti[key];
+                    }
+                });
+            }
+
+            await dbRef.update(updatePayload); // Usa UPDATE per non toccare le altre sezioni
             
             indicator.textContent = 'Salvato con successo!';
             indicator.className = 'save-notification success';
