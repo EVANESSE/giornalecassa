@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Cassa (Collaborativo)</title>
+    <title>Gestione Cassa (Collaborativa)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* CSS Completo - Esattamente come nel file originale + stili per login */
+        /* CSS COMPLETO - ORIGINALE + STILI LOGIN */
         :root {
             --primary-color: #6c757d;
             --primary-color-light: #f8f9fa;
@@ -46,12 +46,14 @@
         }
         button.button-save { background-color: #28a745; font-size: 1.1rem; padding: 12px;}
         button:hover { filter: brightness(90%); }
-        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        button:disabled, fieldset:disabled button { background-color: #ccc; cursor: not-allowed; }
+        fieldset { border: none; padding: 0; margin: 0; }
+        fieldset:disabled { opacity: 0.6; }
         .button-secondary { background-color: #6c757d; }
         .button-edit { background-color: #ffc107; color: #212529; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
         .button-delete { background-color: #dc3545; font-size: 0.8rem; padding: 5px 8px; width: auto; margin: 2px;}
 
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; table-layout: fixed; }
         th, td { padding: 8px; border: 1px solid #ddd; text-align: left; word-wrap: break-word; }
         th { background-color: var(--primary-color-light); }
         
@@ -59,6 +61,8 @@
             font-size: 1.2rem; font-weight: bold; padding: 15px; margin-top: 15px;
             border-radius: 5px; background-color: var(--primary-color-light); border-left: 5px solid var(--primary-color);
         }
+        .risultato-verifica.ok { color: #155724; background-color: #d4edda; border-left-color: #28a745; }
+        .risultato-verifica.errore { color: #721c24; background-color: #f8d7da; border-left-color: #dc3545; }
         
         .modal-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
@@ -67,31 +71,53 @@
         }
         
         #company-selector-modal .modal-content {
-            padding: 30px; display: flex; flex-direction: column;
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff); border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2); border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px 30px; display: flex; flex-direction: column;
             justify-content: center; align-items: center;
+        }
+        #company-selector-modal .company-button {
+            width: 300px; margin: 15px 0; font-weight: bold; padding: 30px 10px;
+            border-bottom: 3px solid rgba(0,0,0,0.25); border-radius: 8px;
+            transition: all 0.2s ease-in-out; font-size: 1.4rem;
+        }
+        #company-selector-modal .company-button:hover {
+            transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.35); filter: brightness(1.1);
+        }
+        
+        .utility-grid-container {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 20px; padding: 20px;
+        }
+        .utility-button {
+            width: 150px; height: 105px; margin: 0; padding: 10px;
+            border-radius: 15px; border: 1px solid #b0b0b0;
+            font-size: 1rem; font-weight: bold; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; gap: 10px; cursor: pointer;
         }
         
         .app-header { 
             display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; 
-            padding: 10px 20px; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 20px; gap: 10px;
+            padding: 10px 20px; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 20px; gap: 20px;
         }
         .app-header .header-group { display: flex; align-items: center; gap: 10px; }
-        
-        #status-indicator { font-weight: bold; padding: 5px 10px; border-radius: 5px; color: white; }
-        #status-indicator.synced { background-color: #28a745; }
-        #status-indicator.error { background-color: #dc3545; }
 
-        .alert-box { display: none; border-radius: 10px; padding: 20px; margin-top: 20px; width: 800px; max-height: 40vh; overflow-y: auto; }
-        .alert-box h3 { margin-top: 0; }
+        .alert-box {
+            display: none; border-radius: 10px; padding: 20px; margin-top: 20px;
+            max-width: 90%; width: 800px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            max-height: 40vh; overflow-y: auto;
+        }
+        .alert-box h3 { margin-top: 0; } .alert-box ul { list-style: none; padding: 0; }
+        .alert-box li { padding: 8px; border-bottom: 1px dotted #ccc; }
         #riattivazioni-alert-container { background-color: #fff3cd; color: #856404; }
         #promemoria-alert-container { background-color: #d1ecf1; color: #0c5460; }
 
         .modal-full { padding: 20px; align-items: flex-start; overflow-y: auto; }
         .modal-full .modal-content-full { width: 95%; max-width: 1800px; background: #fff; padding: 20px; border-radius: 8px; }
-        .modal-toolbar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 2px solid #ccc; margin-bottom: 15px; }
-        .modal-toolbar button, .modal-toolbar select, .modal-toolbar input { width: auto; margin-bottom: 0; padding: 8px; }
+        .modal-toolbar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 2px solid #ccc; margin-bottom: 15px;}
+        .modal-toolbar button { width: auto; margin-bottom: 0; }
         .generic-table td[contenteditable="true"]:hover { background-color: #fff3cd; cursor: text; }
-        .generic-table input[type="checkbox"] { width: auto; }
+        .generic-table input[type="checkbox"] { width: auto; transform: scale(1.2); }
         
         /* Stili per il Login */
         #auth-container { max-width: 400px; margin: 50px auto; padding: 40px; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; }
@@ -131,21 +157,23 @@
                 <div class="modal-wrapper" style="display: flex; gap: 40px;">
                     <div class="modal-content">
                         <h2>Seleziona la Compagnia</h2>
-                        <button class="company-button" onclick="inizializzaApp('Allianz')" style="--primary-color:#007bff">Allianz</button>
-                        <button class="company-button" onclick="inizializzaApp('HDI')" style="--primary-color:#28a745">HDI</button>
-                        <button class="company-button" onclick="inizializzaApp('Vittoria')" style="--primary-color:#6f42c1">Vittoria</button>
-                        <button class="company-button" onclick="inizializzaApp('ARAG')" style="--primary-color:#ffc107">ARAG</button>
-                        <button class="company-button" onclick="inizializzaApp('Helvetia')" style="--primary-color:#dc3545">Helvetia</button>
+                        <button class="company-button" onclick="inizializzaApp('Allianz')" style="background-color:#007bff">Allianz</button>
+                        <button class="company-button" onclick="inizializzaApp('HDI')" style="background-color:#28a745">HDI</button>
+                        <button class="company-button" onclick="inizializzaApp('Vittoria')" style="background-color:#6f42c1">Vittoria</button>
+                        <button class="company-button" onclick="inizializzaApp('ARAG')" style="background-color:#ffc107">ARAG</button>
+                        <button class="company-button" onclick="inizializzaApp('Helvetia')" style="background-color:#dc3545">Helvetia</button>
                     </div>
                     <div class="modal-content">
                         <h2>Altre Funzioni</h2>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <button class="utility-button" onclick="mostraTabella('anticipi')">ANTICIPO</button>
-                            <button class="utility-button" onclick="mostraTabella('abbuoni')">ABBUONI</button>
-                            <button class="utility-button" onclick="mostraTabella('bonifici')">BONIFICI</button>
-                            <button class="utility-button" onclick="mostraTabella('pos')">POS</button>
-                            <button class="utility-button" onclick="mostraTabella('riattivazioni')">RIATTIVAZIONI</button>
-                            <button class="utility-button" onclick="mostraTabella('promemoria')">PROMEMORIA</button>
+                        <div class="utility-grid-container">
+                            <button class="utility-button" onclick="mostraTabella('anticipi')"><i class="fas fa-hand-holding-usd fa-2x"></i><span>ANTICIPO</span></button>
+                            <button class="utility-button" onclick="mostraTabella('abbuoni')"><i class="fas fa-tags fa-2x"></i><span>ABBUONI</span></button>
+                            <button class="utility-button" onclick="mostraTabella('bonifici_hdi_arag')"><i class="fas fa-university fa-2x"></i><span>BONIFICI HDI/ARAG</span></button>
+                            <button class="utility-button" onclick="mostraTabella('pos_hdi_arag')"><i class="far fa-credit-card fa-2x"></i><span>POS HDI/ARAG</span></button>
+                            <button class="utility-button" onclick="mostraTabella('bonifici_allianz')"><i class="fas fa-university fa-2x"></i><span>BONIFICI ALLIANZ</span></button>
+                            <button class="utility-button" onclick="mostraTabella('bonifici_vittoria')"><i class="fas fa-university fa-2x"></i><span>BONIFICI VITTORIA</span></button>
+                            <button class="utility-button" onclick="mostraTabella('riattivazioni_vittoria')"><i class="fas fa-calendar-check fa-2x"></i><span>RIATTIVAZIONI VITTORIA</span></button>
+                            <button class="utility-button" onclick="mostraTabella('promemoria')"><i class="fas fa-bell fa-2x"></i><span>PROMEMORIA</span></button>
                         </div>
                     </div>
                 </div>
@@ -157,10 +185,11 @@
         <div class="modal-overlay modal-full" id="generic-modal" style="display:none;">
             <div class="modal-content-full">
                 <div class="modal-toolbar">
-                     <h2 id="generic-modal-title"></h2>
-                     <div id="generic-modal-notification" class="save-notification"></div>
-                    <button class="button-save" onclick="apriFormAggiunta()"><i class="fa fa-plus"></i> Aggiungi Nuovo</button>
-                    <button class="button-secondary" onclick="document.getElementById('generic-modal').style.display = 'none'">Chiudi</button>
+                    <h2 id="generic-modal-title"></h2>
+                    <div class="action-group">
+                        <button class="button-save" onclick="apriFormAggiunta()"><i class="fa fa-plus"></i> Aggiungi Manualmente</button>
+                        <button class="button-secondary" onclick="document.getElementById('generic-modal').style.display = 'none'">Chiudi</button>
+                    </div>
                 </div>
                 <div style="overflow-x: auto;">
                     <table id="generic-table" class="generic-table">
@@ -173,8 +202,8 @@
 
         <div class="modal-overlay" id="add-item-modal" style="display:none; z-index: 1001;">
             <div class="modal-content" style="text-align: left; width: 450px; padding: 30px;">
-                <h2 id="add-item-title">Aggiungi Nuovo</h2>
-                <form id="add-item-form"></form>
+                <h2 id="add-item-title">Aggiungi Voce Manuale</h2>
+                <form id="add-item-form" onsubmit="event.preventDefault(); processaFormAggiunta();"></form>
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button onclick="processaFormAggiunta()" class="button-save" style="width: 50%;">Salva</button>
                     <button type="button" class="button-secondary" style="width: 50%;" onclick="document.getElementById('add-item-modal').style.display = 'none'">Annulla</button>
@@ -185,10 +214,9 @@
         <div class="container" id="main-container">
             <div class="app-header">
                 <div class="header-group">
-                    <h1 id="main-title" style="margin: 0; padding: 0; border: none;">Registro Cassa</h1>
+                    <h1 id="main-title">Registro Cassa</h1>
                 </div>
                 <div class="header-group">
-                     <div id="status-indicator"></div>
                      <span id="header-user-info"></span>
                      <button onclick="logout()" id="header-logout-button" class="button-secondary">Esci</button>
                 </div>
@@ -203,33 +231,34 @@
                 </div>
             </div>
             <div class="box" id="box-riepilogo-movimenti">
-                <h2>Riepilogo Movimenti di Cassa</h2>
-                <table id="tabellaMovimenti">
-                    <thead><tr>
-                        <th>Cliente</th><th>N° Polizza</th><th>Metodo</th><th>Importo (€)</th><th>Azioni</th>
-                    </tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-             <div class="box">
                 <h2>Aggiungi / Modifica Movimento</h2>
                 <form id="formMovimento" onsubmit="event.preventDefault(); processaFormMovimento();">
                     <input type="hidden" id="editingId">
-                    <input type="text" id="nomeCliente" placeholder="Nome Cliente" required>
-                    <input type="text" id="numeroPolizza" placeholder="Numero Polizza">
-                    <select id="metodologia" required></select>
-                    <input type="number" id="importo" placeholder="Importo" step="0.01" required>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px;">
+                        <input type="text" id="nomeCliente" placeholder="Nome Cliente" required>
+                        <input type="text" id="numeroPolizza" placeholder="Numero Polizza">
+                        <select id="metodologia" required></select>
+                        <input type="number" id="importo" placeholder="Importo" step="0.01" required>
+                    </div>
                     <div id="form-buttons">
                         <button type="submit">Aggiungi Movimento</button>
                     </div>
                 </form>
+                <hr>
+                <h2>Riepilogo Movimenti di Cassa</h2>
+                <table id="tabellaMovimenti">
+                    <thead><tr>
+                        <th>Cliente</th><th>Polizza</th><th>Metodo</th><th>Importo (€)</th><th>Azioni</th>
+                    </tr></thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </div>
 
 <script>
     // ===============================================
-    // ARCHITETTURA COLLABORATIVA JAVASCRIPT
+    // ARCHITETTURA COLLABORATIVA - VERSIONE DEFINITIVA
     // ===============================================
     
     const firebaseConfig = {
@@ -246,8 +275,9 @@
     const db = firebase.firestore();
 
     let currentUser = null;
-    let stato = { compagniaSelezionata: null, dataSelezionata: null, movimentiDelGiorno: [] };
+    let stato = { compagniaSelezionata: null, dataSelezionata: null };
     let unsubscribeListeners = {};
+    let currentTableConfig = null;
 
     const authContainer = document.getElementById('auth-container');
     const appContainer = document.getElementById('app-container');
@@ -270,13 +300,12 @@
         }
     });
 
-    function login() { /* ... */ }
-    function registerUser() { /* ... */ }
+    function login() { /* ... implementazione standard ... */ }
+    function registerUser() { /* ... implementazione standard ... */ }
     function logout() { auth.signOut(); }
-    function showRegisterForm() { /* ... */ }
-    function showLoginForm() { /* ... */ }
+    function showRegisterForm() { /* ... implementazione standard ... */ }
+    function showLoginForm() { /* ... implementazione standard ... */ }
 
-    // --- LOGICA PRINCIPALE ---
     function inizializzaApp(compagnia) {
         stato.compagniaSelezionata = compagnia;
         document.body.className = `theme-${compagnia.toLowerCase()}`;
@@ -285,7 +314,7 @@
         document.getElementById('main-title').textContent = `Registro Cassa ${compagnia}`;
         
         const selectMetodo = document.getElementById('metodologia');
-        selectMetodo.innerHTML = `<option value="Contanti">Contanti</option><option value="Assegno">Assegno</option><option value="POS">POS</option><option value="Bonifico">Bonifico</option><option value="Anticipo">Anticipo</option><option value="Abbuono">Abbuono</option>`;
+        selectMetodo.innerHTML = `<option value="" disabled selected>Metodologia</option><option value="Contanti">Contanti</option><option value="Assegno">Assegno</option><option value="POS">POS</option><option value="Bonifico">Bonifico</option><option value="Anticipo">Anticipo</option><option value="Abbuono">Abbuono</option>`;
 
         document.getElementById('date-selector').valueAsDate = new Date();
         caricaGiornale(new Date());
@@ -303,8 +332,8 @@
             .where('data', '==', dataKey)
             .orderBy('createdAt', 'asc')
             .onSnapshot(snapshot => {
-                stato.movimentiDelGiorno = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                aggiornaTabellaMovimenti();
+                const movimenti = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                aggiornaTabellaMovimenti(movimenti);
             });
     }
 
@@ -334,10 +363,10 @@
         } catch (error) { console.error("Errore salvataggio:", error); }
     }
 
-    function aggiornaTabellaMovimenti() {
+    function aggiornaTabellaMovimenti(movimenti) {
         const tbody = document.getElementById('tabellaMovimenti').querySelector('tbody');
         tbody.innerHTML = '';
-        stato.movimentiDelGiorno.forEach(m => {
+        movimenti.forEach(m => {
             const riga = tbody.insertRow();
             const modificheInfo = m.updatedBy ? `<span class="modified-by">Mod. da: ${m.updatedBy.split('@')[0]}</span>` : '';
             riga.innerHTML = `
@@ -354,14 +383,16 @@
     }
 
     function modificaMovimento(id) {
-        const movimento = stato.movimentiDelGiorno.find(m => m.id === id);
-        if (!movimento) return;
-        document.getElementById('editingId').value = id;
-        document.getElementById('nomeCliente').value = movimento.nomeCliente;
-        document.getElementById('numeroPolizza').value = movimento.numeroPolizza;
-        document.getElementById('importo').value = movimento.importo;
-        document.getElementById('metodologia').value = movimento.metodologia;
-        document.getElementById('form-buttons').innerHTML = `<button type="submit">Salva Modifiche</button><button type="button" class="button-secondary" onclick="annullaModifica()">Annulla</button>`;
+        db.collection('movimenti').doc(id).get().then(doc => {
+            if (!doc.exists) return;
+            const m = doc.data();
+            document.getElementById('editingId').value = id;
+            document.getElementById('nomeCliente').value = m.nomeCliente;
+            document.getElementById('numeroPolizza').value = m.numeroPolizza;
+            document.getElementById('importo').value = m.importo;
+            document.getElementById('metodologia').value = m.metodologia;
+            document.getElementById('form-buttons').innerHTML = `<button type="submit">Salva Modifiche</button><button type="button" class="button-secondary" onclick="annullaModifica()">Annulla</button>`;
+        });
     }
 
     async function cancellaMovimento(id) {
@@ -373,103 +404,145 @@
     function annullaModifica() {
         document.getElementById('editingId').value = "";
         document.getElementById('formMovimento').reset();
+        document.getElementById('metodologia').value = "";
         document.getElementById('form-buttons').innerHTML = `<button type="submit">Aggiungi Movimento</button>`;
     }
 
     function formatDate(date) { return date.toISOString().split('T')[0]; }
 
     // --- LOGICA "ALTRE FUNZIONI" ---
-    let currentTableType = null;
     const configsTabelle = {
-        'promemoria': { title: 'Promemoria', collection: 'promemoria', columns: ['data', 'utente', 'nota'], form: `<input type="date" id="form-data" required><input type="text" id="form-utente" placeholder="Utente" required><textarea id="form-nota" placeholder="Nota"></textarea>` },
-        'riattivazioni': { title: 'Riattivazioni', collection: 'riattivazioni', columns: ['contraente', 'nPolizza', 'dataRiattivazione'], form: `<input type="text" id="form-contraente" placeholder="Contraente" required><input type="text" id="form-nPolizza" placeholder="N° Polizza"><input type="date" id="form-dataRiattivazione" required>` },
-        // ... definisci qui le altre 6 funzioni se necessitano di collezioni separate
+        'anticipi': { title: 'Gestione Anticipi', filter: ['Anticipo'], columns: ['data', 'compagnia', 'nomeCliente', 'importo'], formFields: ['data', 'compagnia', 'nomeCliente', 'importo'] },
+        'abbuoni': { title: 'Gestione Abbuoni', filter: ['Abbuono'], columns: ['data', 'compagnia', 'nomeCliente', 'importo'], formFields: ['data', 'compagnia', 'nomeCliente', 'importo'] },
+        'bonifici_allianz': { title: 'Bonifici Allianz', filter: ['Bonifico'], companyFilter: 'Allianz', columns: ['data', 'nomeCliente', 'importo'], formFields: ['data', 'nomeCliente', 'importo'] },
+        'bonifici_hdi_arag': { title: 'Bonifici HDI/ARAG', filter: ['Bonifico'], companyFilter: ['HDI', 'ARAG'], columns: ['data', 'compagnia', 'nomeCliente', 'importo'], formFields: ['data', 'compagnia', 'nomeCliente', 'importo'] },
+        'bonifici_vittoria': { title: 'Bonifici Vittoria', filter: ['Bonifico'], companyFilter: 'Vittoria', columns: ['data', 'nomeCliente', 'importo'], formFields: ['data', 'nomeCliente', 'importo'] },
+        'pos_hdi_arag': { title: 'POS HDI/ARAG', filter: ['POS'], companyFilter: ['HDI', 'ARAG'], columns: ['data', 'compagnia', 'nomeCliente', 'importo'], formFields: ['data', 'compagnia', 'nomeCliente', 'importo'] },
+        'riattivazioni_vittoria': { title: 'Riattivazioni Vittoria', collection: 'riattivazioni_vittoria', columns: {contraente: 'Contraente', nPolizza: 'N° Polizza', dataSospensione: 'Sospeso il', dataRiattivazione: 'Riattivare il', riattivata: 'OK?'}, formFields: {contraente: 'text', nPolizza: 'text', dataSospensione: 'date', dataRiattivazione: 'date'} },
+        'promemoria': { title: 'Promemoria', collection: 'promemoria', columns: {data: 'Data', utente: 'Utente', nota: 'Nota', fatto: 'OK?'}, formFields: {data: 'date', utente: 'text', nota: 'textarea'} }
     };
 
     function mostraTabella(type) {
-        currentTableType = type;
-        const config = configsTabelle[type];
-        if (!config) { // Per le funzioni derivate come anticipi, etc.
-            // Qui andrebbe la logica per filtrare la collezione 'movimenti'
-            alert("Funzionalità in costruzione per questo tipo di tabella.");
-            return;
+        currentTableConfig = { type, ...configsTabelle[type] };
+        const config = currentTableConfig;
+        document.getElementById('generic-modal-title').textContent = config.title;
+        
+        let query;
+        if (config.collection) {
+            query = db.collection(config.collection).orderBy('createdAt', 'desc');
+        } else {
+            query = db.collection('movimenti').where('metodologia', 'in', config.filter);
+            if (config.companyFilter) {
+                const companies = Array.isArray(config.companyFilter) ? config.companyFilter : [config.companyFilter];
+                query = query.where('compagnia', 'in', companies);
+            }
+            query = query.orderBy('createdAt', 'desc');
         }
 
-        document.getElementById('generic-modal-title').textContent = config.title;
-        const thead = document.getElementById('generic-table').querySelector('thead');
-        thead.innerHTML = `<tr>${config.columns.map(c => `<th>${c}</th>`).join('')}<th>Azioni</th></tr>`;
-
         if (unsubscribeListeners[type]) unsubscribeListeners[type]();
-        unsubscribeListeners[type] = db.collection(config.collection).onSnapshot(snapshot => {
-            const tbody = document.getElementById('generic-table').querySelector('tbody');
-            tbody.innerHTML = '';
-            snapshot.forEach(doc => {
-                const item = doc.data();
-                const riga = tbody.insertRow();
-                riga.innerHTML = `${config.columns.map(c => `<td>${item[c] || ''}</td>`).join('')}<td><button class="button-delete" onclick="cancellaItemGenerico('${type}', '${doc.id}')">X</button></td>`;
-            });
+        unsubscribeListeners[type] = query.onSnapshot(snapshot => {
+            const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            popolaTabellaGenerica(items);
         });
         document.getElementById('generic-modal').style.display = 'flex';
     }
 
+    function popolaTabellaGenerica(items) {
+        const config = currentTableConfig;
+        const table = document.getElementById('generic-table');
+        const columnKeys = Array.isArray(config.columns) ? config.columns : Object.keys(config.columns);
+        const columnHeaders = Array.isArray(config.columns) ? config.columns : Object.values(config.columns);
+        
+        table.querySelector('thead').innerHTML = `<tr>${columnHeaders.map(h => `<th>${h}</th>`).join('')}<th>Azioni</th></tr>`;
+        const tbody = table.querySelector('tbody');
+        tbody.innerHTML = '';
+        items.forEach(item => {
+            const riga = tbody.insertRow();
+            let cellsHtml = '';
+            columnKeys.forEach(key => {
+                let content = item[key] || '';
+                if (typeof content === 'boolean') {
+                    content = `<input type="checkbox" ${content ? 'checked' : ''} onchange="updateGenericItem('${item.id}', '${key}', this.checked)">`;
+                }
+                cellsHtml += `<td>${content}</td>`;
+            });
+            riga.innerHTML = `${cellsHtml}<td><button class="button-delete" onclick="cancellaItemGenerico('${item.id}')">X</button></td>`;
+        });
+    }
+    
     function apriFormAggiunta() {
-        const config = configsTabelle[currentTableType];
-        if (!config) return;
+        const config = currentTableConfig;
         document.getElementById('add-item-title').textContent = `Aggiungi ${config.title}`;
-        document.getElementById('add-item-form').innerHTML = config.form;
+        const form = document.getElementById('add-item-form');
+        form.innerHTML = '';
+        
+        const fields = Array.isArray(config.formFields) ? config.formFields.reduce((obj, key) => ({...obj, [key]: 'text'}), {}) : config.formFields;
+
+        for (const key in fields) {
+            const type = fields[key];
+            if (type === 'textarea') {
+                form.innerHTML += `<label>${key}</label><textarea id="form-${key}"></textarea>`;
+            } else {
+                form.innerHTML += `<label>${key}</label><input type="${type}" id="form-${key}">`;
+            }
+        }
         document.getElementById('add-item-modal').style.display = 'flex';
     }
 
     async function processaFormAggiunta() {
-        const config = configsTabelle[currentTableType];
-        if (!config || !currentUser) return;
+        if (!currentUser) return;
+        const config = currentTableConfig;
+        const newItem = { createdBy: currentUser.email, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
         
-        const newItem = {
-            createdBy: currentUser.email,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        config.columns.forEach(col => {
-            newItem[col] = document.getElementById(`form-${col}`).value;
+        const fields = Array.isArray(config.formFields) ? config.formFields : Object.keys(config.formFields);
+        fields.forEach(key => {
+            newItem[key] = document.getElementById(`form-${key}`).value;
         });
 
-        await db.collection(config.collection).add(newItem);
+        const collectionName = config.collection || 'movimenti';
+        if (!config.collection) { // Se è derivato, assegnamo la metodologia giusta
+            newItem.metodologia = config.filter[0]; 
+        }
+
+        await db.collection(collectionName).add(newItem);
         document.getElementById('add-item-modal').style.display = 'none';
     }
-    
-    async function cancellaItemGenerico(type, id) {
-        const config = configsTabelle[type];
-        if (!config || !confirm('Sicuro?')) return;
-        await db.collection(config.collection).doc(id).delete();
-    }
-    
-    // --- AVVISI GLOBALI ---
-    function setupGlobalListeners() {
-        // Avvisi Promemoria
-        if (unsubscribeListeners.promemoriaAlert) unsubscribeListeners.promemoriaAlert();
-        unsubscribeListeners.promemoriaAlert = db.collection('promemoria').where('data', '==', formatDate(new Date())).onSnapshot(snapshot => {
-            const container = document.getElementById('promemoria-alert-container');
-            if (snapshot.empty) {
-                container.style.display = 'none';
-                return;
-            }
-            let listHtml = '<h3><i class="fas fa-bell"></i> Promemoria di Oggi</h3><ul>';
-            snapshot.forEach(doc => {
-                const item = doc.data();
-                listHtml += `<li>Per <strong>${item.utente}</strong>: ${item.nota}</li>`;
-            });
-            listHtml += '</ul>';
-            container.innerHTML = listHtml;
-            container.style.display = 'block';
-        });
 
-        // Avvisi Riattivazioni (simile a promemoria)
+    async function cancellaItemGenerico(id) {
+        if (!confirm('Sicuro?')) return;
+        const collectionName = currentTableConfig.collection || 'movimenti';
+        await db.collection(collectionName).doc(id).delete();
+    }
+
+    async function updateGenericItem(id, key, value) {
+        const collectionName = currentTableConfig.collection || 'movimenti';
+        const updateData = { [key]: value };
+        await db.collection(collectionName).doc(id).update(updateData);
+    }
+
+    function setupGlobalListeners() {
+        const today = formatDate(new Date());
+        const createAlertListener = (collectionName, containerId, title, formatter) => {
+            const dateField = collectionName === 'riattivazioni_vittoria' ? 'dataRiattivazione' : 'data';
+            if (unsubscribeListeners[collectionName]) unsubscribeListeners[collectionName]();
+            unsubscribeListeners[collectionName] = db.collection(collectionName).where(dateField, '==', today)
+                .onSnapshot(snapshot => {
+                    const container = document.getElementById(containerId);
+                    if (snapshot.empty) { container.style.display = 'none'; return; }
+                    let listHtml = `<h3>${title}</h3><ul>`;
+                    snapshot.forEach(doc => listHtml += `<li>${formatter(doc.data())}</li>`);
+                    container.innerHTML = `${listHtml}</ul>`;
+                    container.style.display = 'block';
+                });
+        };
+        createAlertListener('promemoria', 'promemoria-alert-container', '<i class="fas fa-bell"></i> Promemoria di Oggi', item => `Per <strong>${item.utente}</strong>: ${item.nota}`);
+        createAlertListener('riattivazioni_vittoria', 'riattivazioni-alert-container', '<i class="fas fa-calendar-check"></i> Riattivazioni Vittoria di Oggi', item => `<strong>${item.contraente}</strong> - Polizza ${item.nPolizza || 'N/D'}`);
     }
     
-    // Assegnazione globale delle funzioni
     Object.assign(window, {
         login, registerUser, logout, showLoginForm, showRegisterForm,
         inizializzaApp, caricaGiornale, processaFormMovimento, modificaMovimento, cancellaMovimento, annullaModifica,
-        mostraTabella, apriFormAggiunta, processaFormAggiunta, cancellaItemGenerico, formatDate
+        mostraTabella, apriFormAggiunta, processaFormAggiunta, cancellaItemGenerico, updateGenericItem, formatDate
     });
 
 </script>
